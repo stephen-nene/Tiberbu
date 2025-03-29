@@ -144,7 +144,7 @@ tmpPostgres = urlparse(config("DATABASE_URL"))
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql' if is_production else 'django.db.backends.sqlite3',
-        'NAME': tmpPostgres.path.replace('/', '') if is_production else BASE_DIR / 'tjournal.db',
+        'NAME': tmpPostgres.path.replace('/', '') if is_production else BASE_DIR / 'tibERbu.db',
         'USER': tmpPostgres.username if is_production else '',
         'PASSWORD': tmpPostgres.password if is_production else '',
         'HOST': tmpPostgres.hostname if is_production else '',
@@ -158,7 +158,7 @@ DATABASES = {
 DATABASES2 = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql' if is_production else 'django.db.backends.sqlite3',
-        'NAME': config('DB_NAME') if is_production else BASE_DIR / 'grensert.db',
+        'NAME': config('DB_NAME') if is_production else BASE_DIR / 'tibERbu.db',
         'USER': config('DB_USER') if is_production else '',
         'PASSWORD': config('DB_PASSWORD') if is_production else '',
         'HOST': config('DB_HOST') if is_production else '',
