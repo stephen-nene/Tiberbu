@@ -1,12 +1,27 @@
 import React, { useState } from "react";
 import {
-  Truck,
-  Map,
-  Clock,
+  Stethoscope,
+  ClipboardList,
+  CalendarCheck,
+  UserPlus,
   Shield,
-  Navigation,
-  Route,
-  BookOpen,
+  Activity,
+  Clock,
+  Settings,
+  FileText,
+  Users,
+  HeartPulse,
+  Pill,
+  Syringe,
+  Bed,
+  Microscope,
+  Brain,
+  Eye,
+  Bone,
+  Thermometer,
+  AlertCircle,
+  CheckCircle,
+  PlusCircle,
   ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/shadcn/button";
@@ -16,18 +31,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/shadcn/dialog";
-
-import {
-  BarChart2,
-  Check,
-  Cpu,
-  AlertTriangle,
-  Calculator,
-  FileText,
-  Database,
-} from "lucide-react";
 import {
   Card,
   CardContent,
@@ -35,162 +39,182 @@ import {
   CardTitle,
 } from "@/components/shadcn/card";
 
-export default function Home() {
+export default function HealthcareSystem() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const detailedFeatures = [
+  const medicalFeatures = [
     {
-      icon: FileText,
+      icon: ClipboardList,
+      color: "text-teal-600 dark:text-teal-400",
+      title: "Patient Records",
+      description: "Comprehensive digital health records with instant access",
+      details: [
+        "Medical history tracking",
+        "Allergy and medication lists",
+        "Lab results integration",
+      ],
+    },
+    {
+      icon: CalendarCheck,
       color: "text-blue-600 dark:text-blue-400",
-      title: "Patient Data Management",
-      description:
-        "Centralized database for patient information, reducing administrative overhead and data entry errors.",
+      title: "Appointment Management",
+      description: "Streamlined scheduling for patients and providers",
       details: [
-        "Structured patient profiles",
-        "Insurance validation automation",
-        "Digital medical history access",
+        "Automated reminders",
+        "Waitlist management",
+        "Specialty-specific scheduling",
       ],
     },
     {
-      icon: BarChart2,
-      color: "text-green-600 dark:text-green-400",
-      title: "Staff Scheduling & Optimization",
-      description:
-        "Maximize clinical staff utilization while preventing burnout through intelligent scheduling.",
+      icon: Users,
+      color: "text-purple-600 dark:text-purple-400",
+      title: "Staff Coordination",
+      description: "Optimized workforce management for clinical teams",
       details: [
-        "Specialization-based assignments",
-        "Optimal staff distribution",
-        "Reduced administrative overhead",
+        "Role-based scheduling",
+        "On-call rotations",
+        "Credential tracking",
       ],
     },
     {
-      icon: Calculator,
-      color: "text-yellow-600 dark:text-yellow-400",
-      title: "Resource Allocation",
-      description:
-        "Improve facility utilization and reduce wait times with data-driven resource allocation.",
+      icon: Activity,
+      color: "text-amber-600 dark:text-amber-400",
+      title: "Clinical Analytics",
+      description: "Real-time insights into hospital operations",
       details: [
-        "Room occupancy optimization",
-        "Equipment usage tracking",
-        "Staffing efficiency metrics",
-      ],
-    },
-    {
-      icon: AlertTriangle,
-      title: "Compliance & Reporting",
-      color: "text-red-600 dark:text-red-400",
-      description:
-        "Maintain regulatory compliance with automated record-keeping and reporting functions.",
-      details: [
-        "Regulatory documentation",
-        "Audit-ready reporting",
-        "Compliance risk monitoring",
+        "Patient flow metrics",
+        "Resource utilization",
+        "Performance dashboards",
       ],
     },
   ];
 
-  const keyFeatures = [
+  const medicalBenefits = [
     {
-      icon: FileText,
-      title: "Administrative Efficiency",
-      description:
-        "Reduce administrative workload by 40% through automation of scheduling, record-keeping, and patient processing.",
-      color: "text-blue-600 dark:text-blue-400",
+      icon: HeartPulse,
+      title: "Enhanced Patient Care",
+      description: "Reduce patient wait times by 35% with optimized scheduling",
+      color: "text-red-600 dark:text-red-400",
     },
     {
-      icon: BarChart2,
-      title: "Operational Analytics",
-      description:
-        "Gain actionable insights through comprehensive analytics on patient flow, staff utilization, and facility usage.",
+      icon: Shield,
+      title: "Regulatory Compliance",
+      description: "Automated documentation for healthcare standards",
       color: "text-green-600 dark:text-green-400",
     },
     {
-      icon: Calculator,
-      color: "text-red-600 dark:text-red-400",
-      title: "Cost Reduction",
-      description:
-        "Lower operational costs through efficient staff scheduling, reduced no-shows, and optimized resource allocation.",
+      icon: Clock,
+      title: "Time Efficiency",
+      description: "Save 15+ hours weekly on administrative tasks",
+      color: "text-blue-600 dark:text-blue-400",
     },
     {
-      icon: Cpu,
-      title: "Seamless Integration",
-      description:
-        "Easily integrates with existing hospital systems including EHR, billing, and pharmacy management software.",
-      color: "text-purple-600 dark:text-purple-400",
+      icon: Bed,
+      title: "Bed Management",
+      description: "Real-time inpatient bed tracking and allocation",
+      color: "text-indigo-600 dark:text-indigo-400",
+    },
+  ];
+
+  const medicalModules = [
+    {
+      icon: Stethoscope,
+      title: "Outpatient Clinic",
+      description: "Specialty clinic scheduling and management",
+      color: "bg-teal-100 dark:bg-teal-900",
+    },
+    {
+      icon: Microscope,
+      title: "Laboratory",
+      description: "Test ordering and results management",
+      color: "bg-blue-100 dark:bg-blue-900",
+    },
+    {
+      icon: Pill,
+      title: "Pharmacy",
+      description: "Medication dispensing and inventory",
+      color: "bg-purple-100 dark:bg-purple-900",
+    },
+    {
+      icon: Syringe,
+      title: "Vaccination",
+      description: "Immunization scheduling and tracking",
+      color: "bg-amber-100 dark:bg-amber-900",
     },
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100">
       {/* Hero Section */}
       <div className="container mx-auto px-4 pt-16 pb-24 flex flex-col lg:flex-row items-center">
         <div className="lg:w-1/2 space-y-6 text-center lg:text-left">
           <h1 className="text-4xl md:text-5xl font-bold leading-tight">
-            Tiberbu{" "}
-            <span className="text-green-600 dark:text-green-400">
-              Healthcare
-            </span>
+            <span className="text-teal-600 dark:text-teal-400">TiberBu</span>{" "}
+            Ke
             <br />
-            Management{" "}
-            <span className="text-blue-600 dark:text-blue-400">Solution</span>
+            Management System
           </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-xl">
-            Revolutionize your hospital's operational efficiency with our
-            integrated scheduling and management system designed specifically
-            for Tiberbu Hospital.
+          <p className="text-lg text-slate-600 dark:text-slate-400 max-w-xl">
+            Transform your healthcare delivery with our integrated clinical and
+            administrative platform designed for modern medical facilities.
           </p>
           <div className="flex space-x-4 justify-center lg:justify-start">
             <Button
               size="lg"
-              className="bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600"
+              className="bg-teal-600 hover:bg-teal-700 dark:bg-teal-700 dark:hover:bg-teal-600"
             >
-              View Implementation Plan
+              Request Demo
               <ChevronRight className="ml-2" size={20} />
             </Button>
             <Button
               variant="outline"
               size="lg"
-              className="border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800"
+              className="border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
             >
-              System Architecture
+              Clinical Features
             </Button>
           </div>
         </div>
         <div className="lg:w-1/2 mt-12 lg:mt-0 flex justify-center">
           <div className="relative">
-            <div className="absolute -inset-2 bg-green-400/10 dark:bg-blue-400/10 rounded-full blur-2xl"></div>
-            <Database
+            <div className="absolute -inset-2 bg-teal-400/10 dark:bg-blue-400/10 rounded-full blur-2xl"></div>
+            <HeartPulse
               size={320}
-              className="relative text-green-600 dark:text-blue-400 opacity-20"
+              className="relative text-teal-600/20 dark:text-blue-400/20"
             />
           </div>
         </div>
       </div>
 
-      {/* Key Features Section */}
-      <div className="bg-white dark:bg-gray-800 py-16">
+      {/* Key Benefits Section */}
+      <div className="bg-white dark:bg-slate-800 py-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">
-              Designed for{" "}
-              <span className="text-green-600 dark:text-green-400">
-                Hospital Administration
-              </span>
+              <span className="text-teal-600 dark:text-teal-400">Clinical</span>{" "}
+              Advantages
             </h2>
-            <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-              Empowering your management team with data-driven tools to optimize
-              operations and enhance care delivery.
+            <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+              Designed by healthcare professionals to address real clinical
+              challenges
             </p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {keyFeatures.map((feature, index) => (
+            {medicalBenefits.map((feature, index) => (
               <div
                 key={index}
-                className="bg-gray-100 dark:bg-gray-700 cursor-pointer rounded-xl p-6 transform transition-all hover:scale-105 hover:shadow-lg"
+                className="bg-slate-100 dark:bg-slate-700 rounded-xl p-6 transition-all hover:shadow-lg"
               >
-                <feature.icon size={40} className={`mb-4 ${feature.color}`} />
+                <div
+                  className={`p-3 rounded-full w-fit mb-4 ${feature.color.replace(
+                    "text",
+                    "bg"
+                  )}/10`}
+                >
+                  <feature.icon size={32} className={feature.color} />
+                </div>
                 <h3 className="text-xl font-bold mb-3">{feature.title}</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-sm text-slate-600 dark:text-slate-400">
                   {feature.description}
                 </p>
               </div>
@@ -199,42 +223,47 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Features Deep Dive */}
-      <div className="bg-white dark:bg-gray-800 py-16">
+      {/* Core Features */}
+      <div className="bg-white dark:bg-slate-800 py-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">
-              Operational{" "}
-              <span className="text-green-600 dark:text-green-400">
-                Excellence
-              </span>
+              Comprehensive{" "}
+              <span className="text-teal-600 dark:text-teal-400">Clinical</span>{" "}
+              Features
             </h2>
-            <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-              Our system addresses the unique challenges faced by Tiberbu
-              Hospital's administration.
+            <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+              All the tools you need for efficient hospital management
             </p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {detailedFeatures.map((feature, index) => (
+            {medicalFeatures.map((feature, index) => (
               <Card
                 key={index}
-                className="hover:shadow-lg cursor-pointer transition-all duration-300 group"
+                className="hover:shadow-lg transition-all duration-300 group border-slate-200 dark:border-slate-700"
               >
                 <CardHeader>
-                  <feature.icon
-                    size={40}
-                    className={`mb-4 ${feature.color} group-hover:scale-110 transition-transform`}
-                  />
+                  <div
+                    className={`p-3 rounded-full w-fit mb-4 ${feature.color.replace(
+                      "text",
+                      "bg"
+                    )}/10`}
+                  >
+                    <feature.icon
+                      size={32}
+                      className={`${feature.color} group-hover:scale-110 transition-transform`}
+                    />
+                  </div>
                   <CardTitle>{feature.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                  <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
                     {feature.description}
                   </p>
-                  <ul className="space-y-2 text-xs text-gray-500 dark:text-gray-300">
+                  <ul className="space-y-2 text-xs text-slate-500 dark:text-slate-300">
                     {feature.details.map((detail, i) => (
                       <li key={i} className="flex items-center">
-                        <Check size={14} className="mr-2 text-green-500" />
+                        <CheckCircle size={14} className="mr-2 text-teal-500" />
                         {detail}
                       </li>
                     ))}
@@ -246,234 +275,183 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Technical Specifications */}
+      {/* Specialty Modules */}
       <div className="container mx-auto px-4 py-16">
-        <div className="bg-gray-100 dark:bg-gray-700 rounded-2xl p-8 md:p-12">
+        <div className="bg-slate-100 dark:bg-slate-700 rounded-2xl p-8 md:p-12">
           <h2 className="text-3xl font-bold text-center mb-8">
-            Technical{" "}
-            <span className="text-green-600 dark:text-green-400">
-              Implementation
-            </span>
+            Specialty{" "}
+            <span className="text-teal-600 dark:text-teal-400">Modules</span>
           </h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-              <Database
-                size={40}
-                className="text-blue-600 dark:text-blue-400 mb-4"
-              />
-              <h3 className="font-bold mb-2">Database Architecture</h3>
-              <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-2">
-                <li>Django ORM Integration</li>
-                <li>Secure Data Storage</li>
-                <li>Scalable Infrastructure</li>
-                <li>Redundant Backups</li>
-              </ul>
-            </div>
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-              <Calculator
-                size={40}
-                className="text-green-600 dark:text-green-400 mb-4"
-              />
-              <h3 className="font-bold mb-2">System Performance</h3>
-              <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-2">
-                <li>High-speed Query Processing</li>
-                <li>Concurrent User Support</li>
-                <li>Load Balancing</li>
-                <li>99.9% Uptime Guarantee</li>
-              </ul>
-            </div>
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-              <BarChart2
-                size={40}
-                className="text-indigo-600 dark:text-indigo-400 mb-4"
-              />
-              <h3 className="font-bold mb-2">Analytics Dashboard</h3>
-              <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-2">
-                <li>Real-time Data Visualization</li>
-                <li>Custom Report Generation</li>
-                <li>Department-specific KPIs</li>
-                <li>Trend Analysis</li>
-              </ul>
-            </div>
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-              <FileText
-                size={40}
-                className="text-orange-600 dark:text-orange-400 mb-4"
-              />
-              <h3 className="font-bold mb-2">Documentation & Training</h3>
-              <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-2">
-                <li>Comprehensive Admin Guide</li>
-                <li>Staff Training Materials</li>
-                <li>Technical Documentation</li>
-                <li>Knowledge Base Access</li>
-              </ul>
-            </div>
+            {medicalModules.map((module, index) => (
+              <div
+                key={index}
+                className={`${module.color} p-6 rounded-lg shadow-md`}
+              >
+                <module.icon
+                  size={40}
+                  className="text-slate-800 dark:text-slate-200 mb-4"
+                />
+                <h3 className="font-bold mb-2 text-slate-800 dark:text-slate-200">
+                  {module.title}
+                </h3>
+                <p className="text-sm text-slate-700 dark:text-slate-300">
+                  {module.description}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* ROI Section */}
+      {/* Clinical Outcomes */}
       <div className="container mx-auto px-4 py-16">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold mb-4">
-            Return on{" "}
-            <span className="text-green-600 dark:text-green-400">
-              Investment
+            Proven{" "}
+            <span className="text-teal-600 dark:text-teal-400">
+              Clinical Outcomes
             </span>
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            Quantifiable benefits Tiberbu Hospital can expect from implementing
-            our system.
+          <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+            Measurable improvements for healthcare organizations
           </p>
         </div>
         <div className="grid md:grid-cols-3 gap-8">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 text-center">
-            <div className="text-4xl font-bold text-green-600 dark:text-green-400 mb-2">
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6 text-center">
+            <div className="text-4xl font-bold text-teal-600 dark:text-teal-400 mb-2">
+              40%
+            </div>
+            <h3 className="text-xl font-semibold mb-4">
+              Reduction in Patient Wait Times
+            </h3>
+            <p className="text-slate-600 dark:text-slate-400">
+              Through optimized scheduling and resource allocation
+            </p>
+          </div>
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6 text-center">
+            <div className="text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">
+              99%
+            </div>
+            <h3 className="text-xl font-semibold mb-4">
+              Regulatory Compliance
+            </h3>
+            <p className="text-slate-600 dark:text-slate-400">
+              Automated documentation for healthcare standards
+            </p>
+          </div>
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6 text-center">
+            <div className="text-4xl font-bold text-purple-600 dark:text-purple-400 mb-2">
               30%
             </div>
             <h3 className="text-xl font-semibold mb-4">
-              Administrative Time Saved
+              Staff Productivity Increase
             </h3>
-            <p className="text-gray-600 dark:text-gray-400">
-              Reduction in time spent on scheduling, data entry, and patient
-              processing
-            </p>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 text-center">
-            <div className="text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">
-              25%
-            </div>
-            <h3 className="text-xl font-semibold mb-4">
-              Reduction in No-shows
-            </h3>
-            <p className="text-gray-600 dark:text-gray-400">
-              Through automated reminders and efficient rescheduling
-            </p>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 text-center">
-            <div className="text-4xl font-bold text-purple-600 dark:text-purple-400 mb-2">
-              15%
-            </div>
-            <h3 className="text-xl font-semibold mb-4">
-              Increase in Facility Utilization
-            </h3>
-            <p className="text-gray-600 dark:text-gray-400">
-              Better resource allocation and scheduling optimization
+            <p className="text-slate-600 dark:text-slate-400">
+              Reduced administrative burden on clinical staff
             </p>
           </div>
         </div>
       </div>
 
-      {/* Implementation Timeline */}
-      <div className="bg-white dark:bg-gray-800 py-16">
+      {/* Implementation */}
+      <div className="bg-white dark:bg-slate-800 py-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">
-              Implementation{" "}
-              <span className="text-blue-600 dark:text-blue-400">Timeline</span>
+              Phased{" "}
+              <span className="text-teal-600 dark:text-teal-400">
+                Implementation
+              </span>
             </h2>
-            <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-              A strategic approach to system deployment with minimal disruption
-              to hospital operations.
+            <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+              Minimizing disruption to clinical operations
             </p>
           </div>
           <div className="flex flex-col md:flex-row gap-6">
-            <div className="flex-1 bg-gray-100 dark:bg-gray-700 p-6 rounded-lg">
-              <div className="text-2xl font-bold text-green-600 dark:text-green-400 mb-2">
+            <div className="flex-1 bg-slate-100 dark:bg-slate-700 p-6 rounded-lg">
+              <div className="text-2xl font-bold text-teal-600 dark:text-teal-400 mb-2">
                 Phase 1
               </div>
               <h3 className="text-xl font-semibold mb-3">
-                System Setup & Configuration
+                System Configuration
               </h3>
-              <ul className="space-y-2 text-gray-600 dark:text-gray-400">
+              <ul className="space-y-2 text-slate-600 dark:text-slate-400">
                 <li className="flex items-start">
-                  <Check size={16} className="mr-2 mt-1 text-green-500" />
-                  <span>Database implementation and configuration</span>
+                  <CheckCircle size={16} className="mr-2 mt-1 text-teal-500" />
+                  <span>EHR integration setup</span>
                 </li>
                 <li className="flex items-start">
-                  <Check size={16} className="mr-2 mt-1 text-green-500" />
-                  <span>Server infrastructure deployment</span>
+                  <CheckCircle size={16} className="mr-2 mt-1 text-teal-500" />
+                  <span>Clinical workflow mapping</span>
                 </li>
                 <li className="flex items-start">
-                  <Check size={16} className="mr-2 mt-1 text-green-500" />
-                  <span>Admin user setup and access control</span>
+                  <CheckCircle size={16} className="mr-2 mt-1 text-teal-500" />
+                  <span>Staff access provisioning</span>
                 </li>
               </ul>
-              <div className="mt-4 text-sm text-gray-500">
-                Timeline: 2 weeks
-              </div>
             </div>
-            <div className="flex-1 bg-gray-100 dark:bg-gray-700 p-6 rounded-lg">
+            <div className="flex-1 bg-slate-100 dark:bg-slate-700 p-6 rounded-lg">
               <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-2">
                 Phase 2
               </div>
-              <h3 className="text-xl font-semibold mb-3">
-                Data Migration & Testing
-              </h3>
-              <ul className="space-y-2 text-gray-600 dark:text-gray-400">
+              <h3 className="text-xl font-semibold mb-3">Clinical Training</h3>
+              <ul className="space-y-2 text-slate-600 dark:text-slate-400">
                 <li className="flex items-start">
-                  <Check size={16} className="mr-2 mt-1 text-green-500" />
-                  <span>Existing patient data migration</span>
+                  <CheckCircle size={16} className="mr-2 mt-1 text-teal-500" />
+                  <span>Department-specific sessions</span>
                 </li>
                 <li className="flex items-start">
-                  <Check size={16} className="mr-2 mt-1 text-green-500" />
-                  <span>Doctor and staff onboarding</span>
+                  <CheckCircle size={16} className="mr-2 mt-1 text-teal-500" />
+                  <span>Clinical scenario testing</span>
                 </li>
                 <li className="flex items-start">
-                  <Check size={16} className="mr-2 mt-1 text-green-500" />
-                  <span>System integration testing</span>
+                  <CheckCircle size={16} className="mr-2 mt-1 text-teal-500" />
+                  <span>Super-user certification</span>
                 </li>
               </ul>
-              <div className="mt-4 text-sm text-gray-500">
-                Timeline: 3 weeks
-              </div>
             </div>
-            <div className="flex-1 bg-gray-100 dark:bg-gray-700 p-6 rounded-lg">
+            <div className="flex-1 bg-slate-100 dark:bg-slate-700 p-6 rounded-lg">
               <div className="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-2">
                 Phase 3
               </div>
-              <h3 className="text-xl font-semibold mb-3">
-                Staff Training & Deployment
-              </h3>
-              <ul className="space-y-2 text-gray-600 dark:text-gray-400">
+              <h3 className="text-xl font-semibold mb-3">Go-Live Support</h3>
+              <ul className="space-y-2 text-slate-600 dark:text-slate-400">
                 <li className="flex items-start">
-                  <Check size={16} className="mr-2 mt-1 text-green-500" />
-                  <span>Department-specific training sessions</span>
+                  <CheckCircle size={16} className="mr-2 mt-1 text-teal-500" />
+                  <span>On-site clinical support</span>
                 </li>
                 <li className="flex items-start">
-                  <Check size={16} className="mr-2 mt-1 text-green-500" />
-                  <span>Phased go-live by department</span>
+                  <CheckCircle size={16} className="mr-2 mt-1 text-teal-500" />
+                  <span>24/7 technical assistance</span>
                 </li>
                 <li className="flex items-start">
-                  <Check size={16} className="mr-2 mt-1 text-green-500" />
-                  <span>Post-implementation support</span>
+                  <CheckCircle size={16} className="mr-2 mt-1 text-teal-500" />
+                  <span>Performance optimization</span>
                 </li>
               </ul>
-              <div className="mt-4 text-sm text-gray-500">
-                Timeline: 4 weeks
-              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Call to Action */}
+      {/* CTA Section */}
       <div className="container mx-auto px-4 py-16 text-center">
-        <div className="bg-gradient-to-r from-green-500 to-blue-500 dark:from-green-600 dark:to-blue-600 rounded-2xl p-12 text-white">
+        <div className="bg-gradient-to-r from-teal-500 to-blue-500 dark:from-teal-600 dark:to-blue-600 rounded-2xl p-12 text-white">
           <h2 className="text-3xl font-bold mb-4">
-            Ready to Transform Tiberbu Hospital's Operations?
+            Ready to Transform Your Clinical Operations?
           </h2>
           <p className="mb-8 max-w-2xl mx-auto">
-            Our healthcare management system provides the tools you need to
-            optimize resources, reduce costs, and improve care delivery.
+            Our healthcare management system is designed by clinicians for
+            clinicians, with proven results across multiple specialties.
           </p>
           <div className="flex justify-center space-x-4">
             <Button
               size="lg"
               variant="secondary"
-              className="bg-white text-green-600 hover:bg-gray-100"
+              className="bg-white text-teal-600 hover:bg-gray-100"
             >
-              View Full Proposal
+              Schedule Clinical Demo
             </Button>
             <Button
               size="lg"
@@ -481,53 +459,74 @@ export default function Home() {
               className="border-white text-white hover:bg-white/10"
               onClick={() => setIsModalOpen(true)}
             >
-              Technical Specifications
+              Clinical Features PDF
             </Button>
           </div>
         </div>
       </div>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent aria-describedby="dialog-description">
+        <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>
-              Get Started with Healthcare Scheduling System
+            <DialogTitle className="text-2xl">
+              Request Clinical Demo
             </DialogTitle>
           </DialogHeader>
-
-          <DialogDescription id="dialog-description">
-            Provide the following details to schedule a demo.
+          <DialogDescription className="text-slate-600 dark:text-slate-400">
+            Complete this form to schedule a personalized demonstration of our
+            clinical management system.
           </DialogDescription>
-
-          <div className="space-y-4">
-            <p>To learn more about our healthcare scheduling system:</p>
-            {/* Basic input form would go here */}
-            <div className="grid gap-4">
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                Healthcare Facility
+              </label>
               <input
-                placeholder="Practice Name"
-                className="w-full p-2 border rounded"
+                type="text"
+                placeholder="Hospital/Clinic Name"
+                className="w-full p-2 border rounded dark:bg-slate-800 dark:border-slate-700"
               />
-              <input
-                placeholder="Your Name"
-                className="w-full p-2 border rounded"
-              />
-              <input
-                placeholder="Email Address"
-                className="w-full p-2 border rounded"
-              />
-              <input
-                placeholder="Phone Number"
-                className="w-full p-2 border rounded"
-              />
-              <Button className="w-full bg-green-600 hover:bg-green-700">
-                Schedule Demo
-              </Button>
             </div>
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                Your Name
+              </label>
+              <input
+                type="text"
+                placeholder="Dr. Smith"
+                className="w-full p-2 border rounded dark:bg-slate-800 dark:border-slate-700"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                Email Address
+              </label>
+              <input
+                type="email"
+                placeholder="contact@hospital.org"
+                className="w-full p-2 border rounded dark:bg-slate-800 dark:border-slate-700"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                Clinical Specialty
+              </label>
+              <select className="w-full p-2 border rounded dark:bg-slate-800 dark:border-slate-700">
+                <option>Select specialty</option>
+                <option>Primary Care</option>
+                <option>Cardiology</option>
+                <option>Oncology</option>
+                <option>Pediatrics</option>
+                <option>Surgery</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <Button className="w-full bg-teal-600 hover:bg-teal-700 mt-4">
+              Request Clinical Demo
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
-      
     </div>
   );
 }
-
