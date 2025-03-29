@@ -42,49 +42,49 @@ export default function Home() {
     {
       icon: FileText,
       color: "text-blue-600 dark:text-blue-400",
-      title: "Patient Management",
+      title: "Patient Data Management",
       description:
-        "Comprehensive patient information management with insurance tracking and medical history.",
+        "Centralized database for patient information, reducing administrative overhead and data entry errors.",
       details: [
-        "Easy patient registration",
-        "Insurance information tracking",
-        "Medical history management",
+        "Structured patient profiles",
+        "Insurance validation automation",
+        "Digital medical history access",
       ],
     },
     {
       icon: BarChart2,
       color: "text-green-600 dark:text-green-400",
-      title: "Doctor Management",
+      title: "Staff Scheduling & Optimization",
       description:
-        "Organize healthcare providers by specialization with detailed availability tracking.",
+        "Maximize clinical staff utilization while preventing burnout through intelligent scheduling.",
       details: [
-        "Specialization categorization",
-        "Availability slot management",
-        "Contact information tracking",
+        "Specialization-based assignments",
+        "Optimal staff distribution",
+        "Reduced administrative overhead",
       ],
     },
     {
       icon: Calculator,
       color: "text-yellow-600 dark:text-yellow-400",
-      title: "Appointment Scheduling",
+      title: "Resource Allocation",
       description:
-        "Seamless appointment booking with real-time availability and conflict prevention.",
+        "Improve facility utilization and reduce wait times with data-driven resource allocation.",
       details: [
-        "Real-time availability checking",
-        "Appointment status tracking",
-        "Automated confirmation emails",
+        "Room occupancy optimization",
+        "Equipment usage tracking",
+        "Staffing efficiency metrics",
       ],
     },
     {
       icon: AlertTriangle,
-      title: "Appointment Reminders",
+      title: "Compliance & Reporting",
       color: "text-red-600 dark:text-red-400",
       description:
-        "Automatic notifications to reduce no-shows and keep patients informed.",
+        "Maintain regulatory compliance with automated record-keeping and reporting functions.",
       details: [
-        "Email reminders",
-        "SMS notifications",
-        "Customizable reminder timing",
+        "Regulatory documentation",
+        "Audit-ready reporting",
+        "Compliance risk monitoring",
       ],
     },
   ];
@@ -92,30 +92,30 @@ export default function Home() {
   const keyFeatures = [
     {
       icon: FileText,
-      title: "Patient Records",
+      title: "Administrative Efficiency",
       description:
-        "Easily manage patient information, medical history, and insurance details in one place.",
+        "Reduce administrative workload by 40% through automation of scheduling, record-keeping, and patient processing.",
       color: "text-blue-600 dark:text-blue-400",
     },
     {
       icon: BarChart2,
-      title: "Doctor Scheduling",
+      title: "Operational Analytics",
       description:
-        "Track doctor availability and specializations to optimize healthcare resource allocation.",
+        "Gain actionable insights through comprehensive analytics on patient flow, staff utilization, and facility usage.",
       color: "text-green-600 dark:text-green-400",
     },
     {
       icon: Calculator,
       color: "text-red-600 dark:text-red-400",
-      title: "Appointment Booking",
+      title: "Cost Reduction",
       description:
-        "Streamlined appointment creation with conflict prevention and status tracking.",
+        "Lower operational costs through efficient staff scheduling, reduced no-shows, and optimized resource allocation.",
     },
     {
       icon: Cpu,
-      title: "Automated Workflows",
+      title: "Seamless Integration",
       description:
-        "Reduce administrative burden with automated confirmations, reminders, and reporting.",
+        "Easily integrates with existing hospital systems including EHR, billing, and pharmacy management software.",
       color: "text-purple-600 dark:text-purple-400",
     },
   ];
@@ -126,25 +126,25 @@ export default function Home() {
       <div className="container mx-auto px-4 pt-16 pb-24 flex flex-col lg:flex-row items-center">
         <div className="lg:w-1/2 space-y-6 text-center lg:text-left">
           <h1 className="text-4xl md:text-5xl font-bold leading-tight">
-            Streamline Your{" "}
+            Tiberbu{" "}
             <span className="text-green-600 dark:text-green-400">
               Healthcare
             </span>
             <br />
-            Scheduling{" "}
-            <span className="text-blue-600 dark:text-blue-400">System</span>
+            Management{" "}
+            <span className="text-blue-600 dark:text-blue-400">Solution</span>
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-400 max-w-xl">
-            A comprehensive solution for healthcare providers to manage
-            patients, appointments, and medical staff – all in one intuitive
-            platform.
+            Revolutionize your hospital's operational efficiency with our
+            integrated scheduling and management system designed specifically
+            for Tiberbu Hospital.
           </p>
           <div className="flex space-x-4 justify-center lg:justify-start">
             <Button
               size="lg"
               className="bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600"
             >
-              Get Started
+              View Implementation Plan
               <ChevronRight className="ml-2" size={20} />
             </Button>
             <Button
@@ -152,7 +152,7 @@ export default function Home() {
               size="lg"
               className="border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800"
             >
-              Learn More
+              System Architecture
             </Button>
           </div>
         </div>
@@ -174,12 +174,12 @@ export default function Home() {
             <h2 className="text-3xl font-bold mb-4">
               Designed for{" "}
               <span className="text-green-600 dark:text-green-400">
-                Healthcare Professionals
+                Hospital Administration
               </span>
             </h2>
             <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-              A powerful tool that transforms how you manage appointments and
-              patient information.
+              Empowering your management team with data-driven tools to optimize
+              operations and enhance care delivery.
             </p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -204,14 +204,14 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">
-              Comprehensive{" "}
+              Operational{" "}
               <span className="text-green-600 dark:text-green-400">
-                Healthcare Management
+                Excellence
               </span>
             </h2>
             <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-              Designed specifically for medical practices to streamline
-              operations and improve patient care.
+              Our system addresses the unique challenges faced by Tiberbu
+              Hospital's administration.
             </p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -250,9 +250,9 @@ export default function Home() {
       <div className="container mx-auto px-4 py-16">
         <div className="bg-gray-100 dark:bg-gray-700 rounded-2xl p-8 md:p-12">
           <h2 className="text-3xl font-bold text-center mb-8">
-            System{" "}
+            Technical{" "}
             <span className="text-green-600 dark:text-green-400">
-              Components
+              Implementation
             </span>
           </h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -261,12 +261,12 @@ export default function Home() {
                 size={40}
                 className="text-blue-600 dark:text-blue-400 mb-4"
               />
-              <h3 className="font-bold mb-2">Patient Management</h3>
+              <h3 className="font-bold mb-2">Database Architecture</h3>
               <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-2">
-                <li>Personal Information</li>
-                <li>Insurance Details</li>
-                <li>Medical History</li>
-                <li>Contact Information</li>
+                <li>Django ORM Integration</li>
+                <li>Secure Data Storage</li>
+                <li>Scalable Infrastructure</li>
+                <li>Redundant Backups</li>
               </ul>
             </div>
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
@@ -274,12 +274,12 @@ export default function Home() {
                 size={40}
                 className="text-green-600 dark:text-green-400 mb-4"
               />
-              <h3 className="font-bold mb-2">Doctor Management</h3>
+              <h3 className="font-bold mb-2">System Performance</h3>
               <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-2">
-                <li>Specialization Tracking</li>
-                <li>Availability Management</li>
-                <li>Contact Information</li>
-                <li>Schedule Optimization</li>
+                <li>High-speed Query Processing</li>
+                <li>Concurrent User Support</li>
+                <li>Load Balancing</li>
+                <li>99.9% Uptime Guarantee</li>
               </ul>
             </div>
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
@@ -287,12 +287,12 @@ export default function Home() {
                 size={40}
                 className="text-indigo-600 dark:text-indigo-400 mb-4"
               />
-              <h3 className="font-bold mb-2">Appointment System</h3>
+              <h3 className="font-bold mb-2">Analytics Dashboard</h3>
               <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-2">
-                <li>Easy Appointment Creation</li>
-                <li>Status Tracking</li>
-                <li>Conflict Prevention</li>
-                <li>Automated Reminders</li>
+                <li>Real-time Data Visualization</li>
+                <li>Custom Report Generation</li>
+                <li>Department-specific KPIs</li>
+                <li>Trend Analysis</li>
               </ul>
             </div>
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
@@ -300,13 +300,158 @@ export default function Home() {
                 size={40}
                 className="text-orange-600 dark:text-orange-400 mb-4"
               />
-              <h3 className="font-bold mb-2">Medical Records</h3>
+              <h3 className="font-bold mb-2">Documentation & Training</h3>
               <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-2">
-                <li>Detailed Patient History</li>
-                <li>Treatment Records</li>
-                <li>Prescription Tracking</li>
-                <li>Secured Access</li>
+                <li>Comprehensive Admin Guide</li>
+                <li>Staff Training Materials</li>
+                <li>Technical Documentation</li>
+                <li>Knowledge Base Access</li>
               </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ROI Section */}
+      <div className="container mx-auto px-4 py-16">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold mb-4">
+            Return on{" "}
+            <span className="text-green-600 dark:text-green-400">
+              Investment
+            </span>
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+            Quantifiable benefits Tiberbu Hospital can expect from implementing
+            our system.
+          </p>
+        </div>
+        <div className="grid md:grid-cols-3 gap-8">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 text-center">
+            <div className="text-4xl font-bold text-green-600 dark:text-green-400 mb-2">
+              30%
+            </div>
+            <h3 className="text-xl font-semibold mb-4">
+              Administrative Time Saved
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400">
+              Reduction in time spent on scheduling, data entry, and patient
+              processing
+            </p>
+          </div>
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 text-center">
+            <div className="text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">
+              25%
+            </div>
+            <h3 className="text-xl font-semibold mb-4">
+              Reduction in No-shows
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400">
+              Through automated reminders and efficient rescheduling
+            </p>
+          </div>
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 text-center">
+            <div className="text-4xl font-bold text-purple-600 dark:text-purple-400 mb-2">
+              15%
+            </div>
+            <h3 className="text-xl font-semibold mb-4">
+              Increase in Facility Utilization
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400">
+              Better resource allocation and scheduling optimization
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Implementation Timeline */}
+      <div className="bg-white dark:bg-gray-800 py-16">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">
+              Implementation{" "}
+              <span className="text-blue-600 dark:text-blue-400">Timeline</span>
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+              A strategic approach to system deployment with minimal disruption
+              to hospital operations.
+            </p>
+          </div>
+          <div className="flex flex-col md:flex-row gap-6">
+            <div className="flex-1 bg-gray-100 dark:bg-gray-700 p-6 rounded-lg">
+              <div className="text-2xl font-bold text-green-600 dark:text-green-400 mb-2">
+                Phase 1
+              </div>
+              <h3 className="text-xl font-semibold mb-3">
+                System Setup & Configuration
+              </h3>
+              <ul className="space-y-2 text-gray-600 dark:text-gray-400">
+                <li className="flex items-start">
+                  <Check size={16} className="mr-2 mt-1 text-green-500" />
+                  <span>Database implementation and configuration</span>
+                </li>
+                <li className="flex items-start">
+                  <Check size={16} className="mr-2 mt-1 text-green-500" />
+                  <span>Server infrastructure deployment</span>
+                </li>
+                <li className="flex items-start">
+                  <Check size={16} className="mr-2 mt-1 text-green-500" />
+                  <span>Admin user setup and access control</span>
+                </li>
+              </ul>
+              <div className="mt-4 text-sm text-gray-500">
+                Timeline: 2 weeks
+              </div>
+            </div>
+            <div className="flex-1 bg-gray-100 dark:bg-gray-700 p-6 rounded-lg">
+              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-2">
+                Phase 2
+              </div>
+              <h3 className="text-xl font-semibold mb-3">
+                Data Migration & Testing
+              </h3>
+              <ul className="space-y-2 text-gray-600 dark:text-gray-400">
+                <li className="flex items-start">
+                  <Check size={16} className="mr-2 mt-1 text-green-500" />
+                  <span>Existing patient data migration</span>
+                </li>
+                <li className="flex items-start">
+                  <Check size={16} className="mr-2 mt-1 text-green-500" />
+                  <span>Doctor and staff onboarding</span>
+                </li>
+                <li className="flex items-start">
+                  <Check size={16} className="mr-2 mt-1 text-green-500" />
+                  <span>System integration testing</span>
+                </li>
+              </ul>
+              <div className="mt-4 text-sm text-gray-500">
+                Timeline: 3 weeks
+              </div>
+            </div>
+            <div className="flex-1 bg-gray-100 dark:bg-gray-700 p-6 rounded-lg">
+              <div className="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-2">
+                Phase 3
+              </div>
+              <h3 className="text-xl font-semibold mb-3">
+                Staff Training & Deployment
+              </h3>
+              <ul className="space-y-2 text-gray-600 dark:text-gray-400">
+                <li className="flex items-start">
+                  <Check size={16} className="mr-2 mt-1 text-green-500" />
+                  <span>Department-specific training sessions</span>
+                </li>
+                <li className="flex items-start">
+                  <Check size={16} className="mr-2 mt-1 text-green-500" />
+                  <span>Phased go-live by department</span>
+                </li>
+                <li className="flex items-start">
+                  <Check size={16} className="mr-2 mt-1 text-green-500" />
+                  <span>Post-implementation support</span>
+                </li>
+              </ul>
+              <div className="mt-4 text-sm text-gray-500">
+                Timeline: 4 weeks
+              </div>
             </div>
           </div>
         </div>
@@ -316,11 +461,11 @@ export default function Home() {
       <div className="container mx-auto px-4 py-16 text-center">
         <div className="bg-gradient-to-r from-green-500 to-blue-500 dark:from-green-600 dark:to-blue-600 rounded-2xl p-12 text-white">
           <h2 className="text-3xl font-bold mb-4">
-            Transform Your Healthcare Practice
+            Ready to Transform Tiberbu Hospital's Operations?
           </h2>
           <p className="mb-8 max-w-2xl mx-auto">
-            Join the future of healthcare management. Efficient, organized, and
-            patient-focused scheduling starts here.
+            Our healthcare management system provides the tools you need to
+            optimize resources, reduce costs, and improve care delivery.
           </p>
           <div className="flex justify-center space-x-4">
             <Button
@@ -328,7 +473,7 @@ export default function Home() {
               variant="secondary"
               className="bg-white text-green-600 hover:bg-gray-100"
             >
-              Start Free Trial
+              View Full Proposal
             </Button>
             <Button
               size="lg"
@@ -336,13 +481,12 @@ export default function Home() {
               className="border-white text-white hover:bg-white/10"
               onClick={() => setIsModalOpen(true)}
             >
-              Book a Demo
+              Technical Specifications
             </Button>
           </div>
         </div>
       </div>
 
-      {/* Input Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent aria-describedby="dialog-description">
           <DialogHeader>
@@ -382,6 +526,7 @@ export default function Home() {
           </div>
         </DialogContent>
       </Dialog>
+      
     </div>
   );
 }
