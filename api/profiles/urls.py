@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
-from logs.views import TripViewSet, LogSheetViewSet
+from views import TripViewSet, LogSheetViewSet
 
 router = routers.DefaultRouter()
 router.register(r'trips', TripViewSet)

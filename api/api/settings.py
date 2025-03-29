@@ -10,33 +10,71 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+
 from pathlib import Path
+from decouple import config
+from datetime import timedelta
+from urllib.parse import urlparse
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+is_production = config('ENVIRONMENT', default="development") == 'production'
+
+FRONTEND_URL = config("FRONTEND_URL")
+print(is_production)
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
+
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-)muqid-3w6@o6y)i*uj4k2u&vz$_%7f)sou9)vh2^5*u=u^e^c'
+SECRET_KEY =config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=False, cast=bool)
 
 ALLOWED_HOSTS = []
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=20),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ACTIVATE_TOKEN_LIFETIME": timedelta(days=1),
+    "RESET_TOKEN_LIFETIME": timedelta(minutes=10),
+    "ROTATE_REFRESH_TOKENS": True,  # Rotates refresh tokens upon refresh
+    "BLACKLIST_AFTER_ROTATION": True,
+    "ALGORITHM": "HS256",
+    "SIGNING_KEY": SECRET_KEY,
+    "VERIFYING_KEY": None,     
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    "AUTH_COOKIE_ACCESS": "access", 
+    "AUTH_COOKIE_REFRESH": "refresh",
+    "AUTH_COOKIE_ACTIVATE": "activate",
+    "AUTH_COOKIE_RESET": 'reset', 
+    "AUTH_COOKIE_DOMAIN": None,  # Set this if using a custom domain
+    "AUTH_COOKIE_SECURE": True,  # Use True in production (for HTTPS)
+    "AUTH_COOKIE_HTTP_ONLY": True,  # Prevent JavaScript access
+    "AUTH_COOKIE_PATH": "/",  # Available for all routes
+}
 
 
 # Application definition
 
-INSTALLED_APPS = [
+
+INSTALLED_APPS = [    
+    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'rest_framework_simplejwt',
+    'profiles',
+    'management',
 ]
 
 MIDDLEWARE = [
@@ -49,12 +87,40 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+REST_FRAMEWORK = {
+       'DEFAULT_AUTHENTICATION_CLASSES': (
+           'rest_framework_simplejwt.authentication.JWTAuthentication',
+       ),
+   }
+
+
+
+# If you need to allow dynamic ports, use CORS_ALLOWED_ORIGIN_REGEXES instead:
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^http://localhost:\d+$",
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:1420", 
+     'https://tiberbuke.vercel.app'
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:1420",
+    "https://tiberbuke.vercel.app/",
+    'https://tiberbuke.onrender.com'
+]
+ALLOWED_HOSTS = ["tiberbuke.onrender.com", "localhost", "127.0.0.1"]
+
+
 ROOT_URLCONF = 'api.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -72,13 +138,37 @@ WSGI_APPLICATION = 'api.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
+tmpPostgres = urlparse(config("DATABASE_URL"))
+# print("Database", tmpPostgres)
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'tiberbu.db',
+        'ENGINE': 'django.db.backends.postgresql' if is_production else 'django.db.backends.sqlite3',
+        'NAME': tmpPostgres.path.replace('/', '') if is_production else BASE_DIR / 'tjournal.db',
+        'USER': tmpPostgres.username if is_production else '',
+        'PASSWORD': tmpPostgres.password if is_production else '',
+        'HOST': tmpPostgres.hostname if is_production else '',
+        'PORT': config('DB_PORT') if is_production else '',
+        'OPTIONS': {
+            'sslmode': 'require',
+        } if is_production else {},
     }
 }
+
+DATABASES2 = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql' if is_production else 'django.db.backends.sqlite3',
+        'NAME': config('DB_NAME') if is_production else BASE_DIR / 'grensert.db',
+        'USER': config('DB_USER') if is_production else '',
+        'PASSWORD': config('DB_PASSWORD') if is_production else '',
+        'HOST': config('DB_HOST') if is_production else '',
+        'PORT': config('DB_PORT') if is_production else '',
+        'OPTIONS': {
+            'sslmode': 'require',
+        } if is_production else {},
+    }
+} 
+
+
 
 
 # Password validation
@@ -117,7 +207,25 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+STATIC_ROOT = BASE_DIR/ 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+
+# Base URL for serving media files
+MEDIA_URL = "/api/v1/uploads/"
+# Absolute filesystem path to the directory that will hold uploaded files
+MEDIA_ROOT = os.path.join(BASE_DIR, "uploads")
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Emails 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_USE_TLS = True
+EMAIL_HOST = config('MAIL_SERVER')
+EMAIL_HOST_USER = config('MAIL_USERNAME')
+EMAIL_HOST_PASSWORD = config('MAIL_PASSWORD')
+EMAIL_PORT = config('MAIL_PORT')
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
