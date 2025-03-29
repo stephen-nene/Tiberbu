@@ -35,7 +35,7 @@ export default function DoctorsPage() {
       email: "a.ibrahim@tiberbu.com",
       status: "Available",
       rating: 4.8,
-      image: "/api/placeholder/150/150",
+      image: "/placeholder/150/150",
     },
     {
       id: 2,
@@ -47,7 +47,7 @@ export default function DoctorsPage() {
       email: "r.wong@tiberbu.com",
       status: "Available",
       rating: 4.7,
-      image: "/api/placeholder/150/150",
+      image: "/placeholder/150/150",
     },
     {
       id: 3,
@@ -59,7 +59,7 @@ export default function DoctorsPage() {
       email: "e.rodriguez@tiberbu.com",
       status: "On Leave",
       rating: 4.9,
-      image: "/api/placeholder/150/150",
+      image: "/placeholder/150/150",
     },
     {
       id: 4,
@@ -71,7 +71,7 @@ export default function DoctorsPage() {
       email: "s.okafor@tiberbu.com",
       status: "Available",
       rating: 4.6,
-      image: "/api/placeholder/150/150",
+      image: "/placeholder/150/150",
     },
     {
       id: 5,
@@ -83,7 +83,7 @@ export default function DoctorsPage() {
       email: "p.sharma@tiberbu.com",
       status: "Available",
       rating: 4.8,
-      image: "/api/placeholder/150/150",
+      image: "/placeholder/150/150",
     },
     {
       id: 6,
@@ -95,7 +95,7 @@ export default function DoctorsPage() {
       email: "j.wilson@tiberbu.com",
       status: "Available",
       rating: 4.5,
-      image: "/api/placeholder/150/150",
+      image: "/placeholder/150/150",
     },
   ]);
 
@@ -161,7 +161,10 @@ export default function DoctorsPage() {
             <div className="p-6">
               <div className="flex items-start">
                 <img
-                  src={doctor.image}
+                  src={
+                    
+                    "https://images.unsplash.com/photo-1567446537708-ac4aa75c9c28?q=80&w=1287&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                  }
                   alt={doctor.name}
                   className="h-16 w-16 rounded-full object-cover mr-4"
                 />
