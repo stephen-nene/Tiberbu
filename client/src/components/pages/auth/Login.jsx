@@ -2,12 +2,23 @@ import React, { useState } from "react";
 import { useUserStore } from "../../../store/useUserStore";
 
 import { toast } from "sonner";
-import { Eye, EyeOff, Mail } from "lucide-react";
+import { Eye, EyeOff, Mail, Key } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
-import { handleServerLogin } from "../../../services/requests/auth";
 
 import { SideImg } from "./Reset";
+import LoginImg from "../../../assets/images/auth/Login.png";
+
+import { Button } from "@/components/shadcn/button";
+import { Input } from "@/components/shadcn/input";
+import { Label } from "@/components/shadcn/label";
+import {
+  CardDescription,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/shadcn/card";
+import { Alert, AlertTitle, AlertDescription } from "@/components/shadcn/alert";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -17,12 +28,10 @@ export default function Login() {
     rememberMe: false,
   });
   const [errors, setErrors] = useState({ email: "", password: "" });
-  // const dispatch = useDispatch();
+  const [serverError, setServerError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { user, loggedIn, login,loading } = useUserStore();
-    const [serverError, setServerError] = useState("");
-
-  // console.log(user);
+  const { user, loggedIn, login } = useUserStore();
 
   const validateForm = () => {
     const newErrors = { email: "", password: "" };
@@ -40,16 +49,43 @@ export default function Login() {
     e.preventDefault();
     if (validateForm()) {
       try {
+        setLoading(true);
+        setServerError("");
         const res = await login(formData, navigate);
-        // console.log(res);
       } catch (error) {
-        let errorMSG =
-          error.response.data.detail || "server error, try again later";
-        toast.error(errorMSG);
-        console.log("Caught error is", error.response.data.detail);
+        console.error("Caught error is", error.response?.data);
+        setServerError(error.response?.data?.detail);
+      } finally {
+        setLoading(false);
       }
     } else {
       toast.error("Please fix the errors in the form.", 2);
+    }
+  };
+
+  const handleDummyLogin = async () => {
+    try {
+      setLoading(true);
+      setServerError("");
+
+      // Dummy credentials
+      const dummyCredentials = {
+        email: "stevekid705@gmail.com",
+        password: "mnbvcxzMNBVCXZ",
+      };
+
+      // console.log("Attempting dummy login...");
+
+      // Perform the login
+      const res = await login(dummyCredentials, navigate);
+      if (res) {
+        toast.success("Logged in successfully!", { duration: 2000 });
+      }
+    } catch (error) {
+      // console.error("Dummy login failed:", error.response?.data);
+      setServerError(error.response?.data?.detail || "Failed to login.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -62,37 +98,52 @@ export default function Login() {
   };
 
   return (
-    <div className="font-[sans-serif] min-h-screen flex items-center justify-center max-w- screen sm:px-4 lg:px-40">
-      <div className=" min-h-screen grid lg:grid-cols-2 items-center gap-4 bg-white rounded-md overflow-hidden w-full md:max -w-[80%]">
-        {/* Right Side - Form */}
-        <div className="p-6 w-full">
+    <div className="font-[sans-serif] min-h-screen flex items-center justify-center max-w-screen sm:px-4 lg:px-20">
+      {/* Error alert */}
+      <div className="w-full border-0  grid lg:grid-cols-2 items-center overflow-hidden">
+        <CardContent className="p-6 w-full">
           <form onSubmit={handleSubmit} noValidate>
-            <div className="mb-8">
-              <h3 className="text-gray-800 text-3xl font-extrabold">
-                Welcome Back {(user && user?.username) || user?.first_name} to
-              </h3>
-              <h3 className="text-gray-800 text-3xl font-extrabold">
-                Tender<span className="text-green-500">-Hub</span>
-              </h3>
+            <div className="">
+              <CardHeader className="p-0 mb-4">
+                <CardTitle className="text-gray-800 text-4xl font-extrabold">
+                  Tender<span className="text-green-500">-Hub</span>
+                </CardTitle>
+                <CardTitle className="text-gray-800 text-2xl">
+                  Welcome Back
+                </CardTitle>
+                {loggedIn && (
+                  <CardDescription className="text-green-600">
+                    {user.name || user.email}
+                  </CardDescription>
+                )}
+              </CardHeader>
             </div>
 
+            {serverError && (
+              <Alert variant="error">
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{serverError}</AlertDescription>
+              </Alert>
+            )}
+
             {/* Email Input */}
-            <div>
-              <label className="text-gray-800 text-[15px] mb-2 block">
-                Email
-              </label>
-              <div className="relative flex items-center">
-                <input
+            <div className="space-y-2 my-4">
+              <Label htmlFor="email">Email Address</Label>
+              <div className="relative">
+                <Input
+                  id="email"
                   name="email"
                   type="text"
                   value={formData.email}
                   onChange={handleChange}
-                  className={`w-full text-sm text-gray-800 bg-gray-100 focus:bg-transparent px-4 py-3.5 rounded-md outline-green-600 ${
-                    errors.email ? "border-red-500" : ""
-                  }`}
                   placeholder="Enter email"
+                  className={`${
+                    errors.email
+                      ? "border-red-500 focus-visible:ring-red-500"
+                      : ""
+                  } pl-10`}
                 />
-                <Mail className="w-[18px] h-[18px] absolute right-4" />
+                {/* <Mail className="w-[18px] h-[18px] absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" /> */}
               </div>
               {errors.email && (
                 <p className="text-red-500 text-sm mt-1">{errors.email}</p>
@@ -100,32 +151,34 @@ export default function Login() {
             </div>
 
             {/* Password Input */}
-            <div className="mt-4">
-              <label className="text-gray-800 text-[15px] mb-2 block">
-                Password
-              </label>
-              <div className="relative flex items-center">
-                <input
+            <div className="space-y-2 mb-4">
+              <Label htmlFor="password">Password</Label>
+              <div className="relative">
+                <Input
+                  id="password"
                   name="password"
-                  type={!showPassword ? "password" : "text"}
+                  type={showPassword ? "text" : "password"}
                   value={formData.password}
                   onChange={handleChange}
-                  className={`w-full text-sm text-gray-800 bg-gray-100 focus:bg-transparent px-4 py-3.5 rounded-md outline-green-600 ${
-                    errors.password ? "border-red-500" : ""
-                  }`}
-                  placeholder="Enter password"
+                  placeholder="***********"
+                  className={`${
+                    errors.password
+                      ? "border-red-500 focus-visible:ring-red-500"
+                      : ""
+                  } pl-10 pr-10`}
                 />
-                {showPassword ? (
-                  <EyeOff
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="w-[18px] h-[18px] absolute right-4 cursor-pointer"
-                  />
-                ) : (
-                  <Eye
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="w-[18px] h-[18px] absolute right-4 cursor-pointer"
-                  />
-                )}
+                {/* <Key className="w-[18px] h-[18px] absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" /> */}
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
               </div>
               {errors.password && (
                 <p className="text-red-500 text-sm mt-1">{errors.password}</p>
@@ -133,8 +186,8 @@ export default function Login() {
             </div>
 
             {/* Remember Me & Forgot Password */}
-            <div className="flex flex-wrap items-center justify-between gap-4 my-8">
-              <div className="flex items-center">
+            <div className="flex items-center justify-between my-8">
+              <div className="flex items-center space-x-2">
                 <input
                   id="remember-me"
                   name="rememberMe"
@@ -143,47 +196,57 @@ export default function Login() {
                   onChange={handleChange}
                   className="h-4 w-4 shrink-0 text-green-600 focus:ring-green-500 border-gray-300 rounded-md"
                 />
-                <label
+                <Label
                   htmlFor="remember-me"
-                  className="ml-3 block text-sm text-gray-800"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                 >
                   Remember me
-                </label>
+                </Label>
               </div>
-              <div>
-                <Link
-                  to="/forgot"
-                  className="text-green-600 font-semibold text-sm hover:underline"
-                >
-                  Forgot Password?
-                </Link>
-              </div>
+              <Link
+                to="/forgot"
+                className="text-green-600 font-semibold text-sm hover:underline"
+              >
+                Forgot Password?
+              </Link>
             </div>
 
             {/* Submit Button */}
-            <div className="mt-8">
-              <button
-                type="submit"
-                className="w-full py-3 px-6 text-xl tracking-wide rounded-md text-white bg-green-500 hover:bg-green-700 focus:outline-none"
-              >
-                Login
-              </button>
-            </div>
+            {/* Submit Button */}
+            <Button
+              className="w-full text-xl mb-6"
+              variant="devMode"
+              loading={loading}
+              onClick={() => handleDummyLogin()}
+            >
+              Dev Mode
+            </Button>
+
+            <Button
+              // size="lg"
+              type="submit"
+              className="w-full  text-xl "
+              variant="default"
+              loading={loading}
+            >
+              Login
+            </Button>
 
             {/* Register Link */}
-            <p className="text-sm mt-4 text-gray-800">
+            <p className="text-sm mt-4 text-gray-800 text-center">
               Don't have an account?{" "}
               <Link
                 to="/register"
                 className="text-green-600 font-semibold hover:underline ml-1 whitespace-nowrap"
               >
-                Register here
+                Sign Up
               </Link>
             </p>
           </form>
-        </div>
+        </CardContent>
+
         {/* Left Side - Image */}
-        <SideImg className="hidden " height="full" />
+        <SideImg height="full" img={LoginImg} className="hidden  lg:block" />
       </div>
     </div>
   );

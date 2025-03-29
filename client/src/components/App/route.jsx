@@ -21,7 +21,10 @@ const DashRoutes = {
 
 import Home from "../pages/public/Home.jsx";
 import Record from "../pages/public/Record.jsx";
-import Logs from "../pages/public/Logs.jsx";
+import Doctors from "../pages/public/Doctors.jsx";
+import Patients from "../pages/public/Patients.jsx";
+import Appointments from "../pages/public/Appointments.jsx";
+import Logs from "../pages/public/Doctors.jsx";
 
 // import Training from "../pages/public/training.jsx";
 import Error404 from "../pages/utils/Error404.jsx";
@@ -31,15 +34,19 @@ import ComingSoon from "../pages/utils/ComminSoon.jsx";
 export const routes = [
   // Public Routes
   { path: "/", element: Home },
-  { path: "/record", element: Record },
+  { path: "/records", element: Record },
+  { path: "/doctors", element: Doctors },
+  { path: "/patients", element: Patients },
+  { path: "/appointments", element: Appointments },
+
   { path: "/logs", element: Logs },
 
   // authentication routes
-  // { path: "/login", element: AuthRoutes.Login },
-  // { path: "/register", element: AuthRoutes.Register },
-  // { path: "/forgot", element: AuthRoutes.Forgot },
-  // { path: "/activate/:token", element: AuthRoutes.Activate },
-  // { path: "/reset/:token", element: AuthRoutes.Reset },
+  { path: "/login", element: AuthRoutes.Login },
+  { path: "/register", element: AuthRoutes.Register },
+  { path: "/forgot", element: AuthRoutes.Forgot },
+  { path: "/activate/:token", element: AuthRoutes.Activate },
+  { path: "/reset/:token", element: AuthRoutes.Reset },
 
   // Protected Routes
   {
@@ -64,12 +71,6 @@ export const routes = [
   //   children: [
   //     {
   //       path: "",
-  //       element: DashRoutes.Dashboard,
-  //       protected: true,
-  //       roles: ["admin", "user"],
-  //     },
-  //     {
-  //       path: "products",
   //       element: DashRoutes.Dashboard,
   //       protected: true,
   //       roles: ["admin", "user"],

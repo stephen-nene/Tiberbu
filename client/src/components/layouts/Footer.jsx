@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Truck, Map, Clock, HelpCircle, SendHorizonal } from "lucide-react";
+import { Calendar, User, Clock, HelpCircle, Phone } from "lucide-react";
 import { Facebook, Twitter, Instagram, Linkedin, ArrowUp } from "lucide-react";
 import { Button } from "@/components/shadcn/button";
 import { Input } from "@/components/shadcn/input";
@@ -21,15 +21,13 @@ export default function Footer() {
           {/* Column 1: About */}
           <div>
             <h2 className="text-2xl font-bold mb-4">
-              Spotter Daily{" "}
-              <span className="text-green-600 dark:text-green-400">
-                Driver Log
-              </span>
+              Tib
+              <span className="text-rose-600 dark:text-rose-400">ER</span>bu
             </h2>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              Simplifying electronic logging and trip management for
-              professional drivers. Stay compliant, track hours, and optimize
-              your routes with ease.
+              Streamlining healthcare appointment scheduling for improved
+              patient care. Efficiently manage patient registrations, doctor
+              schedules, and appointment bookings with our comprehensive system.
             </p>
             <div className="flex space-x-3 mt-6">
               <Button
@@ -37,14 +35,14 @@ export default function Footer() {
                 variant="outline"
                 className="text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-gray-800 rounded-full h-9 w-9"
               >
-                <Truck size={18} />
+                <Calendar size={18} />
               </Button>
               <Button
                 size="icon"
                 variant="outline"
                 className="text-green-600 hover:bg-green-50 dark:text-green-400 dark:hover:bg-gray-800 rounded-full h-9 w-9"
               >
-                <Map size={18} />
+                <User size={18} />
               </Button>
               <Button
                 size="icon"
@@ -58,47 +56,47 @@ export default function Footer() {
                 variant="outline"
                 className="text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-gray-800 rounded-full h-9 w-9"
               >
-                <SendHorizonal size={18} />
+                <Phone size={18} />
               </Button>
             </div>
           </div>
 
-          {/* Column 2: Features */}
+          {/* Column 2: Services */}
           <div>
             <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-gray-100">
-              Features
+              Services
             </h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link
-                  to="/route-tracking"
-                  className="text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-500 flex items-center"
+                  to="/appointments"
+                  className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-500 flex items-center"
                 >
-                  <Map size={14} className="mr-2" /> Route Tracking
+                  <Calendar size={14} className="mr-2" /> Schedule Appointments
                 </Link>
               </li>
               <li>
                 <Link
-                  to="/hours-log"
-                  className="text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-500 flex items-center"
+                  to="/doctors"
+                  className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-500 flex items-center"
                 >
-                  <Clock size={14} className="mr-2" /> Hours of Service Log
+                  <User size={14} className="mr-2" /> Find a Doctor
                 </Link>
               </li>
               <li>
                 <Link
-                  to="/compliance"
-                  className="text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-500 flex items-center"
+                  to="/patient-portal"
+                  className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-500 flex items-center"
                 >
-                  <Truck size={14} className="mr-2" /> Compliance Tools
+                  <Clock size={14} className="mr-2" /> Patient Portal
                 </Link>
               </li>
               <li>
                 <Link
-                  to="/reporting"
-                  className="text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-500 flex items-center"
+                  to="/emergency"
+                  className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-500 flex items-center"
                 >
-                  <HelpCircle size={14} className="mr-2" /> Reporting
+                  <HelpCircle size={14} className="mr-2" /> Emergency Services
                 </Link>
               </li>
             </ul>
@@ -112,34 +110,34 @@ export default function Footer() {
             <ul className="space-y-2 text-sm">
               <li>
                 <Link
-                  to="/fmcsa-rules"
-                  className="text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-500"
+                  to="/health-guidelines"
+                  className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-500"
                 >
-                  FMCSA Guidelines
+                  Health Guidelines
                 </Link>
               </li>
               <li>
                 <Link
-                  to="/driver-support"
-                  className="text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-500"
+                  to="/patient-support"
+                  className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-500"
                 >
-                  Driver Support
+                  Patient Support
                 </Link>
               </li>
               <li>
                 <Link
                   to="/tutorials"
-                  className="text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-500"
+                  className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-500"
                 >
-                  Tutorials
+                  Portal Tutorials
                 </Link>
               </li>
               <li>
                 <Link
-                  to="/eld-guide"
-                  className="text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-500"
+                  to="/insurance-info"
+                  className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-500"
                 >
-                  ELD Guide
+                  Insurance Information
                 </Link>
               </li>
             </ul>
@@ -154,7 +152,7 @@ export default function Footer() {
               <li>
                 <Link
                   to="/support"
-                  className="text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-500"
+                  className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-500"
                 >
                   Support Center
                 </Link>
@@ -162,7 +160,7 @@ export default function Footer() {
               <li>
                 <Link
                   to="/contact"
-                  className="text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-500"
+                  className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-500"
                 >
                   Contact Us
                 </Link>
@@ -170,7 +168,7 @@ export default function Footer() {
               <li>
                 <Link
                   to="/feedback"
-                  className="text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-500"
+                  className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-500"
                 >
                   Feedback
                 </Link>
@@ -178,7 +176,7 @@ export default function Footer() {
               <li>
                 <Link
                   to="/careers"
-                  className="text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-500"
+                  className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-500"
                 >
                   Careers
                 </Link>
@@ -196,8 +194,8 @@ export default function Footer() {
                   Stay Updated
                 </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Get the latest updates, compliance tips, and industry
-                  insights.
+                  Get the latest updates on health services, hospital programs,
+                  and medical tips.
                 </p>
               </div>
               <div className="flex space-x-3 mt-4">
@@ -236,7 +234,7 @@ export default function Footer() {
               />
               <Button
                 size="lg"
-                className="bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600"
+                className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600"
               >
                 Subscribe
               </Button>
@@ -247,19 +245,19 @@ export default function Footer() {
         {/* Copyright & Bottom Links */}
         <div className="flex flex-col md:flex-row justify-between items-center pt-6 border-t border-gray-200 dark:border-gray-800">
           <div className="text-sm text-gray-600 dark:text-gray-400 mb-4 md:mb-0">
-            © {new Date().getFullYear()} Spotter Daily Driver Log. All rights
+            © {new Date().getFullYear()} Tiberbu Ke Hospital. All rights
             reserved.
           </div>
           <div className="flex space-x-4 text-sm">
             <Link
               to="/privacy"
-              className="text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-500"
+              className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-500"
             >
               Privacy Policy
             </Link>
             <Link
               to="/terms"
-              className="text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-500"
+              className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-500"
             >
               Terms of Service
             </Link>
@@ -267,7 +265,7 @@ export default function Footer() {
               variant="ghost"
               size="sm"
               onClick={scrollToTop}
-              className="text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-500"
+              className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-500"
             >
               <ArrowUp size={14} className="mr-1" /> Top
             </Button>

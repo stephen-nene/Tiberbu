@@ -20,8 +20,10 @@ const Navbar = () => {
   // Navigation items
   const navItems = [
     { name: "Home", path: "/" },
-    { name: "Record", path: "/record" },
-    { name: "Logs", path: "/logs" },
+    { name: "Patients", path: "/patients" },
+    { name: "Doctors", path: "/doctors" },
+    { name: "Appointments", path: "/appointments" },
+    { name: "Records", path: "/records" },
     // { name: "Contact Us", path: "/contact" },
   ];
 
@@ -45,8 +47,8 @@ const Navbar = () => {
                 className={`font-bold text-2xl dark:text-white text-gray-900
                `}
               >
-                 SD
-                  <span className="text-green-600 dark:text-green-400">DL</span>
+                tib
+                <span className="text-rose-600 dark:text-rose-400">ER</span>bu
               </span>
             </Link>
           </div>
@@ -61,7 +63,7 @@ const Navbar = () => {
                   className={`px-3 py-2 rounded-md text-sm font-medium ${
                     location.pathname === item.path
                       ? "dark:bg-gray-700 dark:text-white bg-gray-200 text-gray-900"
-                      :"dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                      : "dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                   }`}
                 >
                   {item.name}
@@ -71,7 +73,7 @@ const Navbar = () => {
           </div>
 
           {/* Right side items */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-1">
             {/* Dark mode toggle button */}
             <Button
               variant="ghost"
@@ -85,35 +87,76 @@ const Navbar = () => {
                 <Moon size={20} />
               )}
             </Button>
+            <div className="md:block hidden">
+            {loggedIn ? (
+              <div className="md:block hidden  items-center px-5">
+                <Link
+                  to="/dashboard"
+                  className={`flex items-center px-3 py-2 rounded-md text-sm font-medium 
+                    
+                    dark:bg-green-600 dark: text-black dark:hover:bg-green-700
+                      bg-green-500  hover:bg-green-600
+                  `}
+                >
+                  <User size={16} className="mr-1" />
+                  Dashboard
+                </Link>
+
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  onClick={logOut}
+                  className="ml-auto"
+                >
+                  <LogOut size={20} />
+                </Button>
+              </div>
+            ) : (
+              <div className="md:block hidden px-5">
+                <Link
+                  to="/login"
+                  className={`block px-3 py-2 rounded-md text-base font-medium text-center ${
+                    darkMode
+                      ? "bg-blue-600 text-white hover:bg-blue-700"
+                      : "bg-blue-500 text-white hover:bg-blue-600"
+                  }`}
+                  onClick={toggleMenu}
+                >
+                  Login
+                </Link>
+              </div>
+            )}
+            </div>
           </div>
 
           {/* Mobile menu button */}
-          <div className="flex md:hidden">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleDarkMode}
-              className={`rounded-full mr-2 ${
-                darkMode ? "hover:bg-gray-700" : "hover:bg-gray-100"
-              }`}
-            >
-              {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-            </Button>
+            <div className="flex md:hidden">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleDarkMode}
+                className={`rounded-full mr-2 ${
+                  darkMode ? "hover:bg-gray-700" : "hover:bg-gray-100"
+                }`}
+              >
+                {darkMode ? <Sun size={20} /> : <Moon size={20} />}
+              </Button>
 
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleMenu}
-              className={`inline-flex items-center justify-center p-2 rounded-md ${
-                darkMode
-                  ? "text-gray-400 hover:text-white hover:bg-gray-700"
-                  : "text-gray-500 hover:text-gray-900 hover:bg-gray-100"
-              }`}
-            >
-              <span className="sr-only">Open main menu</span>
-              {isOpen ? <X size={24} /> : <Menu size={24} />}
-            </Button>
-          </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleMenu}
+                className={`inline-flex items-center justify-center p-2 rounded-md ${
+                  darkMode
+                    ? "text-gray-400 hover:text-white hover:bg-gray-700"
+                    : "text-gray-500 hover:text-gray-900 hover:bg-gray-100"
+                }`}
+              >
+                <span className="sr-only">Open main menu</span>
+                {isOpen ? <X size={24} /> : <Menu size={24} />}
+              </Button>
+            </div>
+          
         </div>
       </div>
 
