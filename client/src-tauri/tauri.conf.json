@@ -2,7 +2,7 @@
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "tiberbu",
   "version": "0.1.0",
-  "identifier": "tiberbu.vercel.app",
+  "identifier": "tiberbuke.vercel.app",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:5173",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "spotter",
+        "title": "TiberbuKe",
         "width": 800,
         "height": 600,
         "resizable": true,
