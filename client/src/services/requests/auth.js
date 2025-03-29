@@ -1,10 +1,10 @@
-import { apiClient } from "../apiClient";
+import { apiClient1 } from "../apiClient";
 import { toast } from "sonner";
 import { useUserStore } from "@/store/useUserStore";
 
 export const getCurrentUser = async (login) => {
   try {
-    const response = await apiClient.get("login/");
+    const response = await apiClient1.get("login/");
 
     if (response.status === 200) {
       //   showMessage("success", `welcome ${response?.data?.firstname}`, 1);
@@ -46,7 +46,7 @@ export const handleServerLogin = async (data, navigate) => {
   const toastId = toast.loading("Logging in..."); // Show loading toast
 
   try {
-    const response = await apiClient.post("login/", data);
+    const response = await apiClient1.post("login/", data);
 
     if (response.status === 200) {
       // useUserStore.getState().setUser(response.data.user);
@@ -67,7 +67,7 @@ export const handleServerLogin = async (data, navigate) => {
 export const handleServerRegister = async (data, navigate) => {
   const toastId = toast.loading("Registering..."); // Show loading toast
   try {
-    const response = await apiClient.post("register/", data);
+    const response = await apiClient1.post("register/", data);
     console.log("Server Register", response)
     if (response.status === 201) {
       toast.success("Registration successful!", { id: toastId }); // Replace loading toast with success
@@ -87,7 +87,7 @@ export const handleServerRegister = async (data, navigate) => {
 export const handleServerReset = async (data, navigate) => {
   const toastId = toast.loading("sending Server Reset")
   try {
-    const response = await apiClient.post("password/reset/", data);
+    const response = await apiClient1.post("password/reset/", data);
     console.log("Server Reset", response)
     if (response.status === 200) {
       
@@ -105,7 +105,7 @@ export const handleServerReset = async (data, navigate) => {
 }
 export const logoutUser = async (logout, navigate) => {
   try {
-    await apiClient.delete("logouts");
+    await apiClient1.delete("logouts");
     logout();
     navigate("/login");
   } catch (error) {

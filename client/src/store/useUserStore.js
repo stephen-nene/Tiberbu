@@ -2,6 +2,8 @@ import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
 import { toast } from 'sonner';
 
+import { apiClient1 } from "../services/apiClient";
+
 export const useUserStore = create(
   devtools(
     // persist(
@@ -38,7 +40,7 @@ export const useUserStore = create(
         const toastId = toast.loading("Logging in..."); // Show loading toast
 
         try {
-          const response = await apiClientV1.post("login", data);
+          const response = await apiClient1.post("login", data);
           console.log("Response:", response);
           if (response.status === 200) {
             set({
@@ -62,7 +64,7 @@ export const useUserStore = create(
       },
       fetchUser: async () => {
         try {
-          const response = await apiClientV1.get("user");
+          const response = await apiClient1.get("user");
           // console.log("Response:", response);
           if (response.status === 200) {
             set({ user: response.data, loggedIn: true });
@@ -75,7 +77,7 @@ export const useUserStore = create(
 
       logOut: async () => {
         try {
-          const response = await apiClientV1.post("logout");
+          const response = await apiClient1.post("logout");
           console.log(response);
           if (response.status === 200) {
             get().clearUser();

@@ -1,27 +1,45 @@
+// === axios.js ===
 import axios from "axios";
-const API_URL =
-  import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api/v1.0/";
-// const API_URL = "http://127.0.0.1:8000/api/v1.0/";
 
-// console.log(API_URL)
+// === Base URLs ===
 
-const apiClient = axios.create({
-  baseURL: API_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
-  withCredentials: true,
-});
+const BASE_URL =
+  import.meta.env.VITE_API_URL || `http://127.0.0.1:8000/api/v1.0/`;
 
-// for sending images now 
+// === Factory Function for Creating Axios Instances ===
+const createApiClient = (baseURL, contentType = "application/json") => {
+  const client = axios.create({
+    baseURL,
+    headers: {
+      "Content-Type": contentType,
+    },
+    withCredentials: true,
+  });
 
-const apiClient2 = axios.create({
-  baseURL: API_URL,
-  headers: {
-    "Content-Type": "multipart/form-data",
-  },
-  withCredentials: true,
-})
+  // === Request Interceptor ===
+  client.interceptors.request.use(
+    (config) => {
+      return config;
+    },
+    (error) => Promise.reject(error)
+  );
 
-export  {apiClient, apiClient2}
-// api/v1.0/user
+  // === Response Interceptor ===
+  client.interceptors.response.use(
+    (response) => response,
+    (error) => Promise.reject(error)
+  );
+
+  return client;
+};
+
+// === Axios Instances ===
+export const apiClient1 = createApiClient(BASE_URL);
+export const apiClient2 = createApiClient(
+  BASE_URL,
+  "multipart/form-data"
+);
+
+// === Usage Example ===
+// apiClientV1.get('/user');
+// apiClientV2.post('/login', { username, password });
