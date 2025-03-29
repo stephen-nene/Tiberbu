@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import { Lock } from "lucide-react";
+import { Lock, Stethoscope } from "lucide-react";
 import { handleServerReset } from "../../../services/requests/auth";
 
 // import { Card, CardContent } from "@/components/ui/card";
@@ -91,7 +91,7 @@ export default function PasswordResetForm() {
   return (
     <div className="min-h-screen grid lg:grid-cols-2 items-center gap-4 bg-white shadow-md rounded-md overflow-hidden w-full">
       {/* Right Side - Form */}
-      <div className="p-6 sm:max-w-9xl w-full">
+      <div className="p-6 sm:max-w-md w-full">
         <div className="mb-8">
           <h3 className="text-2xl font-bold text-gray-800">
             Procure<span className="text-green-500">365</span>
@@ -203,45 +203,45 @@ export default function PasswordResetForm() {
   );
 }
 
-export const SideImg = ({ height = "full" }) => {
+export const SideImg = ({ height = "full", img, className }) => {
   return (
-    <>
-      <div
-        className={`hidden md:block bg-cover bg-center h-${height} rounded-lg px-4 py-2 mr-7 overflow-hidden`}
-        style={{ backgroundImage: `url(${pic})` }}
-      >
-        {/* Text Section */}
-        <div className="my-4 text-white">
-          <h2 className="text-3xl my-16 font-semibold">
-            Connecting Suppliers to Opportunities
-          </h2>
-          <div>
-            Discover endless possibilities on procure365, where qualified
-            suppliers and businesses unite. Get started by logging in to access
-            a world of tender opportunities and showcase your capabilities.
-          </div>
-        </div>
+    <div
+      className={`hidden md:block bg-contain bg-center h -${height} rounded-lg px-4 py-2 overflow-hidden relative ${className}`}
+      style={{ backgroundImage: `url(${img})` }}
+    >
+      {/* Overlay for better text visibility */}
+      <div className="absolute inset-0 bg-black/30"></div>
 
-        {/* Profile Section */}
-        <div className="py-4 px-8 rounded-lg mt-[400px] text-white mx-auto bg-[#1a523e] overflow-auto sm:mt-[300px]">
-          <div className="flex items-center space-x-4 my-2">
-            <img
-              src={profile}
-              alt="chief-manager"
-              className="w-16 h-16 rounded-full object-cover"
-            />
-            <div>
-              <div className="text-xl font-bold">Amelia Hendrick</div>
-              <p className="font-normal mt-1 text-sm">Chief Manager</p>
-            </div>
-          </div>
-          <p className="font-normal text-sm my-4">
-            Uploading your work samples and relevant documents will give you the
-            competitive edge in the procurement landscape. Your next opportunity
-            awaits!
-          </p>
+      {/* Text Section */}
+      <div className="relative z-10 my-4 text-white p-8">
+        <h2 className="text-3xl my-16 font-bold">
+          Excellence in Healthcare Management
+        </h2>
+        <div className="text-lg">
+          Welcome to MedCare Hospital's management portal. Our integrated system
+          connects healthcare professionals with patients, streamlining
+          appointments, records, and hospital operations for better patient
+          care.
         </div>
       </div>
-    </>
+
+      {/* Profile Section - Doctor Testimonial */}
+      <div className="relative z-10 py-4 px-8 rounded-lg mt-[400px] text-white mx-auto bg-blue-600/90 backdrop-blur-sm max-w-md sm:mt-[300px]">
+        <div className="flex items-center space-x-4 my-2">
+          <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center">
+            <Stethoscope className="w-8 h-8 text-white" />
+          </div>
+          <div>
+            <div className="text-xl font-bold">Dr. Sarah Johnson</div>
+            <p className="font-normal mt-1 text-sm">Chief of Cardiology</p>
+          </div>
+        </div>
+        <p className="font-normal text-sm my-4">
+          Our hospital management system has transformed how we deliver care.
+          With streamlined appointments and instant access to patient records,
+          we can focus more on what matters - our patients' health.
+        </p>
+      </div>
+    </div>
   );
 };

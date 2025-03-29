@@ -1,17 +1,28 @@
 import React, { useState } from "react";
 import { useUserStore } from "../../../store/useUserStore";
-
 import { toast } from "sonner";
-import { Eye, EyeOff, Mail, Key } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  Mail,
+  Key,
+  User,
+  Stethoscope,
+  Shield,
+} from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-
-
 import { SideImg } from "./Reset";
 import LoginImg from "../../../assets/images/auth/Login.png";
-
 import { Button } from "@/components/shadcn/button";
 import { Input } from "@/components/shadcn/input";
 import { Label } from "@/components/shadcn/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/shadcn/select";
 import {
   CardDescription,
   CardContent,
@@ -30,6 +41,7 @@ export default function Login() {
   const [errors, setErrors] = useState({ email: "", password: "" });
   const [serverError, setServerError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [devModeUserType, setDevModeUserType] = useState("admin");
   const navigate = useNavigate();
   const { user, loggedIn, login } = useUserStore();
 
@@ -68,22 +80,38 @@ export default function Login() {
       setLoading(true);
       setServerError("");
 
-      // Dummy credentials
-      const dummyCredentials = {
-        email: "stevekid705@gmail.com",
-        password: "mnbvcxzMNBVCXZ",
+      // Dummy credentials based on user type
+      const credentials = {
+        admin: {
+          email: "admin@hospital.com",
+          password: "Admin@123",
+          role: "admin",
+        },
+        doctor: {
+          email: "doctor@hospital.com",
+          password: "Doctor@123",
+          role: "doctor",
+        },
+        patient: {
+          email: "patient@hospital.com",
+          password: "Patient@123",
+          role: "patient",
+        },
       };
 
-      // console.log("Attempting dummy login...");
+      const dummyCredentials = credentials[devModeUserType];
 
-      // Perform the login
       const res = await login(dummyCredentials, navigate);
       if (res) {
-        toast.success("Logged in successfully!", { duration: 2000 });
+        toast.success(`Logged in as ${devModeUserType} successfully!`, {
+          duration: 2000,
+          description: `You now have ${devModeUserType} level access`,
+        });
       }
     } catch (error) {
-      // console.error("Dummy login failed:", error.response?.data);
+      console.error("Dummy login failed:", error);
       setServerError(error.response?.data?.detail || "Failed to login.");
+      toast.error("Dummy login failed");
     } finally {
       setLoading(false);
     }
@@ -98,18 +126,17 @@ export default function Login() {
   };
 
   return (
-    <div className="font-[sans-serif] min-h-screen flex items-center justify-center max-w-screen sm:px-4 lg:px-20">
-      {/* Error alert */}
-      <div className="w-full border-0  grid lg:grid-cols-2 items-center overflow-hidden">
+    <div className="font-[sans-serif] flex items-center justify-center max-w-screen sm:px-4 lg:px-20">
+      <div className="w-full border-0 grid lg:grid-cols-2 items-center overflow-hidden">
         <CardContent className="p-6 w-full">
           <form onSubmit={handleSubmit} noValidate>
             <div className="">
               <CardHeader className="p-0 mb-4">
                 <CardTitle className="text-gray-800 text-4xl font-extrabold">
-                  Tender<span className="text-green-500">-Hub</span>
+                  tib<span className="text-rose-600">ER</span>bu HMS
                 </CardTitle>
                 <CardTitle className="text-gray-800 text-2xl">
-                  Welcome Back
+                  Staff & Patient Portal
                 </CardTitle>
                 {loggedIn && (
                   <CardDescription className="text-green-600">
@@ -120,7 +147,7 @@ export default function Login() {
             </div>
 
             {serverError && (
-              <Alert variant="error">
+              <Alert variant="destructive" className="mb-4">
                 <AlertTitle>Error</AlertTitle>
                 <AlertDescription>{serverError}</AlertDescription>
               </Alert>
@@ -143,7 +170,7 @@ export default function Login() {
                       : ""
                   } pl-10`}
                 />
-                {/* <Mail className="w-[18px] h-[18px] absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" /> */}
+                <Mail className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               </div>
               {errors.email && (
                 <p className="text-red-500 text-sm mt-1">{errors.email}</p>
@@ -167,16 +194,16 @@ export default function Login() {
                       : ""
                   } pl-10 pr-10`}
                 />
-                {/* <Key className="w-[18px] h-[18px] absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" /> */}
+                <Key className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2"
                 >
                   {showPassword ? (
-                    <EyeOff className="h-5 w-5" />
+                    <EyeOff className="h-5 w-5 text-gray-400" />
                   ) : (
-                    <Eye className="h-5 w-5" />
+                    <Eye className="h-5 w-5 text-gray-400" />
                   )}
                 </button>
               </div>
@@ -194,7 +221,7 @@ export default function Login() {
                   type="checkbox"
                   checked={formData.rememberMe}
                   onChange={handleChange}
-                  className="h-4 w-4 shrink-0 text-green-600 focus:ring-green-500 border-gray-300 rounded-md"
+                  className="h-4 w-4 shrink-0 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
                 <Label
                   htmlFor="remember-me"
@@ -205,27 +232,62 @@ export default function Login() {
               </div>
               <Link
                 to="/forgot"
-                className="text-green-600 font-semibold text-sm hover:underline"
+                className="text-blue-600 font-semibold text-sm hover:underline"
               >
                 Forgot Password?
               </Link>
             </div>
 
-            {/* Submit Button */}
-            {/* Submit Button */}
-            <Button
-              className="w-full text-xl mb-6"
-              variant="devMode"
-              loading={loading}
-              onClick={() => handleDummyLogin()}
-            >
-              Dev Mode
-            </Button>
+            {/* Dev Mode Section */}
+            <div className="mb-6 space-y-2">
+              <Label>Developer Mode</Label>
+              <div className="flex gap-2">
+                <Select
+                  value={devModeUserType}
+                  onValueChange={setDevModeUserType}
+                >
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select user type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="admin">
+                      <div className="flex items-center gap-2">
+                        <Shield className="h-4 w-4" />
+                        Admin
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="doctor">
+                      <div className="flex items-center gap-2">
+                        <Stethoscope className="h-4 w-4" />
+                        Doctor
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="patient">
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4" />
+                        Patient
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button
+                  className="flex-1"
+                  variant="outline"
+                  loading={loading}
+                  onClick={handleDummyLogin}
+                >
+                  Quick Login
+                </Button>
+              </div>
+              <p className="text-xs text-gray-500">
+                Use this to quickly test different user roles
+              </p>
+            </div>
 
+            {/* Login Button */}
             <Button
-              // size="lg"
               type="submit"
-              className="w-full  text-xl "
+              className="w-full"
               variant="default"
               loading={loading}
             >
@@ -233,20 +295,20 @@ export default function Login() {
             </Button>
 
             {/* Register Link */}
-            <p className="text-sm mt-4 text-gray-800 text-center">
+            <p className="text-sm mt-4 text-gray-600 text-center">
               Don't have an account?{" "}
               <Link
                 to="/register"
-                className="text-green-600 font-semibold hover:underline ml-1 whitespace-nowrap"
+                className="text-blue-600 font-semibold hover:underline ml-1 whitespace-nowrap"
               >
-                Sign Up
+                Register Here
               </Link>
             </p>
           </form>
         </CardContent>
 
         {/* Left Side - Image */}
-        <SideImg height="full" img={LoginImg} className="hidden  lg:block" />
+        <SideImg height="full" img={LoginImg} className="hidden lg:block" />
       </div>
     </div>
   );

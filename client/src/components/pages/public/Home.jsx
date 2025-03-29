@@ -45,7 +45,7 @@ export default function HealthcareSystem() {
   const medicalFeatures = [
     {
       icon: ClipboardList,
-      color: "text-teal-600 dark:text-teal-400",
+      color: "text-rose-600 dark:text-rose-400",
       title: "Patient Records",
       description: "Comprehensive digital health records with instant access",
       details: [
@@ -121,7 +121,7 @@ export default function HealthcareSystem() {
       icon: Stethoscope,
       title: "Outpatient Clinic",
       description: "Specialty clinic scheduling and management",
-      color: "bg-teal-100 dark:bg-teal-900",
+      color: "bg-rose-100 dark:bg-rose-900",
     },
     {
       icon: Microscope,
@@ -149,8 +149,7 @@ export default function HealthcareSystem() {
       <div className="container mx-auto px-4 pt-16 pb-24 flex flex-col lg:flex-row items-center">
         <div className="lg:w-1/2 space-y-6 text-center lg:text-left">
           <h1 className="text-4xl md:text-5xl font-bold leading-tight">
-            <span className="text-teal-600 dark:text-teal-400">TiberBu</span>{" "}
-            Ke
+            tib<span className="text-rose-600 dark:text-rose-400">ER</span>bu Ke
             <br />
             Management System
           </h1>
@@ -161,7 +160,7 @@ export default function HealthcareSystem() {
           <div className="flex space-x-4 justify-center lg:justify-start">
             <Button
               size="lg"
-              className="bg-teal-600 hover:bg-teal-700 dark:bg-teal-700 dark:hover:bg-teal-600"
+              className="bg-rose-600 hover:bg-rose-700 dark:bg-rose-700 dark:hover:bg-rose-600"
             >
               Request Demo
               <ChevronRight className="ml-2" size={20} />
@@ -177,10 +176,10 @@ export default function HealthcareSystem() {
         </div>
         <div className="lg:w-1/2 mt-12 lg:mt-0 flex justify-center">
           <div className="relative">
-            <div className="absolute -inset-2 bg-teal-400/10 dark:bg-blue-400/10 rounded-full blur-2xl"></div>
+            <div className="absolute -inset-2 bg-rose-400/10 dark:bg-blue-400/10 rounded-full blur-2xl"></div>
             <HeartPulse
               size={320}
-              className="relative text-teal-600/20 dark:text-blue-400/20"
+              className="relative text-rose-600/20 dark:text-blue-400/20"
             />
           </div>
         </div>
@@ -191,7 +190,7 @@ export default function HealthcareSystem() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">
-              <span className="text-teal-600 dark:text-teal-400">Clinical</span>{" "}
+              <span className="text-rose-600 dark:text-rose-400">Clinical</span>{" "}
               Advantages
             </h2>
             <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
@@ -206,10 +205,7 @@ export default function HealthcareSystem() {
                 className="bg-slate-100 dark:bg-slate-700 rounded-xl p-6 transition-all hover:shadow-lg"
               >
                 <div
-                  className={`p-3 rounded-full w-fit mb-4 ${feature.color.replace(
-                    "text",
-                    "bg"
-                  )}/10`}
+                  className={`p-3 rounded-full w-fit mb-4 }/10`}
                 >
                   <feature.icon size={32} className={feature.color} />
                 </div>
@@ -229,7 +225,7 @@ export default function HealthcareSystem() {
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">
               Comprehensive{" "}
-              <span className="text-teal-600 dark:text-teal-400">Clinical</span>{" "}
+              <span className="text-rose-600 dark:text-rose-400">Clinical</span>{" "}
               Features
             </h2>
             <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
@@ -244,10 +240,7 @@ export default function HealthcareSystem() {
               >
                 <CardHeader>
                   <div
-                    className={`p-3 rounded-full w-fit mb-4 ${feature.color.replace(
-                      "text",
-                      "bg"
-                    )}/10`}
+                    className={`p-3 rounded-full w-fit mb-4 `}
                   >
                     <feature.icon
                       size={32}
@@ -263,7 +256,7 @@ export default function HealthcareSystem() {
                   <ul className="space-y-2 text-xs text-slate-500 dark:text-slate-300">
                     {feature.details.map((detail, i) => (
                       <li key={i} className="flex items-center">
-                        <CheckCircle size={14} className="mr-2 text-teal-500" />
+                        <CheckCircle size={14} className="mr-2 text-rose-500" />
                         {detail}
                       </li>
                     ))}
@@ -280,7 +273,7 @@ export default function HealthcareSystem() {
         <div className="bg-slate-100 dark:bg-slate-700 rounded-2xl p-8 md:p-12">
           <h2 className="text-3xl font-bold text-center mb-8">
             Specialty{" "}
-            <span className="text-teal-600 dark:text-teal-400">Modules</span>
+            <span className="text-rose-600 dark:text-rose-400">Modules</span>
           </h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {medicalModules.map((module, index) => (
@@ -309,7 +302,7 @@ export default function HealthcareSystem() {
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold mb-4">
             Proven{" "}
-            <span className="text-teal-600 dark:text-teal-400">
+            <span className="text-rose-600 dark:text-rose-400">
               Clinical Outcomes
             </span>
           </h2>
@@ -319,7 +312,7 @@ export default function HealthcareSystem() {
         </div>
         <div className="grid md:grid-cols-3 gap-8">
           <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6 text-center">
-            <div className="text-4xl font-bold text-teal-600 dark:text-teal-400 mb-2">
+            <div className="text-4xl font-bold text-rose-600 dark:text-rose-400 mb-2">
               40%
             </div>
             <h3 className="text-xl font-semibold mb-4">
@@ -360,7 +353,7 @@ export default function HealthcareSystem() {
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">
               Phased{" "}
-              <span className="text-teal-600 dark:text-teal-400">
+              <span className="text-rose-600 dark:text-rose-400">
                 Implementation
               </span>
             </h2>
@@ -370,7 +363,7 @@ export default function HealthcareSystem() {
           </div>
           <div className="flex flex-col md:flex-row gap-6">
             <div className="flex-1 bg-slate-100 dark:bg-slate-700 p-6 rounded-lg">
-              <div className="text-2xl font-bold text-teal-600 dark:text-teal-400 mb-2">
+              <div className="text-2xl font-bold text-rose-600 dark:text-rose-400 mb-2">
                 Phase 1
               </div>
               <h3 className="text-xl font-semibold mb-3">
@@ -378,15 +371,15 @@ export default function HealthcareSystem() {
               </h3>
               <ul className="space-y-2 text-slate-600 dark:text-slate-400">
                 <li className="flex items-start">
-                  <CheckCircle size={16} className="mr-2 mt-1 text-teal-500" />
+                  <CheckCircle size={16} className="mr-2 mt-1 text-rose-500" />
                   <span>EHR integration setup</span>
                 </li>
                 <li className="flex items-start">
-                  <CheckCircle size={16} className="mr-2 mt-1 text-teal-500" />
+                  <CheckCircle size={16} className="mr-2 mt-1 text-rose-500" />
                   <span>Clinical workflow mapping</span>
                 </li>
                 <li className="flex items-start">
-                  <CheckCircle size={16} className="mr-2 mt-1 text-teal-500" />
+                  <CheckCircle size={16} className="mr-2 mt-1 text-rose-500" />
                   <span>Staff access provisioning</span>
                 </li>
               </ul>
@@ -398,15 +391,15 @@ export default function HealthcareSystem() {
               <h3 className="text-xl font-semibold mb-3">Clinical Training</h3>
               <ul className="space-y-2 text-slate-600 dark:text-slate-400">
                 <li className="flex items-start">
-                  <CheckCircle size={16} className="mr-2 mt-1 text-teal-500" />
+                  <CheckCircle size={16} className="mr-2 mt-1 text-rose-500" />
                   <span>Department-specific sessions</span>
                 </li>
                 <li className="flex items-start">
-                  <CheckCircle size={16} className="mr-2 mt-1 text-teal-500" />
+                  <CheckCircle size={16} className="mr-2 mt-1 text-rose-500" />
                   <span>Clinical scenario testing</span>
                 </li>
                 <li className="flex items-start">
-                  <CheckCircle size={16} className="mr-2 mt-1 text-teal-500" />
+                  <CheckCircle size={16} className="mr-2 mt-1 text-rose-500" />
                   <span>Super-user certification</span>
                 </li>
               </ul>
@@ -418,15 +411,15 @@ export default function HealthcareSystem() {
               <h3 className="text-xl font-semibold mb-3">Go-Live Support</h3>
               <ul className="space-y-2 text-slate-600 dark:text-slate-400">
                 <li className="flex items-start">
-                  <CheckCircle size={16} className="mr-2 mt-1 text-teal-500" />
+                  <CheckCircle size={16} className="mr-2 mt-1 text-rose-500" />
                   <span>On-site clinical support</span>
                 </li>
                 <li className="flex items-start">
-                  <CheckCircle size={16} className="mr-2 mt-1 text-teal-500" />
+                  <CheckCircle size={16} className="mr-2 mt-1 text-rose-500" />
                   <span>24/7 technical assistance</span>
                 </li>
                 <li className="flex items-start">
-                  <CheckCircle size={16} className="mr-2 mt-1 text-teal-500" />
+                  <CheckCircle size={16} className="mr-2 mt-1 text-rose-500" />
                   <span>Performance optimization</span>
                 </li>
               </ul>
@@ -449,7 +442,7 @@ export default function HealthcareSystem() {
             <Button
               size="lg"
               variant="secondary"
-              className="bg-white text-teal-600 hover:bg-gray-100"
+              className="bg-white text-rose-600 hover:bg-gray-100"
             >
               Schedule Clinical Demo
             </Button>
@@ -521,7 +514,7 @@ export default function HealthcareSystem() {
                 <option>Other</option>
               </select>
             </div>
-            <Button className="w-full bg-teal-600 hover:bg-teal-700 mt-4">
+            <Button className="w-full bg-rose-600 hover:bg-rose-700 mt-4">
               Request Clinical Demo
             </Button>
           </div>
