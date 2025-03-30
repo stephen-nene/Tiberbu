@@ -6,3 +6,5 @@ venv
 *.pyc
 
 *.db
+
+__init__.*

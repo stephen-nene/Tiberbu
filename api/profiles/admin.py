@@ -1,69 +1,57 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User, Doctor, Patient, Image
+from django.utils.translation import gettext_lazy as _
+from .models import HealthcareUser, Doctor, Patient, ClinicalImage
 
-# Customize the UserAdmin
-@admin.register(User)
-class UserAdmin(UserAdmin):
-    # Define the fields to be displayed in the admin list view
-    list_display = ('username', 'email', 'role', 'status', 'is_active')
-    list_filter = ('role', 'status', 'is_active', 'date_joined')
+
+# Customizing UserAdmin for HealthcareUser
+@admin.register(HealthcareUser)
+class HealthcareUserAdmin(UserAdmin):
+    list_display = ('username', 'email', 'role', 'status', 'date_of_birth', 'mfa_enabled', 'is_active', 'is_staff')
+    list_filter = ('role', 'status', 'is_active', 'is_staff', 'date_of_birth')
     search_fields = ('username', 'email', 'phone_number')
-    ordering = ('-date_joined',)
-    readonly_fields = ('last_login', 'date_joined', 'token')
-
-    # Define fieldsets for grouping related fields
+    ordering = ('username',)
     fieldsets = (
-        (None, {'fields': ('username', 'email', 'password', 'profile_image')}),
-        ('Personal Info', {'fields': ('phone_number', 'address')}),
-        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
-        ('Status & Role', {'fields': ('role', 'status', 'token')}),
-        ('Important Dates', {'fields': ('last_login', 'date_joined')}),
+        (_('Personal Info'), {'fields': ('first_name', 'last_name', 'email', 'phone_number', 'date_of_birth','blood_group', 'gender')}),
+        (_('Access Control'), {'fields': ('role', 'status', 'mfa_enabled', 'groups', 'user_permissions')}),
+        (_('Security'), {'fields': ('password', 'last_login', 'is_active', 'is_staff', 'is_superuser')}),
+        (_('Audit Info'), {'fields': ('terms_accepted_at', 'privacy_policy_version')}),
     )
 
 
-# Admin for Doctor
+# Doctor Admin
 @admin.register(Doctor)
 class DoctorAdmin(admin.ModelAdmin):
-    list_display = ('user', 'license_number', 'is_available', 'experience', 'fees')
-    list_filter = ('is_available', 'gender', 'specialization')
-    search_fields = ('user__username', 'license_number', 'specialization__name')
-    autocomplete_fields = ('specialization',)
-    ordering = ('-created_at',)
-    readonly_fields = ('created_at', 'updated_at')
+    list_display = ('user', 'license_number', 'license_jurisdiction', 'is_available', 'rating', 'experience')
+    list_filter = ('is_available', 'specializations')
+    search_fields = ('user__username', 'license_number', 'specializations__name')
+    ordering = ('user__username',)
     fieldsets = (
-        (None, {'fields': ('user', 'license_number', 'gender', 'bio', 'rating', 'fees', 'experience')}),
-        ('Specialization', {'fields': ('specialization',)}),
-        ('Availability', {'fields': ('is_available',)}),
-        # ('Timestamps', {'fields': ('created_at', 'updated_at')}),
+        ('Doctor Info', {'fields': ('user',  'specializations', 'license_number', 'license_jurisdiction', 'medical_license')}),
+        ('Practice Details', {'fields': ('experience', 'bio', 'rating', 'fees', 'is_available', 'accepting_new_patients', 'emergency_availability')}),
     )
 
 
-# Admin for Patient
+# Patient Admin
 @admin.register(Patient)
 class PatientAdmin(admin.ModelAdmin):
-    list_display = ('user', 'date_of_birth', 'gender', 'blood_group')
-    list_filter = ('gender', 'blood_group')
-    search_fields = ('user__username', 'emergency_contact', 'medical_history')
-    ordering = ('-created_at',)
-    readonly_fields = ('created_at', 'updated_at')
+    list_display = ('user', 'gender')
+    search_fields = ('user__username', 'user__email')
+    ordering = ('user__username',)
     fieldsets = (
-        (None, {'fields': ('user', 'date_of_birth', 'gender', 'blood_group')}),
-        ('Contact & History', {'fields': ('emergency_contact', 'medical_history')}),
-        # ('Timestamps', {'fields': ('created_at', 'updated_at')}),
+        ('Patient Info', {'fields': ('user', 'gender', 'medical_history')}),
+        ('Health Data', {'fields': ('known_allergies', 'permanent_medications', 'emergency_contacts', 'primary_insurance')}),
     )
 
 
-# Admin for Image
-@admin.register(Image)
-class ImageAdmin(admin.ModelAdmin):
-    list_display = ('content_object', 'caption', 'created_at')
-    list_filter = ('content_type',)
-    search_fields = ('caption', 'description')
-    ordering = ('-created_at',)
-    readonly_fields = ('created_at', 'updated_at')
+# Clinical Image Admin
+@admin.register(ClinicalImage)
+class ClinicalImageAdmin(admin.ModelAdmin):
+    list_display = ('content_object', 'caption', 'sensitivity_level', 'image')
+    search_fields = ('caption', 'content_object__username')
+    list_filter = ('sensitivity_level',)
+    ordering = ('-id',)
     fieldsets = (
-        (None, {'fields': ('content_type', 'object_id', 'content_object', 'image')}),
-        ('Details', {'fields': ('caption', 'description')}),
-        ('Timestamps', {'fields': ('created_at', 'updated_at')}),
+        ('Image Details', {'fields': ('content_object', 'image', 'caption', 'clinical_context')}),
+        ('Security', {'fields': ('sensitivity_level', 'access_log')}),
     )
