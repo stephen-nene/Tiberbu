@@ -294,4 +294,6 @@ class AllUserView(APIView,AuthenticationMixin):
         except AuthenticationFailed as e:
             response = JsonResponse({'detail': str(e)}, status=401)
             return response
+        
+# ----------------------- 
             
