@@ -1,62 +1,95 @@
 from rest_framework import serializers
-from .models import User,Route,Order,MilkCollection
 from django.contrib.auth.hashers import make_password
-class RouteSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Route
-        fields = ['id','name','location','synonym','type']
+from django.core.validators import RegexValidator
+from .models import HealthcareUser, Doctor, Patient, ClinicalImage,Gender,UserRole,UserStatus
+
 
 class UserSerializer(serializers.ModelSerializer):
-    routes = RouteSerializer(many=True,read_only=True)
-    class Meta:
-        model = User
-        fields = ['id','username','first_name','last_name', 'email', 'role', 'phone_number','profile_image','status','unit_price','routes']
-
-    def validate_status(self, value):
-        if value not in ['active', 'inactive', 'deactivated' ]:
-            raise serializers.ValidationError("Invalid status. Choose 'active' or 'inactive'.")
-        return value
-    
-
-class OrderSerializer(serializers.ModelSerializer):
-    employee = UserSerializer(read_only=True)
-    customer = UserSerializer(read_only=True)
+    password = serializers.CharField(write_only=True, min_length=8)
 
     class Meta:
-        model = Order
+        model = HealthcareUser
         fields = [
-            'id',
-            'employee',
-            'customer',
-            'amount_issued',
-            'order_amount',
-            'issuance_date',
-            'status',
-            'paid',
+            'id', 'username', 'first_name', 'last_name', 'email',
+            'phone_number', 'password', 'status', 'role', 'date_of_birth',
+            'gender', 'address', 'profile_image', 'mfa_enabled'
         ]
 
+    def create(self, validated_data):
+        try:
+            validated_data['password'] = make_password(validated_data['password'])
+            return super().create(validated_data)
+        except Exception as e:
+            raise serializers.ValidationError({"error": "Failed to create user", "details": str(e)})
 
-    # def get_employee(self, obj):
-    #     # Include employee data only for admins and employees
-    #     if self.context.get('role') in ['admin', 'employee']:
-    #         return UserSerializer(obj.employee).data if obj.employee else None
-    #     return None
+    def update(self, instance, validated_data):
+        if 'password' in validated_data:
+            validated_data['password'] = make_password(validated_data['password'])
+        return super().update(instance, validated_data)
 
-    # def get_customer(self, obj):
-    #     # Include customer data only for admins and employees
-    #     if self.context.get('role') in ['admin', 'employee']:
-    #         return UserSerializer(obj.customer).data
-    #     return None
+    def validate_phone_number(self, value):
+        phone_validator = RegexValidator(
+            regex=r'^\+?1?\d{9,15}$',
+            message="Phone number must be in international format: +[country code][number]."
+        )
+        phone_validator(value)
+        return value
 
-class CollectionSerializer(serializers.ModelSerializer):
-    route = RouteSerializer(read_only=True)
-    farmer = UserSerializer(read_only=True)
-    employee = UserSerializer(read_only=True)
+    def validate_role(self, value):
+        allowed_roles = [choice[0] for choice in UserRole.choices]
+        if value not in allowed_roles:
+            raise serializers.ValidationError(f"Invalid role. Choose from: {', '.join(allowed_roles)}")
+        return value
+
+    def validate_status(self, value):
+        allowed_statuses = [choice[0] for choice in UserStatus.choices]
+        if value not in allowed_statuses:
+            raise serializers.ValidationError(f"Invalid status. Choose from: {', '.join(allowed_statuses)}")
+        return value
+
+    def validate_gender(self, value):
+        allowed_genders = [choice[0] for choice in Gender.choices]
+        if value not in allowed_genders:
+            raise serializers.ValidationError(f"Invalid gender. Choose from: {', '.join(allowed_genders)}")
+        return value
+    
+class DoctorSerializer(serializers.ModelSerializer):
+    user = UserSerializer()  # Nest user details
+
     class Meta:
-        model = MilkCollection
-        fields = ['id','amount','route','farmer','employee','created_at','updated_at']
- 
-class CollectionsSaveSerializer(serializers.ModelSerializer):
+        model = Doctor
+        fields = [
+            'user', 'license_number', 'specializations', 'medical_license',
+            'license_jurisdiction', 'certifications', 'accepting_new_patients',
+            'emergency_availability', 'experience', 'bio', 'rating', 'is_available', 'fees'
+        ]
+    
+    def create(self, validated_data):
+        user_data = validated_data.pop('user')
+        user = HealthcareUser.objects.create(**user_data)
+        doctor = Doctor.objects.create(user=user, **validated_data)
+        return doctor
+    
+class PatientSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+
     class Meta:
-        model = MilkCollection
-        fields = "__all__"
+        model = Patient
+        fields = [
+            'user', 'gender', 'medical_history', 'known_allergies',
+            'permanent_medications', 'emergency_contacts', 'primary_insurance'
+        ]
+
+    def create(self, validated_data):
+        user_data = validated_data.pop('user')
+        user = HealthcareUser.objects.create(**user_data)
+        patient = Patient.objects.create(user=user, **validated_data)
+        return patient
+
+class ClinicalImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ClinicalImage
+        fields = [
+            'id', 'content_type', 'object_id', 'image', 'caption',
+            'clinical_context', 'sensitivity_level', 'access_log'
+        ]

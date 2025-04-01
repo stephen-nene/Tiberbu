@@ -1,7 +1,34 @@
 from django.shortcuts import render
-import requests
 from django.views import View
 from django.http import JsonResponse
+from django.db import transaction
+
+
+from django.contrib.auth.hashers import check_password
+
+
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework import status
+
+from rest_framework_simplejwt.exceptions import AuthenticationFailed
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.tokens import RefreshToken,AccessToken
+# from rest_framework.exceptions import AuthenticationFailed
+
+
+import requests
+from decouple import config
+
+
+from profiles.services.emails import send_login_email,send_custom_email,send_speed_date_email
+from .models import HealthcareUser
+from .serializers import *
+
+ENVIRONMENT = config('ENVIRONMENT', default="development")
+
+is_production = ENVIRONMENT == 'production'
 
 # Create your views here.
 
@@ -100,5 +127,171 @@ class FunnyAPIView(View):
         }
 
         return JsonResponse(response_data)
+
+
+
+
+# ----------------- Authentication Views -----------------
+
+class AuthenticationMixin:
+    def get_authenticated_user(self, request):
+        # Try with access token first
+        access_token = request.COOKIES.get('access')
+        if access_token:
+            try:
+                token = AccessToken(access_token)
+                user_id = token['user_id']
+                return HealthcareUser.objects.get(id=user_id), None
+            except Exception:
+                # print("passed access",access_token)
+                pass
+
+        # Try with refresh token if access token is invalid
+        refresh_token = request.COOKIES.get('refresh')
+        if refresh_token:
+            try:
+                refresh = RefreshToken(refresh_token)
+                user_id = refresh['user_id']
+                new_access_token = str(refresh.access_token)
+                response = Response()
+                response.set_cookie('refresh', refresh.access_token, httponly=True, samesite='None' if is_production else 'None', secure=True)
+                response.set_cookie('access', new_access_token, httponly=True, samesite='None' if is_production else 'None', secure=True)
+
+                user = HealthcareUser.objects.get(id=user_id)
+                return user, response
+            except Exception:
+                # print("passed refresh",refresh_token)
+                pass
+
+        response = Response()
+        response.delete_cookie('access', samesite="None")
+        response.delete_cookie('refresh', samesite="None")
+        raise AuthenticationFailed('Unauthorized, please log in.')
     
+
+# ---------------------   login   ---------------------
+
+class CustomLoginView(APIView):
+    def post(self, request):
+        # Get the login credentials
+        # print(request.data)
+        identifier = request.data.get('identifier')
+        password = request.data.get('password')
+        
+        if not identifier or not password:
+            return Response({"error": "Both identifier and password are required."}, status=400)
+        
+        user = HealthcareUser.objects.filter(email=identifier).first() or \
+               HealthcareUser.objects.filter(phone_number=identifier).first() or \
+               HealthcareUser.objects.filter(username=identifier).first()
+
+        if not user:
+            raise AuthenticationFailed("User not found.")
+        if not check_password(password, user.password):
+            raise AuthenticationFailed("Incorrect password.")
+                # Send login email
+        try:
+            print("will send login email here")
+            # send_login_email(user.email, user.username)
+        except Exception as e:
+            print(f"Failed to send login email: {str(e)}")
+            return Response({"error": f"Failed to send login email: {str(e)}"}, status=500)
+
+        refresh = RefreshToken.for_user(user)
+        serialized_user = UserSerializer(user).data
+        response = Response({
+            "message": "Login successful.",
+            "User": serialized_user
+        })
+        response.set_cookie(
+            key='access',
+            value=str(refresh.access_token),
+            httponly=True,
+            samesite="None",
+            # samesite='Lax' if is_production else 'None',
+            secure=True,
+        )
+        response.set_cookie(
+            key='refresh',
+            value=str(refresh),
+            httponly=True,
+            samesite="None",
+            secure=True
+        )
+        return response
     
+class UserCreateView(APIView):
+    def post(self, request):
+        try:
+            serializer = UserSerializer(data=request.data)
+            if serializer.is_valid():
+                user = serializer.save()
+                return Response({
+                    "message": "User created successfully.",
+                    "user": serializer.data
+                }, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(
+                {"error": "User creation failed", "details": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+# ---------------------   logout   ---------------------
+
+class LogoutView(APIView):
+    def post(self, request):
+        try:
+            response = Response({"message": "Logout successful."}, status=status.HTTP_200_OK)
+            response.delete_cookie(key='access', samesite="None")
+            response.delete_cookie(key='refresh', samesite="None")
+            return response
+
+        except Exception as e:
+            return Response(
+                {"error": "Something went wrong during logout.", "details": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+            
+      
+
+@api_view(['POST'])
+def signup(request):
+    serializer = UserSerializer(data=request.data)  # Deserialize user input
+    if serializer.is_valid():  # Validate input
+        user = serializer.save(password=make_password(serializer.validated_data['password']))
+        return Response({
+            "message": "User created successfully.",
+            "user": {
+                "id": user.id,
+                "username": user.username,
+                "email": user.email,
+                "phone_number": user.phone_number
+            }
+        }, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class MeView(APIView, AuthenticationMixin):
+    def get(self, request):
+        user, response = self.get_authenticated_user(request) 
+        serialized_user = UserSerializer(user).data
+        
+        if response:
+            response.data = {'User': serialized_user}
+            return response
+        
+        return Response({'User': serialized_user})
+      
+            
+# ---------------    get all user2   ---------------------
+
+class AllUserView(APIView,AuthenticationMixin):
+    def get(self, request):
+        try:
+            user, _ = self.get_authenticated_user(request)
+            users = HealthcareUser.objects.all()  # Assuming a related name 'records' for associated data
+            # serialized_records = UserSerializer(users, many=True).data
+            return Response({'users': users})
+        except AuthenticationFailed as e:
+            response = JsonResponse({'detail': str(e)}, status=401)
+            return response
+            
