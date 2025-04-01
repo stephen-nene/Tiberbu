@@ -10,7 +10,7 @@ router = routers.DefaultRouter()
 # router.register(r'logs', LogSheetViewSet)
 
 urlpatterns = [
-    path('api/', include(router.urls)),
+    # path('api/', include(router.urls)),
     
         # Authentication routes ----------------------------
     path('auth/me', MeView.as_view(), name='me'),  # Logged-in user info route
@@ -23,6 +23,10 @@ urlpatterns = [
     # Other routes ---------------------------
     # path('auth/token', TokenObtainPairView.as_view(), name='token_obtain'),  # 
     # path('auth/refresh', TokenRefreshView.as_view(), name='token_refresh'),  # Refresh token
+    
+    
+    # All users ---------------------------------------
+    path('users',AllUserView.as_view(),name='all users')
     
     
 ]
