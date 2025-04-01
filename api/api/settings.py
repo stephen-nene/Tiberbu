@@ -112,10 +112,10 @@ CORS_ALLOWED_ORIGINS = [
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:1420",
     "https://tiberbuke.vercel.app/",
-    'https://tiberbuke.onrender.com',
     'https://tiberbu.onrender.com'
+    'https://tiberbuke.onrender.com',
 ]
-ALLOWED_HOSTS = ["tiberbuke.onrender.com",'tiberbu.onrender.com' "localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ['tiberbu.onrender.com' "localhost", "127.0.0.1"]
 
 
 ROOT_URLCONF = 'api.urls'
