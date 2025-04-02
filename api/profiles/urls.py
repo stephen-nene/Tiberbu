@@ -17,8 +17,8 @@ urlpatterns = [
     path('auth/login', CustomLoginView.as_view(), name='login'),  # JWT login
     path('auth/signup', UserCreateView.as_view(), name='signup'),
     path('auth/logout', LogoutView.as_view(), name='logout'),
-    # path('auth/forgot_password', views.forgot_password, name='forgot_password'),
-    # path('auth/reset_password', views.reset_password, name='reset_password'),
+    path('auth/forgot', ForgotPasswordView.as_view(), name='forgot_password'),
+    path('auth/reset', ResetPasswordView.as_view(), name='reset_password'),
     
     # Other routes ---------------------------
     # path('auth/token', TokenObtainPairView.as_view(), name='token_obtain'),  # 

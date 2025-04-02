@@ -22,7 +22,7 @@ import requests
 from decouple import config
 
 
-from profiles.services.emails import send_login_email,send_custom_email,send_speed_date_email
+from profiles.services.emails import send_login_email,send_custom_email,send_welcome_email
 from .models import HealthcareUser
 from .serializers import *
 
@@ -236,6 +236,17 @@ class UserCreateView(APIView):
                 {"error": "User creation failed", "details": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+class ResetPasswordView(APIView):
+    def post(self, request):
+        # take the token and the new passwords all over again
+        pass
+    
+class ForgotPasswordView(APIView):
+    def post(self, request):
+        # take the email and then chack in db and send email with reset instaructiosn and link
+        pass
+    
 # ---------------------   logout   ---------------------
 
 class LogoutView(APIView):
