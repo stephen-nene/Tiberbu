@@ -89,7 +89,7 @@ const Navbar = () => {
             </Button>
             <div className="md:block hidden">
             {loggedIn ? (
-              <div className="md:block hidden  items-center px-5">
+              <div className="md:flex hidden  gap-1.5">
                 <Link
                   to="/dashboard"
                   className={`flex items-center px-3 py-2 rounded-md text-sm font-medium 
@@ -115,7 +115,7 @@ const Navbar = () => {
               <div className="md:block hidden px-5">
                 <Link
                   to="/login"
-                  className={`block px-3 py-2 rounded-md text-base font-medium text-center ${
+                  className={` px-3 py-2 rounded-md text-base font-medium text-center ${
                     darkMode
                       ? "bg-blue-600 text-white hover:bg-blue-700"
                       : "bg-blue-500 text-white hover:bg-blue-600"
