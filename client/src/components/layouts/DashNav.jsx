@@ -1,15 +1,11 @@
-import React, { useState } from "react";
+import React, { useState,useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Menu,
   X,
   LogOut,
-  Home,
   Truck,
-  ClipboardCheck,
-  BarChart,
-  User,
-  Users,
+  BookOpen ,
   Sun,
   Moon,
   Map,
@@ -19,8 +15,26 @@ import {
   ChevronDown,
   ChevronRight,
   Package,
-  FileText,
   Clock,
+} from "lucide-react";
+import {
+  Home,
+  Calendar,
+  CalendarClock,
+  CalendarCheck,
+  BookOpenCheck,
+  CalendarX,
+  User,
+  Users,
+  FileText,
+  Stethoscope,
+  Syringe,
+  ClipboardCheck,
+  Bed,
+  HeartPulse,
+  Pill,
+  ScanEye,
+  Activity,
 } from "lucide-react";
 import { Button } from "@/components/shadcn/button";
 import {
@@ -29,6 +43,7 @@ import {
   AvatarImage,
 } from "@/components/shadcn/avatar";
 import { useUserStore } from "@/store/useUserStore";
+import { navItems,  } from "@/lib/navItems";
 import { toast } from "sonner";
 
 const DashNav = () => {
@@ -63,124 +78,216 @@ const DashNav = () => {
   };
 
   // Reorganized navigation items with dropdowns
-  const navItems = [
-    {
-      name: "Dashboard",
-      path: "/dashboard",
-      icon: <Home className="w-5 h-5" />,
-    },
-    {
-      name: "Shipments",
-      path: "/dashboard/shipments",
-      icon: <Truck className="w-5 h-5" />,
-      hasDropdown: true,
-      children: [
-        {
-          name: "All Shipments",
-          path: "/dashboard/shipments",
-          icon: <Package className="w-4 h-4" />,
-        },
-        {
-          name: "Dispatch",
-          path: "/dashboard/shipments/dispatch",
-          icon: <Truck className="w-4 h-4" />,
-        },
-        {
-          name: "Receive",
-          path: "/dashboard/shipments/receive",
-          icon: <ClipboardCheck className="w-4 h-4" />,
-        },
-        {
-          name: "Track",
-          path: "/dashboard/shipments/track",
-          icon: <Map className="w-4 h-4" />,
-        },
-      ],
-    },
-    // {
-    //   name: "Assign",
-    //   path: "/dashboard/shipments/dispatch",
-    //   icon: <ClipboardCheck className="w-5 h-5" />,
-    // },
-    {
-      name: "Users",
-      path: "/dashboard/users",
-      icon: <Users className="w-5 h-5" />,
-      hasDropdown: true,
-      children: [
-        {
-          name: "Drivers",
-          path: "/dashboard/users/drivers",
-          icon: <User className="w-4 h-4" />,
-        },
-        {
-          name: "Customers",
-          path: "/dashboard/users/customers",
-          icon: <Users className="w-4 h-4" />,
-        },
-        {
-          name: "Staff",
-          path: "/dashboard/users/staff",
-          icon: <User className="w-4 h-4" />,
-        },
-      ],
-      // Only show to admin
-      roleRequired: "admin",
-    },
-    // {
-    //   name: "Tracking",
-    //   path: "/dashboard/tracking",
-    //   icon: <Map className="w-5 h-5" />,
-    // },
-    {
-      name: "Reports",
-      path: "/dashboard/reports",
-      icon: <BarChart className="w-5 h-5" />,
-      hasDropdown: true,
-      children: [
-        {
-          name: "Delivery Performance",
-          path: "/dashboard/reports/delivery",
-          icon: <Clock className="w-4 h-4" />,
-        },
-        {
-          name: "Financial Summary",
-          path: "/dashboard/reports/financial",
-          icon: <FileText className="w-4 h-4" />,
-        },
-      ],
-      // Only show to admin and manager
-      roleRequired: ["admin", "manager"],
-    },
-    {
-      name: "Settings",
-      path: "/dashboard/settings",
-      icon: <Settings className="w-5 h-5" />,
-      hasDropdown: true,
-      children: [
-        {
-          name: "Profile",
-          path: "/dashboard/settings/profile",
-          icon: <Clock className="w-4 h-4" />,
-          roleRequired: ["admin", "manager", "staff"],
-        },
-        // {
-        //   name: "Account",
-        //   path: "/dashboard/reports/financial",
-        //   icon: <FileText className="w-4 h-4" />,
-        // },
-      ],
-    },
-  ];
 
+const navItems = [
+  {
+    name: "Dashboard",
+    path: "/dashboard",
+    icon: <Home className="w-5 h-5" />,
+  },
+  {
+    name: "Availabilities",
+    path: "/dashboard/availability",
+    icon: <BookOpen  className="w-5 h-5" />,
+    roleRequired: ["system_admin", "clinician", "receptionist", "nurse"],
+  },
+  {
+    name: "Appointments",
+    path: "/dashboard/appointments",
+    icon: <Calendar className="w-5 h-5" />,
+    hasDropdown: true,
+    roleRequired: ["system_admin", "clinician", "receptionist", "nurse"],
+    children: [
+      {
+        name: "Schedule",
+        path: "/dashboard/appointments/schedule",
+        icon: <CalendarClock className="w-4 h-4" />,
+        roleRequired: ["system_admin", "clinician", "receptionist"],
+      },
+      {
+        name: "Upcoming",
+        path: "/dashboard/appointments/upcoming",
+        icon: <CalendarCheck className="w-4 h-4" />,
+        roleRequired: ["system_admin", "clinician", "receptionist", "nurse"],
+      },
+      {
+        name: "Completed",
+        path: "/dashboard/appointments/completed",
+        icon: <BookOpenCheck className="w-4 h-4" />,
+        roleRequired: ["system_admin", "clinician"],
+      },
+      {
+        name: "Cancelled",
+        path: "/dashboard/appointments/cancelled",
+        icon: <CalendarX className="w-4 h-4" />,
+        roleRequired: ["system_admin", "receptionist"],
+      },
+    ],
+  },
+  {
+    name: "Patients",
+    path: "/dashboard/patients",
+    icon: <User className="w-5 h-5" />,
+    hasDropdown: true,
+    roleRequired: ["system_admin", "clinician", "receptionist"],
+    children: [
+      {
+        name: "Directory",
+        path: "/dashboard/patients",
+        icon: <Users className="w-4 h-4" />,
+        roleRequired: ["system_admin", "clinician", "receptionist"],
+      },
+      {
+        name: "Medical Records",
+        path: "/dashboard/patients/records",
+        icon: <FileText className="w-4 h-4" />,
+        roleRequired: ["system_admin", "clinician"],
+      },
+      {
+        name: "New Patient",
+        path: "/dashboard/patients/new",
+        icon: <User className="w-4 h-4" />,
+        roleRequired: ["system_admin", "receptionist"],
+      },
+    ],
+  },
+  {
+    name: "Medical Staff",
+    path: "/dashboard/staff",
+    icon: <Stethoscope className="w-5 h-5" />,
+    hasDropdown: true,
+    roleRequired: ["system_admin"],
+    children: [
+      {
+        name: "Doctors",
+        path: "/dashboard/staff/doctors",
+        icon: <Stethoscope className="w-4 h-4" />,
+      },
+      {
+        name: "Nurses",
+        path: "/dashboard/staff/nurses",
+        icon: <Syringe className="w-4 h-4" />,
+      },
+      {
+        name: "Receptionists",
+        path: "/dashboard/staff/receptionists",
+        icon: <ClipboardCheck className="w-4 h-4" />,
+      },
+    ],
+  },
+  {
+    name: "Ward Management",
+    path: "/dashboard/wards",
+    icon: <Bed className="w-5 h-5" />,
+    roleRequired: ["system_admin", "nurse"],
+    hasDropdown: true,
+    children: [
+      {
+        name: "Bed Availability",
+        path: "/dashboard/wards/availability",
+        icon: <Bed className="w-4 h-4" />,
+        roleRequired: ["system_admin", "nurse", "receptionist"],
+      },
+      {
+        name: "Patient Admissions",
+        path: "/dashboard/wards/admissions",
+        icon: <HeartPulse className="w-4 h-4" />,
+        roleRequired: ["system_admin", "nurse"],
+      },
+    ],
+  },
+  {
+    name: "Pharmacy",
+    path: "/dashboard/pharmacy",
+    icon: <Pill className="w-5 h-5" />,
+    roleRequired: ["system_admin", "pharmacist"],
+    hasDropdown: true,
+    children: [
+      {
+        name: "Inventory",
+        path: "/dashboard/pharmacy/inventory",
+        icon: <Pill className="w-4 h-4" />,
+      },
+      {
+        name: "Prescriptions",
+        path: "/dashboard/pharmacy/prescriptions",
+        icon: <ScanEye className="w-4 h-4" />,
+      },
+    ],
+  },
+  {
+    name: "Reports",
+    path: "/dashboard/reports",
+    icon: <Activity className="w-5 h-5" />,
+    roleRequired: ["system_admin"],
+    hasDropdown: true,
+    children: [
+      {
+        name: "Appointments",
+        path: "/dashboard/reports/appointments",
+        icon: <Calendar className="w-4 h-4" />,
+      },
+      {
+        name: "Financial",
+        path: "/dashboard/reports/financial",
+        icon: <Activity className="w-4 h-4" />,
+      },
+    ],
+  },
+  {
+    name: "Settings",
+    path: "/dashboard/settings",
+    icon: <Settings className="w-5 h-5" />,
+    hasDropdown: true,
+    roleRequired: ["system_admin"],
+    children: [
+      {
+        name: "Profile",
+        path: "/dashboard/settings/profile",
+        icon: <User className="w-4 h-4" />,
+      },
+      {
+        name: "Hospital Info",
+        path: "/dashboard/settings/hospital",
+        icon: <Home className="w-4 h-4" />,
+      },
+    ],
+  },
+];
+
+  // useMemo(() => {
+  // }, [navItems, user?.role]);
+
+  const filterNavItems = (items, userRole) => {
+    return items
+      .filter((item) => {
+        // First, check the item itself
+        if (!item.roleRequired) return true;
+        if (Array.isArray(item.roleRequired)) {
+          return item.roleRequired.includes(userRole);
+        }
+        return item.roleRequired === userRole;
+      })
+      .map((item) => {
+        // Then, recursively filter any nested children (if present)
+        if (item.children) {
+          item.children = filterNavItems(item.children, userRole);
+          // If there are no visible children after filtering, we remove the dropdown
+          if (item.children.length === 0) {
+            delete item.hasDropdown;
+          }
+        }
+        return item;
+      });
+  };
+
+  // const filteredNavItems = filterNavItems(navItems, user?.role);
   // Filter nav items based on user role
-  const filteredNavItems = navItems.filter((item) => {
-    if (!item.roleRequired) return true;
-    if (Array.isArray(item.roleRequired)) {
-      return item.roleRequired.includes(user?.role);
-    }
-    return item.roleRequired === user?.role;
-  });
+  const filteredNavItems = useMemo(
+    () => filterNavItems(navItems, user?.role),
+    [navItems, user?.role]
+  );
+
 
   const renderNavItem = (item) => {
     const isActive = location.pathname === item.path;
