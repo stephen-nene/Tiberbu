@@ -13,9 +13,13 @@ const DashRoutes = {
   DashboardLayout: lazy(() =>
     import("../../components/layouts/Dashlayout.jsx")
   ),
-  UsersLayout: lazy(()=>import("../../components/layouts/UsersLayout.jsx")),
+  UsersLayout: lazy(() => import("../../components/layouts/UsersLayout.jsx")),
+  PatientsLayout: lazy(() => import("../../components/layouts/PatientsLayout.jsx")),
   Dashboard: lazy(() => import("../pages/dash/home/Dashboard.jsx")),
   Profile: lazy(() => import("../pages/dash/Profile.jsx")),
+  Security: lazy(() => import("../pages/dash/Security.jsx")),
+
+  Patients: lazy(() => import("../pages/dash/users/Patients/Patients.jsx")),
 
   // Users: lazy(() => import("../Components/pages/dash/Users.jsx")),
 };
@@ -81,6 +85,44 @@ export const routes = [
         element: DashRoutes.Profile,
         protected: true,
         roles: ["system_admin", "clinician"],
+      },
+
+      {
+        path: "patients",
+        element: DashRoutes.PatientsLayout,
+        protected: true,
+        roles: ["system_admin"],
+        children: [
+          {
+            path: "",
+            element: DashRoutes.Patients,
+            protected: true,
+            roles: ["system_admin"],
+          },
+          // {
+          //   path: "customers",
+          //   element: DashRoutes.CustomersManagement,
+          //   protected: true,
+          //   roles: ["system_admin"],
+          // },
+          // {
+          //   path: "staff",
+          //   element: DashRoutes.StaffManagement,
+          //   protected: true,
+          //   roles: ["system_admin"],
+          // },
+          {
+            path: "*",
+            element: Error404,
+          }
+        ],
+      },
+
+      {
+        path: "settings/security",
+        element: DashRoutes.Security,
+        protected: true,
+        roles: ["system_admin"],
       },
 
       // Add other dashboard routes as needed

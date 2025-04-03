@@ -7,7 +7,7 @@ export default function DashLayout() {
     <>
       <DashNav />
 
-      <div className="co ntainer mx-auto min-h-screen py-5 px-5">
+      <div className="container mx-auto min-h-screen ">
         <Outlet />
       </div>
     </>

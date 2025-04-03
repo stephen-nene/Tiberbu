@@ -15,7 +15,7 @@ import {
   ChevronDown,
   ChevronRight,
   Package,
-  Clock,
+  Lock,
 } from "lucide-react";
 import {
   Home,
@@ -251,6 +251,12 @@ const navItems = [
         path: "/dashboard/settings/hospital",
         icon: <Home className="w-4 h-4" />,
       },
+      {
+        name: "Security",
+        path: "/dashboard/settings/security",
+        icon: <Lock className="w-4 h-4" />,
+        roleRequired: ["system_admin"],
+      }
     ],
   },
 ];
@@ -404,7 +410,8 @@ const navItems = [
           <div className="flex items-center justify-between h-16">
             {/* Left */}
             <div className="flex items-center">
-              <div className="flex items-center mr-4">
+              <div className="flex  gap-1.5 items-center mr-4">
+                <Activity className="h-8 w-8 text-blue-600" />
                 <span className="text-2xl font-bold">
                   <span className="font-bold text-blue-900 dark:text-white">
                     tibe
@@ -490,8 +497,10 @@ const navItems = [
       >
         {/* Logo */}
         <div className="flex items-center justify-between h-16 px-6 border-b border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-950">
-          <div className="flex items-center">
-            <Link to="/" className="text-2xl font-bold cursor-pointer">
+          <div className="flex gap-1.5 items-center">
+
+            <Activity className="h-8 w-8 text-blue-600" />
+            <Link to="/" className="flex  text-2xl font-bold cursor-pointer">
               <span className="font-bold text-blue-900 dark:text-white">
                 tibe
               </span>

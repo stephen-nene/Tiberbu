@@ -5,14 +5,14 @@ import DoctorDashboard from "./DoctorDashboard.jsx";
 import PatientDashboard from "./PatientDashboard.jsx";
 
 
-
 export default function Dashboard() {
-  const user = useUserStore((state) => state.user); // Get the user role
+
+  const user = useUserStore((state) => state.user); 
 
   return (
-    <div className="min-h-screen bg-sky-500">
+    <div className="min-h-screen bg-sk y-500 p-3">
       <h1>Welcome to the Hospital Management System</h1>
-      {user.role === "admin" && <AdminDashboard />}
+      {user.role === "system_admin" && <AdminDashboard />}
       {user.role === "clinician" && <DoctorDashboard />}
       {user.role === "patient" && <PatientDashboard />}
     </div>
