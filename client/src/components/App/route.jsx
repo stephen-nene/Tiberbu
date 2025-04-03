@@ -13,7 +13,8 @@ const DashRoutes = {
   DashboardLayout: lazy(() =>
     import("../../components/layouts/Dashlayout.jsx")
   ),
-  Dashboard: lazy(() => import("../pages/dash/Dashboard.jsx")),
+  UsersLayout: lazy(()=>import("../../components/layouts/UsersLayout.jsx")),
+  Dashboard: lazy(() => import("../pages/dash/home/Dashboard.jsx")),
   Profile: lazy(() => import("../pages/dash/Profile.jsx")),
 
   // Users: lazy(() => import("../Components/pages/dash/Users.jsx")),
@@ -63,29 +64,29 @@ export const routes = [
   //   roles: ["admin", "user"],
   // },
 
-  // {
-  //   path: "/dashboard/",
-  //   element: DashRoutes.DashboardLayout,
-  //   protected: true,
-  //   roles: ["admin", "user"],
-  //   children: [
-  //     {
-  //       path: "",
-  //       element: DashRoutes.Dashboard,
-  //       protected: true,
-  //       roles: ["admin", "user"],
-  //     },
-  //     {
-  //       path: "profile",
-  //       element: DashRoutes.Profile,
-  //       protected: true,
-  //       roles: ["admin", "user"],
-  //     },
+  {
+    path: "/dashboard/",
+    element: DashRoutes.DashboardLayout,
+    protected: true,
+    roles: ["system_admin", "clinician"],
+    children: [
+      {
+        path: "",
+        element: DashRoutes.Dashboard,
+        protected: true,
+        roles: ["system_admin", "clinician"],
+      },
+      {
+        path: "profile",
+        element: DashRoutes.Profile,
+        protected: true,
+        roles: ["system_admin", "clinician"],
+      },
 
-  //     // Add other dashboard routes as needed
-  //     { path: "*", element: Error404 }, // For routes that aren't implemented yet
-  //   ],
-  // },
+      // Add other dashboard routes as needed
+      { path: "*", element: Error404 }, // For routes that aren't implemented yet
+    ],
+  },
 
   // 404 Route
   { path: "*", element: Error404 },

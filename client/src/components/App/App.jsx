@@ -18,11 +18,11 @@ import { useUserStore } from "../../store/useUserStore.js"
 
 import "../../assets/styles/App.css";
 const App = React.forwardRef((props, ref) => {
-  const { login, loggedIn, darkMode, fetchUser } = useUserStore();
+  const { user, loggedIn, darkMode, fetchUser } = useUserStore();
   const location = useLocation();
   const isDashboard = location.pathname.startsWith("/dashboard");
 
-  // console.log(loggedIn)
+  console.log(user)
 
   useEffect(() => {
     window.scrollTo(0, 0);
