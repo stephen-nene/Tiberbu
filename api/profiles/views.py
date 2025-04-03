@@ -171,7 +171,17 @@ class AuthenticationMixin:
 
 # ---------------------   login   ---------------------
 
-class CustomLoginView(APIView):
+class CustomLoginView(AuthenticationMixin,APIView):
+    def get(self, request):
+        user, response = self.get_authenticated_user(request) 
+        serialized_user = UserSerializer(user).data
+        
+        if response:
+            response.data = {'User': serialized_user}
+            return response
+        
+        return Response({'User': serialized_user})
+      
     def post(self, request):
         # Get the login credentials
         # print(request.data)
