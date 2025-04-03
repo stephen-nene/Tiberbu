@@ -16,8 +16,7 @@ def create_user_profile(sender, instance, created, **kwargs):
     if created:
         if instance.role == UserRole.CLINICIAN:
             Doctor.objects.create(user=instance)
-            # Automatically activate clinician accounts
-            instance.status = UserStatus.ACTIVE
+            # instance.status = UserStatus.ACTIVE
             instance.save()
             
         elif instance.role == UserRole.PATIENT:
@@ -25,10 +24,12 @@ def create_user_profile(sender, instance, created, **kwargs):
             
         elif instance.role == UserRole.SYSTEM_ADMIN:
             # Admins might need special handling
-            instance.status = UserStatus.ACTIVE
-            instance.is_staff = True
-            instance.is_superuser = True
-            instance.save()
+            # instance.status = UserStatus.ACTIVE
+            # instance.is_staff = True
+            # instance.is_superuser = True
+            # instance.save()
+            pass
+            
             
         elif instance.role == UserRole.NURSE:
             # Create nurse profile if you have a Nurse model
