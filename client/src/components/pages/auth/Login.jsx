@@ -37,13 +37,14 @@ export default function Login() {
     email: "",
     password: "",
     rememberMe: false,
-  });
+  }); 
   const [errors, setErrors] = useState({ email: "", password: "" });
   const [serverError, setServerError] = useState("");
   const [loading, setLoading] = useState(false);
   const [devModeUserType, setDevModeUserType] = useState("admin");
   const navigate = useNavigate();
   const { user, loggedIn, login } = useUserStore();
+  console.log(user) 
 
   const validateForm = () => {
     const newErrors = { email: "", password: "" };
@@ -59,10 +60,10 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setServerError("");
     if (validateForm()) {
+      setLoading(true);
       try {
-        setLoading(true);
-        setServerError("");
         const res = await login(formData, navigate);
       } catch (error) {
         console.error("Caught error is", error.response?.data);
@@ -71,11 +72,12 @@ export default function Login() {
         setLoading(false);
       }
     } else {
-      toast.error("Please fix the errors in the form.", 2);
+      console.error("Please fix the errors in the form.", 2);
     }
   };
 
-  const handleDummyLogin = async () => {
+  const handleDummyLogin = async (e) => {
+    e.preventDefault();
     try {
       setLoading(true);
       setServerError("");
@@ -83,18 +85,18 @@ export default function Login() {
       // Dummy credentials based on user type
       const credentials = {
         admin: {
-          email: "admin@hospital.com",
-          password: "Admin@123",
+          identifier: "admin@example.com",
+          password: "mnbvcxzxcvbnm",
           role: "admin",
         },
         doctor: {
-          email: "doctor@hospital.com",
-          password: "Doctor@123",
+          identifier: "drsmith@example.com",
+          password: "mnbvcxzxcvbnm",
           role: "doctor",
         },
         patient: {
-          email: "patient@hospital.com",
-          password: "Patient@123",
+          identifier: "janedoe@example.com",
+          password: "mnbvcxzxcvbnm",
           role: "patient",
         },
       };
@@ -109,9 +111,9 @@ export default function Login() {
         });
       }
     } catch (error) {
-      console.error("Dummy login failed:", error);
-      setServerError(error.response?.data?.detail || "Failed to login.");
-      toast.error("Dummy login failed");
+      console.error("Dummy login failed:", error?.response);
+      const error2 = error?.response?.data?.error || error?.response?.data?.detail
+      setServerError(error2 || "Failed to login.");
     } finally {
       setLoading(false);
     }
@@ -140,7 +142,7 @@ export default function Login() {
                 </CardTitle>
                 {loggedIn && (
                   <CardDescription className="text-green-600">
-                    {user.name || user.email}
+                    {user?.name || user?.email}
                   </CardDescription>
                 )}
               </CardHeader>
@@ -274,7 +276,7 @@ export default function Login() {
                   className="flex-1"
                   variant="outline"
                   loading={loading}
-                  onClick={handleDummyLogin}
+                  onClick={(e)=>handleDummyLogin(e)}
                 >
                   Quick Login
                 </Button>

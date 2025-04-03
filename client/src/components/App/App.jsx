@@ -18,7 +18,7 @@ import { useUserStore } from "../../store/useUserStore.js"
 
 import "../../assets/styles/App.css";
 const App = React.forwardRef((props, ref) => {
-  const { login, loggedIn, darkMode } = useUserStore();
+  const { login, loggedIn, darkMode, fetchUser } = useUserStore();
   const location = useLocation();
   const isDashboard = location.pathname.startsWith("/dashboard");
 
@@ -28,14 +28,14 @@ const App = React.forwardRef((props, ref) => {
     window.scrollTo(0, 0);
   }, [location]); // Runs when the pathname changes
 
-  // useEffect(() => {
-  //   if (loggedIn === false) {
-  //     const getUser = async () => {
-  //       await getCurrentUser(login);
-  //     };
-  //     getUser();
-  //   }
-  // }, []);
+  useEffect(() => {
+    if (loggedIn === false) {
+      const getUser = async () => {
+        await fetchUser();
+      };
+      getUser();
+    }
+  }, []);
 
   const renderRoute = (route) => {
     const RouteComponent = route.element;
@@ -50,7 +50,9 @@ const App = React.forwardRef((props, ref) => {
               allowedRoles={route.roles || []}
               allowPendingAccess={route.allowPendingAccess}
             >
-              <Suspense fallback={<LoadingSpinner size='xl' variant="primary" />}>
+              <Suspense
+                fallback={<LoadingSpinner size="xl" variant="primary" />}
+              >
                 <RouteComponent />
               </Suspense>
             </ProtectedRoute>
