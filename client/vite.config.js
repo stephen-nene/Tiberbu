@@ -1,42 +1,24 @@
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
-import tailwindcss from "@tailwindcss/vite";
 import path from "path";
+import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig(({ mode }) => {
-  // Load environment variables manually
   const env = loadEnv(mode, process.cwd(), "");
-
-  // Environment variables
-
-  const localUrl = "http://localhost:3000";
-  const backUrl = env.BACKEND_URL || "https://tiberbu.onrender.com/api/v1.0";
-
-  const host = env.TAURI_DEV_HOST;
-  const isTauriBuild = env.TAURI_ENV === "true";
+  
+  console.log(env.BACKEND_URL);
+  
+  const backUrl = env.BACKEND_URL || "https://tiberbu.onrender.com/api/v1.0/";
 
   return {
-    plugins: [react(), tailwindcss()],
-
-    resolve: {
-      alias: {
-        "@": path.resolve(__dirname, "./src"),
-        "~": path.resolve(__dirname, "./public"),
-      },
-    },
+    plugins: [react(),tailwindcss()],
 
     server: {
+      host: "0.0.0.0",
       port: 5173,
-      strictPort: true,
-      host: host || "0.0.0.0",
-
-      hmr: host
-        ? {
-            protocol: "ws",
-            host,
-            port: 5173,
-          }
-        : undefined,
+      // strictPort: true,
+      // allowedHosts: [".ngrok-free.app"],
+      // cors: true,
 
       proxy: {
         "/api": {
@@ -52,9 +34,8 @@ export default defineConfig(({ mode }) => {
             });
           },
         },
-        
         "/socket.io": {
-          target: localUrl,
+          target: backUrl,
           ws: true,
           changeOrigin: true,
         },
@@ -64,26 +45,11 @@ export default defineConfig(({ mode }) => {
         ignored: ["**/src-tauri/**"],
       },
     },
-
-    build: {
-      target: isTauriBuild ? ["es2021", "chrome100", "safari15"] : "esnext",
-      chunkSizeWarningLimit: isTauriBuild ? 500 : 1000,
-      sourcemap: !isTauriBuild,
-      rollupOptions: {
-        output: {
-          manualChunks: isTauriBuild
-            ? undefined
-            : {
-                react: ["react", "react-dom"],
-                vendor: ["lodash", "axios"],
-              },
-        },
+    resolve: {
+      alias: {
+        "@": path.resolve(__dirname, "./src"),
+        "~": path.resolve(__dirname, "./public"),
       },
-    },
-
-    define: {
-      __APP_ENV__: JSON.stringify(env.NODE_ENV || "development"),
-      __BACKEND_URL__: JSON.stringify(isTauriBuild ? "/api" : backUrl),
     },
   };
 });
