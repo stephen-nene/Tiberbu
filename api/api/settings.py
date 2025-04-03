@@ -143,19 +143,19 @@ WSGI_APPLICATION = 'api.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 tmpPostgres = urlparse(config("DATABASE_URL"))
 # print("Database", tmpPostgres)
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql' if is_production else 'django.db.backends.sqlite3',
-        'NAME': tmpPostgres.path.replace('/', '') if is_production else BASE_DIR / 'tibERbu.db',
-        'USER': tmpPostgres.username if is_production else '',
-        'PASSWORD': tmpPostgres.password if is_production else '',
-        'HOST': tmpPostgres.hostname if is_production else '',
-        'PORT': config('DB_PORT') if is_production else '',
-        'OPTIONS': {
-            'sslmode': 'require',
-        } if is_production else {},
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql' if is_production else 'django.db.backends.sqlite3',
+#         'NAME': tmpPostgres.path.replace('/', '') if is_production else BASE_DIR / 'tibERbu.db',
+#         'USER': tmpPostgres.username if is_production else '',
+#         'PASSWORD': tmpPostgres.password if is_production else '',
+#         'HOST': tmpPostgres.hostname if is_production else '',
+#         'PORT': config('DB_PORT') if is_production else '',
+#         'OPTIONS': {
+#             'sslmode': 'require',
+#         } if is_production else {},
+#     }
+# }
 
 DATABASES2 = {
     'default': {
@@ -170,6 +170,15 @@ DATABASES2 = {
         } if is_production else {},
     }
 } 
+
+# connections for local db
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'tibERbu.db',
+    }
+}
 
 
 
