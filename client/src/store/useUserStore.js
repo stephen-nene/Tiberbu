@@ -49,9 +49,9 @@ export const useUserStore = create(
               loggedIn: true,
             });
             toast.success(response.data.message || "Login successful!"); // Replace loading toast with success
-            // setTimeout(() => {
-            //   navigate("/dashboard");
-            // }, 3000);
+            setTimeout(() => {
+              navigate("/dashboard");
+            }, 3000);
             return response;
           }
         } catch (error) {
