@@ -4,12 +4,12 @@ import DashNav from "./DashNav";
 
 export default function DashLayout() {
   return (
-    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-950">
+    <>
       <DashNav />
-      <main className="flex-1 pt-10 lg:pl-64">
-        vhvhv
+
+      <div className="co ntainer mx-auto min-h-screen py-5 px-5">
         <Outlet />
-      </main>
-    </div>
+      </div>
+    </>
   );
 }
