@@ -36,7 +36,7 @@ SECRET_KEY =config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["tiberbu.onrender.com",'localhost:5173','tiberbuke.vercel.app']
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=20),
@@ -104,18 +104,18 @@ CORS_ALLOWED_ORIGIN_REGEXES = [
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:1420", 
+    "http://localhost:5173", 
      'https://tiberbuke.vercel.app',
     'https://tiberbu.onrender.com'     
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:1420",
+    "http://localhost:5173",
     "https://tiberbuke.vercel.app/",
     'https://tiberbu.onrender.com'
     'https://tiberbuke.onrender.com',
 ]
-ALLOWED_HOSTS = ['tiberbu.onrender.com' "localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ['tiberbu.onrender.com', "localhost", "127.0.0.1",'tiberbuke.vercel.app']
 
 
 ROOT_URLCONF = 'api.urls'

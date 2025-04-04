@@ -3,8 +3,15 @@ venv
 
 *.env
 
-*.pyc
 
 *.db
 
 __init__.*
+
+# Ignore Python bytecode and cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.cpython-*
+*.pyd
+*.pyc
