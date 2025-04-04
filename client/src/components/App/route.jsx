@@ -73,19 +73,19 @@ export const routes = [
     path: "/dashboard/",
     element: DashRoutes.DashboardLayout,
     protected: true,
-    roles: ["system_admin", "clinician"],
+    roles: ["system_admin", "clinician", "patient"],
     children: [
       {
         path: "",
         element: DashRoutes.Dashboard,
         protected: true,
-        roles: ["system_admin", "clinician"],
+        roles: ["system_admin", "clinician", "patient"],
       },
       {
         path: "profile",
         element: DashRoutes.Profile,
         protected: true,
-        roles: ["system_admin", "clinician"],
+        // roles: ["system_admin", "clinician", "patient"],
       },
 
       {
@@ -98,7 +98,7 @@ export const routes = [
             path: "",
             element: DashRoutes.Patients,
             protected: true,
-            roles: ["system_admin"],
+            roles: ["system_admin",'clinician']
           },
           // {
           //   path: "customers",
@@ -123,7 +123,7 @@ export const routes = [
         path: "settings/security",
         element: DashRoutes.Security,
         protected: true,
-        roles: ["system_admin"],
+        roles: ["system_admin", "clinician"],
       },
 
       // Add other dashboard routes as needed
