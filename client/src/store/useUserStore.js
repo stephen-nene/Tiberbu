@@ -39,7 +39,7 @@ export const useUserStore = create(
       login: async (data, navigate) => {
         const toastId = toast.loading("Logging in..."); // Show loading toast
         const newdata = {
-          identifier: data.email,
+          identifier: data.identifier||data.email,
           password: data.password,
         }
 

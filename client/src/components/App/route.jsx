@@ -9,18 +9,40 @@ const AuthRoutes = {
   Activate: lazy(() => import("../pages/auth/Activate.jsx")),
 };
 
-const DashRoutes = {
+const LayoutRoutes = {
+  AvailabilityLayout: lazy(() =>
+    import("../../components/layouts/AvailabilityLayout.jsx")
+  ),
   DashboardLayout: lazy(() =>
     import("../../components/layouts/Dashlayout.jsx")
   ),
   UsersLayout: lazy(() => import("../../components/layouts/UsersLayout.jsx")),
-  PatientsLayout: lazy(() => import("../../components/layouts/PatientsLayout.jsx")),
+  PatientsLayout: lazy(() =>
+    import("../../components/layouts/PatientsLayout.jsx")
+  ),
+  AppointmentsLayout: lazy(()=>import("../../components/layouts/AppointmentsLayout.jsx")),
+};
+
+const DashRoutes = {
   Dashboard: lazy(() => import("../pages/dash/home/Dashboard.jsx")),
+
+  Availability: lazy(() =>
+    import("../pages/dash/availability/Availability.jsx")
+  ),
+  Appointments: lazy(() =>
+    import("../pages/dash/appointments/Appointments.jsx")
+  ),
+  NewAppointments: lazy(() =>
+    import("../pages/dash/appointments/NewAppointments.jsx")
+  ),
+  NewAvailability: lazy(() =>
+    import("../pages/dash/availability/NewAvailability.jsx")
+  ),
   Profile: lazy(() => import("../pages/dash/Profile.jsx")),
   Security: lazy(() => import("../pages/dash/Security.jsx")),
 
   Patients: lazy(() => import("../pages/dash/users/Patients/Patients.jsx")),
-
+  Records: lazy(() => import("../pages/dash/users/Records/Records.jsx")),
   // Users: lazy(() => import("../Components/pages/dash/Users.jsx")),
 };
 
@@ -71,7 +93,7 @@ export const routes = [
 
   {
     path: "/dashboard/",
-    element: DashRoutes.DashboardLayout,
+    element: LayoutRoutes.DashboardLayout,
     protected: true,
     roles: ["system_admin", "clinician", "patient"],
     children: [
@@ -82,15 +104,63 @@ export const routes = [
         roles: ["system_admin", "clinician", "patient"],
       },
       {
-        path: "profile",
+        path: "settings/profile",
         element: DashRoutes.Profile,
         protected: true,
         // roles: ["system_admin", "clinician", "patient"],
       },
 
       {
+        path: "availability",
+        element: LayoutRoutes.AvailabilityLayout,
+        protected: true,
+        roles: ["system_admin"],
+        children: [
+          {
+            path: "",
+            element: DashRoutes.Availability,
+            protected: true,
+            roles: ["system_admin"],
+          },
+          {
+            path: "new",
+            element: DashRoutes.NewAvailability,
+            protected: true,
+            roles: ["system_admin", "clinician"],
+          },
+          // {
+          //   path: "*",
+          //   element: ComingSoon,
+          // },
+        ],
+      },
+      {
+        path: "appointments",
+        element: LayoutRoutes.AppointmentsLayout,
+        protected: true,
+        roles: ["system_admin"],
+        children: [
+          {
+            path: "",
+            element: DashRoutes.Appointments,
+            protected: true,
+            roles: ["system_admin", "clinician"],
+          },
+          {
+            path: "Schedule",
+            element: DashRoutes.NewAppointments,
+            protected: true,
+            roles: ["system_admin", "clinician"],
+          },
+          {
+            path: "*",
+            element: ComingSoon2,
+          },
+        ],
+      },
+      {
         path: "patients",
-        element: DashRoutes.PatientsLayout,
+        element: LayoutRoutes.PatientsLayout,
         protected: true,
         roles: ["system_admin"],
         children: [
@@ -98,14 +168,14 @@ export const routes = [
             path: "",
             element: DashRoutes.Patients,
             protected: true,
-            roles: ["system_admin",'clinician']
+            roles: ["system_admin", "clinician"],
           },
-          // {
-          //   path: "customers",
-          //   element: DashRoutes.CustomersManagement,
-          //   protected: true,
-          //   roles: ["system_admin"],
-          // },
+          {
+            path: "records",
+            element: DashRoutes.Records,
+            protected: true,
+            roles: ["system_admin"],
+          },
           // {
           //   path: "staff",
           //   element: DashRoutes.StaffManagement,
