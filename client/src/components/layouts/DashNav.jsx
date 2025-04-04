@@ -180,7 +180,7 @@ const navItems = [
     ],
   },
   {
-    name: "Medical Staff",
+    name: "Staff",
     path: "/dashboard/staff",
     icon: <Stethoscope className="w-5 h-5" />,
     hasDropdown: true,
@@ -191,11 +191,11 @@ const navItems = [
         path: "/dashboard/staff/doctors",
         icon: <Stethoscope className="w-4 h-4" />,
       },
-      // {
-      //   name: "Nurses",
-      //   path: "/dashboard/staff/nurses",
-      //   icon: <Syringe className="w-4 h-4" />,
-      // },
+      {
+        name: "Specialization",
+        path: "/dashboard/staff/specializations",
+        icon: <Syringe className="w-4 h-4" />,
+      },
       // {
       //   name: "Receptionists",
       //   path: "/dashboard/staff/receptionists",
@@ -267,7 +267,7 @@ const navItems = [
     path: "/dashboard/settings",
     icon: <Settings className="w-5 h-5" />,
     hasDropdown: true,
-    roleRequired: ["system_admin"],
+    roleRequired: ["system_admin", "clinician","receptionist", "nurse",],
     children: [
       {
         name: "Profile",
@@ -290,13 +290,10 @@ const navItems = [
   },
 ];
 
-  // useMemo(() => {
-  // }, [navItems, user?.role]);
 
   const filterNavItems = (items, userRole) => {
     return items
       .filter((item) => {
-        // First, check the item itself
         if (!item.roleRequired) return true;
         if (Array.isArray(item.roleRequired)) {
           return item.roleRequired.includes(userRole);
@@ -304,10 +301,8 @@ const navItems = [
         return item.roleRequired === userRole;
       })
       .map((item) => {
-        // Then, recursively filter any nested children (if present)
         if (item.children) {
           item.children = filterNavItems(item.children, userRole);
-          // If there are no visible children after filtering, we remove the dropdown
           if (item.children.length === 0) {
             delete item.hasDropdown;
           }
@@ -316,8 +311,6 @@ const navItems = [
       });
   };
 
-  // const filteredNavItems = filterNavItems(navItems, user?.role);
-  // Filter nav items based on user role
   const filteredNavItems = useMemo(
     () => filterNavItems(navItems, user?.role),
     [navItems, user?.role]

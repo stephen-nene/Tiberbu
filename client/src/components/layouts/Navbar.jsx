@@ -19,11 +19,11 @@ const Navbar = () => {
 
   // Navigation items
   const navItems = [
-    { name: "Home", path: "/" },
-    { name: "Patients", path: "/patients" },
-    { name: "Doctors", path: "/doctors" },
-    { name: "Appointments", path: "/appointments" },
-    { name: "Records", path: "/records" },
+    // { name: "Home", path: "/" },
+    // { name: "Patients", path: "/patients" },
+    // { name: "Doctors", path: "/doctors" },
+    // { name: "Appointments", path: "/appointments" },
+    // { name: "Records", path: "/records" },
     // { name: "Contact Us", path: "/contact" },
   ];
 

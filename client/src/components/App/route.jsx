@@ -38,11 +38,15 @@ const DashRoutes = {
   NewAvailability: lazy(() =>
     import("../pages/dash/availability/NewAvailability.jsx")
   ),
+  Specializations: lazy(()=>import("../pages/dash/specializations/Specializations.jsx")),
   Profile: lazy(() => import("../pages/dash/Profile.jsx")),
   Security: lazy(() => import("../pages/dash/Security.jsx")),
 
+  Doctors: lazy(() => import("../pages/dash/users/Doctors/Doctors.jsx")),
   Patients: lazy(() => import("../pages/dash/users/Patients/Patients.jsx")),
+  NewPatients: lazy(()=>import("../pages/dash/users/Patients/NewPatients.jsx")),
   Records: lazy(() => import("../pages/dash/users/Records/Records.jsx")),
+  NewRecords: lazy(()=>import("../pages/dash/users/Records/NewRecords.jsx")),
   // Users: lazy(() => import("../Components/pages/dash/Users.jsx")),
 };
 
@@ -114,13 +118,13 @@ export const routes = [
         path: "availability",
         element: LayoutRoutes.AvailabilityLayout,
         protected: true,
-        roles: ["system_admin"],
+        roles: ["system_admin", "clinician"],
         children: [
           {
             path: "",
             element: DashRoutes.Availability,
             protected: true,
-            roles: ["system_admin"],
+            roles: ["system_admin" , "clinician"],
           },
           {
             path: "new",
@@ -138,7 +142,7 @@ export const routes = [
         path: "appointments",
         element: LayoutRoutes.AppointmentsLayout,
         protected: true,
-        roles: ["system_admin"],
+        roles: ["system_admin", "clinician"],
         children: [
           {
             path: "",
@@ -162,7 +166,7 @@ export const routes = [
         path: "patients",
         element: LayoutRoutes.PatientsLayout,
         protected: true,
-        roles: ["system_admin"],
+        roles: ["system_admin", "clinician"],
         children: [
           {
             path: "",
@@ -174,7 +178,19 @@ export const routes = [
             path: "records",
             element: DashRoutes.Records,
             protected: true,
-            roles: ["system_admin"],
+            roles: ["system_admin", "clinician"],
+          },
+          {
+            path: "records/new",
+            element: DashRoutes.NewRecords,
+            protected: true,
+            roles: ["system_admin", "clinician"],
+          },
+          {
+            path: "new",
+            element: DashRoutes.NewPatients,
+            protected: true,
+            roles: ["system_admin", "clinician"],
           },
           // {
           //   path: "staff",
@@ -188,12 +204,42 @@ export const routes = [
           },
         ],
       },
+      {
+        path: "staff",
+        element: LayoutRoutes.UsersLayout,
+        protected: true,
+        roles: ["system_admin"],
+        children: [
+          {
+            path: "",
+            element: DashRoutes.Doctors,
+            protected: true,
+            roles: ["system_admin"],
+          },
+          {
+            path: "doctors",
+            element: DashRoutes.Doctors,
+            protected: true,
+            roles: ["system_admin"],
+          },
+          {
+            path: "specializations",
+            element: DashRoutes.Specializations,
+            protected: true,
+            roles: ["system_admin"],
+          },
+          {
+            path: "*",
+            element: ComingSoon2,
+          },
+        ],
+      },
 
       {
         path: "settings/security",
         element: DashRoutes.Security,
         protected: true,
-        roles: ["system_admin", "clinician"],
+        roles: ["system_admin"],
       },
 
       // Add other dashboard routes as needed
