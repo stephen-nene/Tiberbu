@@ -11,7 +11,7 @@ router.register(r'specializations', SpecializationViewSet, basename='specializat
 urlpatterns = [
     
     path('', include(router.urls)),
-    path('home', FunnyAPIView.as_view(), name='default_view'),
+    path('home/', FunnyAPIView.as_view(), name='default_view'),
     # router.urls,
     
 ]

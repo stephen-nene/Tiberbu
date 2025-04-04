@@ -13,12 +13,12 @@ urlpatterns = [
     # path('api/', include(router.urls)),
     
         # Authentication routes ----------------------------
-    path('auth/me', MeView.as_view(), name='me'),  # Logged-in user info route
-    path('auth/login', CustomLoginView.as_view(), name='login'),  # JWT login
-    path('auth/signup', UserCreateView.as_view(), name='signup'),
-    path('auth/logout', LogoutView.as_view(), name='logout'),
-    path('auth/forgot', ForgotPasswordView.as_view(), name='forgot_password'),
-    path('auth/reset', ResetPasswordView.as_view(), name='reset_password'),
+    path('auth/me/', MeView.as_view(), name='me'),  # Logged-in user info route
+    path('auth/login/', CustomLoginView.as_view(), name='login'),  # JWT login
+    path('auth/signup/', UserCreateView.as_view(), name='signup'),
+    path('auth/logout/', LogoutView.as_view(), name='logout'),
+    path('auth/forgot/', ForgotPasswordView.as_view(), name='forgot_password'),
+    path('auth/reset/', ResetPasswordView.as_view(), name='reset_password'),
     
     # Other routes ---------------------------
     # path('auth/token', TokenObtainPairView.as_view(), name='token_obtain'),  # 
@@ -26,7 +26,7 @@ urlpatterns = [
     
     
     # All users ---------------------------------------
-    path('users',AllUserView.as_view(),name='all users')
+    path('users/',AllUserView.as_view(),name='all users')
     
     
 ]
