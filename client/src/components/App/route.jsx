@@ -34,6 +34,7 @@ import Logs from "../pages/public/Doctors.jsx";
 // import Training from "../pages/public/training.jsx";
 import Error404 from "../pages/utils/Error404.jsx";
 import ComingSoon from "../pages/utils/ComminSoon.jsx";
+import ComingSoon2 from "../pages/utils/ComminSoon copy.jsx";
 
 // Route configurations
 export const routes = [
@@ -113,8 +114,8 @@ export const routes = [
           // },
           {
             path: "*",
-            element: Error404,
-          }
+            element: ComingSoon2,
+          },
         ],
       },
 
@@ -126,7 +127,7 @@ export const routes = [
       },
 
       // Add other dashboard routes as needed
-      { path: "*", element: Error404 }, // For routes that aren't implemented yet
+      { path: "*", element: ComingSoon }, // For routes that aren't implemented yet
     ],
   },
 
