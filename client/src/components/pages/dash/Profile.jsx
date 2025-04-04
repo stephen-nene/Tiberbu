@@ -26,7 +26,7 @@ export default function ProfilePage() {
   const [isSaving, setIsSaving] = useState(false);
   const navigate = useNavigate();
 
-  console.log(user);
+  // console.log(user);
 
   // Default profile with fallbacks to backend data or N/A
   const [profile, setProfile] = useState({
