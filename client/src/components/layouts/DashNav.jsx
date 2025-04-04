@@ -483,7 +483,7 @@ const navItems = [
               {/* Avatar */}
               <div className="flex items-center">
                 <Link
-                  to="/dashboard/profile"
+                  to="/dashboard/settings/profile"
                   className="flex items-center space-x-2 p-0.9 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 >
                   <Avatar className="h-9 w-9 border-2 border-white dark:border-gray-800">
@@ -520,7 +520,6 @@ const navItems = [
         {/* Logo */}
         <div className="flex items-center justify-between h-16 px-6 border-b border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-950">
           <div className="flex gap-1.5 items-center">
-
             <Activity className="h-8 w-8 text-blue-600" />
             <Link to="/" className="flex  text-2xl font-bold cursor-pointer">
               <span className="font-bold text-blue-900 dark:text-white">
