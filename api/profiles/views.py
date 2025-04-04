@@ -10,7 +10,7 @@ from django.contrib.auth.hashers import check_password
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import status
+from rest_framework import status, viewsets
 
 from rest_framework_simplejwt.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -316,5 +316,10 @@ class AllUserView(APIView,AuthenticationMixin):
             response = JsonResponse({'detail': str(e)}, status=401)
             return response
         
-# ----------------------- 
+# ----------------------- DRF’s Generic Views for all users
+
+class UserList(viewsets.ModelViewSet):
+    queryset = HealthcareUser.objects.all()
+    serializer_class = UserSerializer
+    
             
