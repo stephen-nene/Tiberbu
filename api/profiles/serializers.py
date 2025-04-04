@@ -6,19 +6,35 @@ from .models import HealthcareUser, Doctor, Patient, ClinicalImage,Gender,UserRo
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8)
-
+    
+    # Optional nested data for patient or doctor info
+    patient_profile = serializers.DictField(write_only=True, required=False)
+    clinician_profile = serializers.DictField(write_only=True, required=False)
     class Meta:
         model = HealthcareUser
         fields = [
             'id', 'username', 'first_name', 'last_name', 'email',
             'phone_number', 'password', 'status', 'role', 'date_of_birth',
-            'gender', 'address', 'profile_image', 'mfa_enabled'
+            'gender', 'address', 'profile_image', 'mfa_enabled', 'patient_profile', 'clinician_profile'
         ]
 
     def create(self, validated_data):
         try:
+            patient_data = validated_data.pop('patient_profile', {})
+            doctor_data = validated_data.pop('clinician_profile', {})
             validated_data['password'] = make_password(validated_data['password'])
-            return super().create(validated_data)
+
+            # Create user instance without saving yet
+            user = HealthcareUser(**validated_data)
+
+            # Attach the role-specific data to be used in signal
+            if user.role == UserRole.PATIENT:
+                user._profile_data = patient_data
+            elif user.role == UserRole.CLINICIAN:
+                user._profile_data = doctor_data
+
+            user.save()
+            return user
         except Exception as e:
             raise serializers.ValidationError({"error": "Failed to create user", "details": str(e)})
 

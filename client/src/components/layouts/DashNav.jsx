@@ -88,40 +88,68 @@ const navItems = [
   {
     name: "Availabilities",
     path: "/dashboard/availability",
-    icon: <BookOpen  className="w-5 h-5" />,
+    icon: <BookOpen className="w-5 h-5" />,
+    hasDropdown: true,
     roleRequired: ["system_admin", "clinician", "receptionist", "nurse"],
+    children: [
+      {
+        name: "All",
+        path: "/dashboard/availability",
+        icon: <CalendarCheck className="w-4 h-4" />,
+        roleRequired: ["system_admin", "clinician", "receptionist"],
+      },
+      {
+        name: "New",
+        path: "/dashboard/availability/new",
+        icon: <CalendarClock className="w-4 h-4" />,
+        roleRequired: ["system_admin", "clinician", "receptionist"],
+      },
+    ],
   },
   {
     name: "Appointments",
     path: "/dashboard/appointments",
     icon: <Calendar className="w-5 h-5" />,
     hasDropdown: true,
-    roleRequired: ["system_admin", "clinician", "receptionist", "nurse"],
+    roleRequired: [
+      "system_admin",
+      "clinician",
+      "receptionist",
+      "nurse",
+      "patient",
+    ],
     children: [
+      {
+        name: "All",
+        path: "/dashboard/appointments",
+        icon: <CalendarCheck className="w-4 h-4" />,
+        roleRequired: [
+          "system_admin",
+          "clinician",
+          "receptionist",
+          "nurse",
+          "patient",
+        ],
+      },
       {
         name: "Schedule",
         path: "/dashboard/appointments/schedule",
         icon: <CalendarClock className="w-4 h-4" />,
-        roleRequired: ["system_admin", "clinician", "receptionist"],
+
+        roleRequired: ["system_admin", "clinician", "receptionist", "patient"],
       },
-      {
-        name: "Upcoming",
-        path: "/dashboard/appointments/upcoming",
-        icon: <CalendarCheck className="w-4 h-4" />,
-        roleRequired: ["system_admin", "clinician", "receptionist", "nurse"],
-      },
-      {
-        name: "Completed",
-        path: "/dashboard/appointments/completed",
-        icon: <BookOpenCheck className="w-4 h-4" />,
-        roleRequired: ["system_admin", "clinician"],
-      },
-      {
-        name: "Cancelled",
-        path: "/dashboard/appointments/cancelled",
-        icon: <CalendarX className="w-4 h-4" />,
-        roleRequired: ["system_admin", "receptionist"],
-      },
+      // {
+      //   name: "Completed",
+      //   path: "/dashboard/appointments/completed",
+      //   icon: <BookOpenCheck className="w-4 h-4" />,
+      //   roleRequired: ["system_admin", "clinician"],
+      // },
+      // {
+      //   name: "Cancelled",
+      //   path: "/dashboard/appointments/cancelled",
+      //   icon: <CalendarX className="w-4 h-4" />,
+      //   roleRequired: ["system_admin", "receptionist"],
+      // },
     ],
   },
   {
@@ -132,7 +160,7 @@ const navItems = [
     roleRequired: ["system_admin", "clinician", "receptionist"],
     children: [
       {
-        name: "Directory",
+        name: "All",
         path: "/dashboard/patients",
         icon: <Users className="w-4 h-4" />,
         roleRequired: ["system_admin", "clinician", "receptionist"],
@@ -143,16 +171,16 @@ const navItems = [
         icon: <FileText className="w-4 h-4" />,
         roleRequired: ["system_admin", "clinician"],
       },
-      {
-        name: "New Patient",
-        path: "/dashboard/patients/new",
-        icon: <User className="w-4 h-4" />,
-        roleRequired: ["system_admin", "receptionist"],
-      },
+      // {
+      //   name: "New Patient",
+      //   path: "/dashboard/patients/new",
+      //   icon: <User className="w-4 h-4" />,
+      //   roleRequired: ["system_admin","clinician", "receptionist"],
+      // },
     ],
   },
   {
-    name: "Medical Staff",
+    name: "Staff",
     path: "/dashboard/staff",
     icon: <Stethoscope className="w-5 h-5" />,
     hasDropdown: true,
@@ -164,110 +192,108 @@ const navItems = [
         icon: <Stethoscope className="w-4 h-4" />,
       },
       {
-        name: "Nurses",
-        path: "/dashboard/staff/nurses",
+        name: "Specialization",
+        path: "/dashboard/staff/specializations",
         icon: <Syringe className="w-4 h-4" />,
       },
-      {
-        name: "Receptionists",
-        path: "/dashboard/staff/receptionists",
-        icon: <ClipboardCheck className="w-4 h-4" />,
-      },
+      // {
+      //   name: "Receptionists",
+      //   path: "/dashboard/staff/receptionists",
+      //   icon: <ClipboardCheck className="w-4 h-4" />,
+      // },
     ],
   },
-  {
-    name: "Ward Management",
-    path: "/dashboard/wards",
-    icon: <Bed className="w-5 h-5" />,
-    roleRequired: ["system_admin", "nurse"],
-    hasDropdown: true,
-    children: [
-      {
-        name: "Bed Availability",
-        path: "/dashboard/wards/availability",
-        icon: <Bed className="w-4 h-4" />,
-        roleRequired: ["system_admin", "nurse", "receptionist"],
-      },
-      {
-        name: "Patient Admissions",
-        path: "/dashboard/wards/admissions",
-        icon: <HeartPulse className="w-4 h-4" />,
-        roleRequired: ["system_admin", "nurse"],
-      },
-    ],
-  },
-  {
-    name: "Pharmacy",
-    path: "/dashboard/pharmacy",
-    icon: <Pill className="w-5 h-5" />,
-    roleRequired: ["system_admin", "pharmacist"],
-    hasDropdown: true,
-    children: [
-      {
-        name: "Inventory",
-        path: "/dashboard/pharmacy/inventory",
-        icon: <Pill className="w-4 h-4" />,
-      },
-      {
-        name: "Prescriptions",
-        path: "/dashboard/pharmacy/prescriptions",
-        icon: <ScanEye className="w-4 h-4" />,
-      },
-    ],
-  },
-  {
-    name: "Reports",
-    path: "/dashboard/reports",
-    icon: <Activity className="w-5 h-5" />,
-    roleRequired: ["system_admin"],
-    hasDropdown: true,
-    children: [
-      {
-        name: "Appointments",
-        path: "/dashboard/reports/appointments",
-        icon: <Calendar className="w-4 h-4" />,
-      },
-      {
-        name: "Financial",
-        path: "/dashboard/reports/financial",
-        icon: <Activity className="w-4 h-4" />,
-      },
-    ],
-  },
+  // {
+  //   name: "Ward Management",
+  //   path: "/dashboard/wards",
+  //   icon: <Bed className="w-5 h-5" />,
+  //   roleRequired: ["system_admin", "nurse"],
+  //   hasDropdown: true,
+  //   children: [
+  //     {
+  //       name: "Bed Availability",
+  //       path: "/dashboard/wards/availability",
+  //       icon: <Bed className="w-4 h-4" />,
+  //       roleRequired: ["system_admin", "nurse", "receptionist"],
+  //     },
+  //     {
+  //       name: "Patient Admissions",
+  //       path: "/dashboard/wards/admissions",
+  //       icon: <HeartPulse className="w-4 h-4" />,
+  //       roleRequired: ["system_admin", "nurse"],
+  //     },
+  //   ],
+  // },
+  // {
+  //   name: "Pharmacy",
+  //   path: "/dashboard/pharmacy",
+  //   icon: <Pill className="w-5 h-5" />,
+  //   roleRequired: ["system_admin", "pharmacist"],
+  //   hasDropdown: true,
+  //   children: [
+  //     {
+  //       name: "Inventory",
+  //       path: "/dashboard/pharmacy/inventory",
+  //       icon: <Pill className="w-4 h-4" />,
+  //     },
+  //     {
+  //       name: "Prescriptions",
+  //       path: "/dashboard/pharmacy/prescriptions",
+  //       icon: <ScanEye className="w-4 h-4" />,
+  //     },
+  //   ],
+  // },
+  // {
+  //   name: "Reports",
+  //   path: "/dashboard/reports",
+  //   icon: <Activity className="w-5 h-5" />,
+  //   roleRequired: ["system_admin"],
+  //   hasDropdown: true,
+  //   children: [
+  //     {
+  //       name: "Appointments",
+  //       path: "/dashboard/reports/appointments",
+  //       icon: <Calendar className="w-4 h-4" />,
+  //     },
+  //     {
+  //       name: "Financial",
+  //       path: "/dashboard/reports/financial",
+  //       icon: <Activity className="w-4 h-4" />,
+  //     },
+  //   ],
+  // },
   {
     name: "Settings",
     path: "/dashboard/settings",
     icon: <Settings className="w-5 h-5" />,
     hasDropdown: true,
-    roleRequired: ["system_admin"],
+    roleRequired: ["system_admin", "clinician","receptionist", "nurse",],
     children: [
       {
         name: "Profile",
         path: "/dashboard/settings/profile",
         icon: <User className="w-4 h-4" />,
       },
-      {
-        name: "Hospital Info",
-        path: "/dashboard/settings/hospital",
-        icon: <Home className="w-4 h-4" />,
-      },
+      // {
+      //   name: "Hospital Info",
+      //   path: "/dashboard/settings/hospital",
+      //   icon: <Home className="w-4 h-4" />,
+      //   roleRequired: ["system_admin"],
+      // },
       {
         name: "Security",
         path: "/dashboard/settings/security",
         icon: <Lock className="w-4 h-4" />,
         roleRequired: ["system_admin"],
-      }
+      },
     ],
   },
 ];
 
-  // useMemo(() => {
-  // }, [navItems, user?.role]);
 
   const filterNavItems = (items, userRole) => {
     return items
       .filter((item) => {
-        // First, check the item itself
         if (!item.roleRequired) return true;
         if (Array.isArray(item.roleRequired)) {
           return item.roleRequired.includes(userRole);
@@ -275,10 +301,8 @@ const navItems = [
         return item.roleRequired === userRole;
       })
       .map((item) => {
-        // Then, recursively filter any nested children (if present)
         if (item.children) {
           item.children = filterNavItems(item.children, userRole);
-          // If there are no visible children after filtering, we remove the dropdown
           if (item.children.length === 0) {
             delete item.hasDropdown;
           }
@@ -287,8 +311,6 @@ const navItems = [
       });
   };
 
-  // const filteredNavItems = filterNavItems(navItems, user?.role);
-  // Filter nav items based on user role
   const filteredNavItems = useMemo(
     () => filterNavItems(navItems, user?.role),
     [navItems, user?.role]
@@ -461,7 +483,7 @@ const navItems = [
               {/* Avatar */}
               <div className="flex items-center">
                 <Link
-                  to="/dashboard/profile"
+                  to="/dashboard/settings/profile"
                   className="flex items-center space-x-2 p-0.9 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 >
                   <Avatar className="h-9 w-9 border-2 border-white dark:border-gray-800">
@@ -498,7 +520,6 @@ const navItems = [
         {/* Logo */}
         <div className="flex items-center justify-between h-16 px-6 border-b border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-950">
           <div className="flex gap-1.5 items-center">
-
             <Activity className="h-8 w-8 text-blue-600" />
             <Link to="/" className="flex  text-2xl font-bold cursor-pointer">
               <span className="font-bold text-blue-900 dark:text-white">

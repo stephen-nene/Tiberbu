@@ -7,7 +7,7 @@ export default function DashLayout() {
     <>
       <DashNav />
 
-      <div className="container mx-auto min-h-screen ">
+      <div className="cont ainer lg:max-w-[80%] mx-auto min-h-screen ">
         <Outlet />
       </div>
     </>

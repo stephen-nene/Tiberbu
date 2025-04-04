@@ -14,13 +14,16 @@ def create_user_profile(sender, instance, created, **kwargs):
     Also updates the user's status to active if they're a clinician or admin.
     """
     if created:
+        extra_data = getattr(instance, '_profile_data', {})
+        
         if instance.role == UserRole.CLINICIAN:
-            Doctor.objects.create(user=instance)
-            # instance.status = UserStatus.ACTIVE
+            Doctor.objects.create(user=instance, **extra_data)
+            instance.status = UserStatus.PENDING_VERIFICATION
             instance.save()
             
         elif instance.role == UserRole.PATIENT:
-            Patient.objects.create(user=instance)
+            Patient.objects.create(user=instance,**extra_data)
+            # instance.status = UserStatus.ACTIVE
             
         elif instance.role == UserRole.SYSTEM_ADMIN:
             # Admins might need special handling

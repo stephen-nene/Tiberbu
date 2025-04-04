@@ -6,11 +6,11 @@ from rest_framework_simplejwt.views import (TokenObtainPairView, TokenRefreshVie
 
 
 router = routers.DefaultRouter()
-# router.register(r'trips', TripViewSet)
+router.register(r'users', UserList)
 # router.register(r'logs', LogSheetViewSet)
 
 urlpatterns = [
-    # path('api/', include(router.urls)),
+    path('', include(router.urls)),
     
         # Authentication routes ----------------------------
     path('auth/me/', MeView.as_view(), name='me'),  # Logged-in user info route

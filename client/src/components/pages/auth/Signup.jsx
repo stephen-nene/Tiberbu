@@ -164,12 +164,9 @@ export default function Signup() {
         </div>
 
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-4"
-          >
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             {/* Account Type */}
-            {/* <FormField
+            <FormField
               control={form.control}
               name="user_type"
               render={({ field }) => (
@@ -185,19 +182,19 @@ export default function Signup() {
                       className="flex gap-4"
                     >
                       <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="Bidder" id="Bidder" />
-                        <label htmlFor="Bidder">Bidder/Supplier</label>
+                        <RadioGroupItem value="Doctor" id="Doctor" />
+                        <label htmlFor="Doctor">Doctor</label>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="Tenderer" id="Tenderer" />
-                        <label htmlFor="Tenderer">Tender Advertiser</label>
+                        <RadioGroupItem value="patient" id="patient" />
+                        <label htmlFor="patient">Patient</label>
                       </div>
                     </RadioGroup>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
-            /> */}
+            />
 
             {/* Company Name */}
             <FormField
