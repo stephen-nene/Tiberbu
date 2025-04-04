@@ -22,7 +22,7 @@ const App = React.forwardRef((props, ref) => {
   const location = useLocation();
   const isDashboard = location.pathname.startsWith("/dashboard");
 
-  console.log(user)
+  // console.log(user)
 
   useEffect(() => {
     window.scrollTo(0, 0);

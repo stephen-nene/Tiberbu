@@ -44,7 +44,7 @@ export default function Login() {
   const [devModeUserType, setDevModeUserType] = useState("admin");
   const navigate = useNavigate();
   const { user, loggedIn, login } = useUserStore();
-  console.log(user) 
+  // console.log(user) 
 
   const validateForm = () => {
     const newErrors = { email: "", password: "" };

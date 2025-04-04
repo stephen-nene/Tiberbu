@@ -13,7 +13,7 @@ export const useUserStore = create(
       token: null,
       loggedIn: false,
 
-      darkMode: JSON.parse(localStorage.getItem("darkMode")) || false,
+      darkMode: false,
 
       // Get user info
       getUser: () => get().user,
@@ -25,9 +25,9 @@ export const useUserStore = create(
           position: "bottom-left",
         });
         set((state) => {
-          const newMode = !state.darkMode;
-          localStorage.setItem("darkMode", JSON.stringify(newMode));
-          return { darkMode: newMode };
+          // const newMode = !state.darkMode;
+          // localStorage.setItem("darkMode", JSON.stringify(newMode));
+          return { darkMode: !state.darkMode };
         });
       },
 
@@ -38,9 +38,16 @@ export const useUserStore = create(
       clearUser: () => set({ user: null, token: null, loggedIn: false }),
       login: async (data, navigate) => {
         const toastId = toast.loading("Logging in..."); // Show loading toast
+        const newdata = {
+          identifier: data.email,
+          password: data.password,
+        }
 
         try {
-          const response = await apiClient1.post("profiles/auth/login/", data);
+          const response = await apiClient1.post(
+            "profiles/auth/login/",
+            newdata
+          );
           // console.log("Response:", response);
           if (response.status === 200) {
             set({
