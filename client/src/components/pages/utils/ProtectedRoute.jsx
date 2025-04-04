@@ -41,13 +41,13 @@ const ProtectedRoute = ({ children, allowedRoles, allowPendingAccess }) => {
     );
   }
 
-  if (user.status !== "active" && !allowPendingAccess) {
-    return (
-      <Suspense fallback={<LoadingSpinner />}>
-        <NotActivate darkMode={darkMode} />
-      </Suspense>
-    );
-  }
+  // if (user.status === "pending" && !allowPendingAccess) {
+  //   return (
+  //     <Suspense fallback={<LoadingSpinner />}>
+  //       <NotActivate darkMode={darkMode} />
+  //     </Suspense>
+  //   );
+  // }
 
   return children;
 };
