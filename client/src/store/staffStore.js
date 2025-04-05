@@ -16,7 +16,7 @@ export const staffStore = create(
           const toastId = toast.loading("Fetching users...");
           set({ loading: true });
           try {
-            const response = await apiClient1.get("/api/v1.0/profiles/users/", {
+            const response = await apiClient1.get("/profiles/users/", {
               params: filters,
             });
 

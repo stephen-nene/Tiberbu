@@ -44,7 +44,9 @@ export default function Specializations() {
   const loading = staffStore((state) => state.loading);
 
   useEffect(() => {
-    fetchSpecializations();
+    if (!specializations) {
+      fetchSpecializations();
+    }
   }, [fetchSpecializations]);
 
   const handleAddNew = () => {

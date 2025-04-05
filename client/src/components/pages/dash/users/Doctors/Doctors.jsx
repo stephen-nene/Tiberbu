@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import {
   Search,
   Filter,
@@ -21,19 +21,20 @@ import {
   DropdownMenuTrigger,
 } from "@/components/shadcn/dropdown-menu";
 import { Badge } from "@/components/shadcn/badge";
+import { staffStore } from "@/store/staffStore";
 
 export default function DoctorsPage() {
 
   const filters = {
-    role: "doctor",
-    status: "active",
-    gender: "female",
-    blood_group: "O+",
+    role: "clinician",
+    // status: "active",
+    // gender: "female",
+    // blood_group: "O+",
   };
 
-  const fetchDoctors = useStaffStore((state) => state.fetchDoctors);
+  const fetchUsers = staffStore((state) => state.fetchUsers);
   useEffect(() => {
-    fetchDoctors(filters);
+    fetchUsers(filters);
   }, [filters]);
 
   // Dummy doctor data
