@@ -33,10 +33,18 @@ import {
   FormMessage,
 } from "@/components/shadcn/form";
 
+import { toast } from "sonner";
+
+import { staffStore } from "@/store/staffStore";
+
 // Define Zod schemas for form validation
 const addressSchema = z.object({
-  street: z.string().optional(),
-  city: z.string().optional(),
+  street: z.string().min(2, "Street is required"),
+  city: z
+    .string()
+    .min(3, "City must be at least 3 characters")
+    .optional()
+    .nullable(),
   state: z.string().optional(),
   zip: z.string().optional(),
   country: z.string().optional(),
@@ -52,7 +60,7 @@ const basicInfoSchema = z.object({
     .or(z.literal("")),
   first_name: z.string().optional(),
   last_name: z.string().optional(),
-  full_name: z.string().min(2, "Name must be at least 2 characters"),
+  // full_name: z.string().min(2, "Name must be at least 2 characters"),
   date_of_birth: z.string().refine((val) => !val || !isNaN(Date.parse(val)), {
     message: "Please enter a valid date",
   }),
@@ -97,6 +105,10 @@ export default function PatientForm() {
     is_sensitive: false,
   });
 
+
+  const savePatient = staffStore((state) => state.savePatient);
+
+
   // Initialize form with React Hook Form and Zod
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -107,9 +119,9 @@ export default function PatientForm() {
         phone_number: "",
         first_name: "",
         last_name: "",
-        full_name: "",
+        // full_name: "",
         date_of_birth: "",
-        gender: "",
+        gender: "undisclosed",
         blood_group: "",
         address: {
           street: "",
@@ -129,11 +141,11 @@ export default function PatientForm() {
       attachments: [],
     },
   });
-  
+
   // Initialize form data from location state if it exists
   useEffect(() => {
     if (location.state) {
-      console.log(location.state)
+      console.log(location.state);
       const { patientData, formMode } = location.state;
 
       if (formMode && ["create", "edit", "view"].includes(formMode)) {
@@ -149,7 +161,7 @@ export default function PatientForm() {
             phone_number: patientData.phone_number || "",
             first_name: patientData.first_name || "",
             last_name: patientData.last_name || "",
-            full_name: patientData.get_full_name || "",
+            // full_name: patientData.get_full_name || "",
             date_of_birth: patientData.date_of_birth || "",
             gender: patientData.gender || "",
             blood_group: patientData.blood_group || "",
@@ -208,13 +220,132 @@ export default function PatientForm() {
     );
   };
 
-  const onSubmit = (data) => {
-    console.log("Form submitted:", data);
-    // Here you would handle the API call to save the patient data
-    // For example: savePatient(data, mode)
+const processErrors = (errors, toastId) => {
+  // Iterate over the error object and extract the first error message for each field
+  for (const field in errors) {
+    if (errors.hasOwnProperty(field)) {
+      const fieldErrors = errors[field];
+      if (Array.isArray(fieldErrors) && fieldErrors.length > 0) {
+        // Dismiss the loading toast as we're showing the error now
+        toast.dismiss(toastId);
 
-    // Navigate back to the patients list or detail view
-    // navigate('/patients');
+        // Use the field name as the toast title and the first error message as the description
+        toast.error(`${field.charAt(0).toUpperCase() + field.slice(1)} Error`, {
+          description: fieldErrors[0], // Show the first error for the field
+        });
+        break; // Only show the first error for any field
+      }
+    }
+  }
+};
+
+// Submit handler
+const onSubmit = async (data) => {
+  const data2 = {
+    ...data.basicInfo,
+    password: "dummypassword", // You can remove this for actual submissions
+
+    attachments: data.attachments,
+    patient_profile: data.patientInfo,
+  };
+  console.log("✅ Form submitted:", data2);
+
+  // Show a loading toast with an ID
+  const toastId = toast.loading("Saving patient...");
+
+  try {
+    // Simulate API call (replace with your actual API request)
+    const response = await savePatient(data2);
+
+    // Dismiss the loading toast since the operation is complete
+    toast.dismiss(toastId);
+
+    console.log("Response:", response);
+    navigate('/dashboard/patients');
+
+    // Show a success toast (you can customize the message as needed)
+    toast.success("Patient saved successfully!");
+  } catch (error) {
+    if (error?.response?.data) {
+      // Process the errors and display them as toast notifications
+      processErrors(error?.response?.data, toastId);
+    }
+    console.error("Error saving patient:", error?.response);
+  }
+};
+  
+  const savePatient2 = async (data) => {
+
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        reject({
+          response: {
+            data: {
+              username: ["A user with that username already exists."],
+              password: ["This field is required."],
+            },
+          },
+        });
+      }, 2000); // Simulate a 2-second delay
+    });
+  };
+
+  const onError = (errors) => {
+    console.error("❌ Validation errors:", errors);
+
+    const firstMessage = getFirstErrorMessage(errors);
+
+    if (firstMessage) {
+      toast.error(firstMessage);
+    }
+  };
+
+  // Helper to find the first error message (deep or flat)
+  const getFirstErrorMessage = (errorObject) => {
+    for (const key in errorObject) {
+      const value = errorObject[key];
+
+      if (value?.message) {
+        return value.message;
+      }
+
+      if (typeof value === "object") {
+        const nested = getFirstErrorMessage(value);
+        if (nested) return nested;
+      }
+    }
+
+    return null;
+  };
+  // Error handler
+  const onError2 = (errors) => {
+    console.error("❌ Validation errors:", errors);
+
+    const flatErrors = flattenErrors(errors);
+
+    // Show all validation errors (or just the first one if you prefer)
+    flatErrors.forEach((msg) => {
+      toast.error(msg);
+    });
+  };
+
+  // Helper to flatten nested errors (like basicInfo.full_name)
+  const flattenErrors = (errors) => {
+    const messages = [];
+
+    const extract = (errObj) => {
+      Object.values(errObj).forEach((val) => {
+        if (val?.message) {
+          messages.push(val.message);
+        } else if (typeof val === "object") {
+          extract(val);
+        }
+      });
+    };
+
+    extract(errors);
+
+    return messages;
   };
 
   // Handle form fields for array data (allergies, medications, contacts)
@@ -226,7 +357,13 @@ export default function PatientForm() {
   };
 
   // Options for dropdowns
-  const genderOptions = ["MALE", "FEMALE", "OTHER", "UNDISCLOSED"];
+  // class Gender(models.TextChoices):
+  //   MALE = 'male', 'Male'
+  //   FEMALE = 'female', 'Female'
+  //   NON_BINARY = 'non_binary', 'Non-binary'
+  //   UNDISCLOSED = 'undisclosed', 'Prefer not to say'
+
+  const genderOptions = ["male", "female", "non_binary", "undisclosed"];
   const bloodGroupOptions = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
   const documentTypeOptions = [
     "MEDICAL_RECORD",
@@ -251,7 +388,7 @@ export default function PatientForm() {
       </h1>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
+        <form onSubmit={form.handleSubmit(onSubmit, onError)}>
           <Tabs
             value={activeTab}
             onValueChange={setActiveTab}
@@ -259,8 +396,15 @@ export default function PatientForm() {
           >
             <TabsList className="grid grid-cols-3 mb-4">
               <TabsTrigger value="basic">Basic Information</TabsTrigger>
-              <TabsTrigger value="patient">Patient Information</TabsTrigger>
-              <TabsTrigger value="attachments">Medical Attachments</TabsTrigger>
+              {/* if atimetdata is null don't show */}
+              {location?.state?.patientData?.id && (
+                <>
+                  <TabsTrigger value="patient">Patient Information</TabsTrigger>
+                  <TabsTrigger value="attachments">
+                    Medical Attachments
+                  </TabsTrigger>
+                </>
+              )}
             </TabsList>
 
             {/* Basic Information Tab */}
@@ -345,7 +489,6 @@ export default function PatientForm() {
                         </FormItem>
                       )}
                     />
-                      
 
                     {/* <FormField
                       control={form.control}
@@ -807,7 +950,8 @@ export default function PatientForm() {
             {isDisabled && (
               <Button
                 type="button"
-                onClick={() => setMode("edit")
+                onClick={
+                  () => setMode("edit")
                   // navigate(location.pathname, {
                   //   state: { patientData: form.getValues(), formMode: "edit" },
                   // })

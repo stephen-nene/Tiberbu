@@ -2,11 +2,19 @@
 import axios from "axios";
 
 // === Base URLs ===
+const env = import.meta.env.VITE_ENV
 const url = import.meta.env.VITE_BACKEND_URL;
-// console.log(url)
-// const BASE_URL = url || `http://127.0.0.1:8000/api/v1.0/`;
 
-const BASE_URL = `/api/`;
+let BASE_URL = "";
+// if env === dev use ai else use ul
+if (env === "development") { 
+  BASE_URL = `/api/`;
+  console.log(" Environment");
+} else {
+  BASE_URL = url || `https://tiberbu.onrender.com/api/v1.0/`;
+}
+
+console.log(env)
 
 // === Factory Function for Creating Axios Instances ===
 const createApiClient = (baseURL, contentType = "application/json") => {

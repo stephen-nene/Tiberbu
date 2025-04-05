@@ -23,7 +23,7 @@ export const staffStore = create(
 
 
             // Log the response for debugging
-            console.log("Response:", response);
+            // console.log("Response:", response);
 
             if (response.status === 200 ) {
               if (filters.role === "clinician") {
@@ -110,6 +110,36 @@ export const staffStore = create(
             set({ loading: false });
           }
         },
+
+        // save doctor and add to the list
+
+
+        // save atient and add to the list
+        savePatient: async (data) => {
+          set({ loading: true });
+          try {
+            const response = await apiClient1.post("/profiles/users/", data);
+
+            // Log the response for debugging
+            if (response.status === 201) {
+              set((state) => ({
+                patients: [...state.patients, response.data],
+              }));
+              // toast.success("Patient saved successfully!", {
+              //   id: toastId,
+              // });
+              return response;
+            }
+          } catch (error) {
+            console.error("Error saving patient:", error?.response);
+            // toast.error("Failed to save patient", { id: toastId });
+            throw error;
+          }
+          finally {
+            // toast.dismiss(toastId);
+            set({ loading: false });
+          }
+        }
 
 
       }),
