@@ -9,7 +9,7 @@ export const staffStore = create(
       (set, get) => ({
         doctors: [],
         specializations: [],
-        patients: null,
+        patients: [],
         loading: false,
 
         fetchUsers: async (filters) => {
@@ -23,10 +23,15 @@ export const staffStore = create(
 
 
             // Log the response for debugging
-            console.log("Response:", response.data);
+            console.log("Response:", response);
 
-            if (response.status === 200 || response.status === 202) {
-              set({ doctors: response.data });
+            if (response.status === 200 ) {
+              if (filters.role === "clinician") {
+                // console.log("first")
+                set({ doctors: response.data });
+              } else if (filters.role === "patient") {
+                      set({ patients: response.data });
+                    }
               toast.success("Users fetched successfully!", { id: toastId });
             } else {
               toast.error(`Failed to fetch users. Status: ${response.status}`, {
