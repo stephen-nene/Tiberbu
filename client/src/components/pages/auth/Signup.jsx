@@ -55,7 +55,7 @@ const formSchema = z
         /^[AP]\d{9}[A-Z,a-z]$/,
         "Invalid KRA PIN format. e.g AP123456789A"
       ),
-    insurace: z
+    insurance: z
       .string()
       .optional()
       .regex(
