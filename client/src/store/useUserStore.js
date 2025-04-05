@@ -89,6 +89,8 @@ export const useUserStore = create(
           const response = await apiClient1.post("profiles/auth/logout/");
           console.log(response);
           if (response.status === 200) {
+            localStorage.removeItem("staff-storage");
+
             get().clearUser();
           }
         } catch (error) {
