@@ -38,11 +38,13 @@ const DashRoutes = {
   NewAvailability: lazy(() =>
     import("../pages/dash/availability/NewAvailability.jsx")
   ),
-  Specializations: lazy(()=>import("../pages/dash/specializations/Specializations.jsx")),
+  Specializations: lazy(() => import("../pages/dash/specializations/Specializations.jsx")),
+  NewSpecialization: lazy(()=>import("../pages/dash/specializations/NewSpecialization.jsx")),
   Profile: lazy(() => import("../pages/dash/Profile.jsx")),
   Security: lazy(() => import("../pages/dash/Security.jsx")),
 
   Doctors: lazy(() => import("../pages/dash/users/Doctors/Doctors.jsx")),
+  NewDoctor: lazy(()=>import("../pages/dash/users/Doctors/NewDoctor.jsx")),
   Patients: lazy(() => import("../pages/dash/users/Patients/Patients.jsx")),
   NewPatients: lazy(()=>import("../pages/dash/users/Patients/NewPatients.jsx")),
   Records: lazy(() => import("../pages/dash/users/Records/Records.jsx")),
@@ -61,6 +63,7 @@ import Logs from "../pages/public/Doctors.jsx";
 import Error404 from "../pages/utils/Error404.jsx";
 import ComingSoon from "../pages/utils/ComminSoon.jsx";
 import ComingSoon2 from "../pages/utils/ComminSoon copy.jsx";
+import NewSpecialization from "../pages/dash/specializations/NewSpecialization.jsx";
 
 // Route configurations
 export const routes = [
@@ -223,8 +226,20 @@ export const routes = [
             roles: ["system_admin"],
           },
           {
+            path: "doctors/new",
+            element: DashRoutes.NewDoctor,
+            protected: true,
+            roles: ["system_admin"],
+          },
+          {
             path: "specializations",
             element: DashRoutes.Specializations,
+            protected: true,
+            roles: ["system_admin"],
+          },
+          {
+            path: "specializations/new",
+            element: DashRoutes.NewSpecialization,
             protected: true,
             roles: ["system_admin"],
           },

@@ -5,14 +5,21 @@ from .models import Specialization
 from .serializers import SpecializationSerializer
 from django.shortcuts import get_object_or_404
 
+from profiles.permissions import IsAdminUserCustom
+
+
 class SpecializationViewSet(viewsets.ModelViewSet):
     """
     API endpoint for managing medical specializations.
     """
     queryset = Specialization.objects.filter(is_active=True).order_by('display_order')
     serializer_class = SpecializationSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    # permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     lookup_field = 'slug'
+    # def get_permissions(self):
+    #     if self.action in ['create', 'update', 'partial_update', 'destroy', 'toggle_active']:
+    #         return [IsAdminUserCustom()]
+    #     return [permissions.AllowAny()]
 
     def get_queryset(self):
         """

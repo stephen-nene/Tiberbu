@@ -41,8 +41,7 @@ import { Link, useNavigate } from "react-router-dom";
 // Define the form schema using Zod
 const formSchema = z
   .object({
-    user_type: z.enum(["Bidder", "Tenderer"]),
-    company_name: z.string().min(1, "Please input company name"),
+    user_type: z.enum(["Patient", "Doctor"]),
     email: z.string().email("Please enter a valid email"),
     contact_number: z
       .string()
@@ -51,8 +50,20 @@ const formSchema = z
     sector: z.string().min(1, "Please select sector type"),
     kra_pin: z
       .string()
-      .optional(),
-      // .regex(/^[AP]\d{9}[A-Z,a-z]$/, "Invalid KRA PIN format. e.g AP123456789A"),
+      .optional()
+      .regex(
+        /^[AP]\d{9}[A-Z,a-z]$/,
+        "Invalid KRA PIN format. e.g AP123456789A"
+      ),
+    insurance: z
+      .string()
+      .optional()
+      .regex(
+        /^[A-Z]{2}\d{8}$/,
+        "Invalid Insurance Number format. e.g AB12345678"
+      ),
+    first_name: z.string().min(1, "Please enter your first name"),
+    last_name: z.string().min(1, "Please enter your last name"),
     location: z.string().min(1, "Please enter your location"),
     industries: z
       .array(z.string())
@@ -65,39 +76,39 @@ const formSchema = z
     path: ["confirmPassword"],
   })
   .superRefine((data, ctx) => {
-      // Conditional validation for KRA PIN
-      if (data.user_type === "Tenderer") {
-        if (!data.kra_pin) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: "KRA PIN is required for Tenderers",
-            path: ["kra_pin"],
-          });
-        } else if (!/^[AP]\d{9}[A-Za-z]$/.test(data.kra_pin)) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: "Invalid KRA PIN format. e.g AP123456789A",
-            path: ["kra_pin"],
-          });
-        }
-      }
-
-      // Password match validation
-      if (data.password !== data.confirmPassword) {
+    // Conditional validation for KRA PIN
+    if (data.user_type === "Tenderer") {
+      if (!data.kra_pin) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "Passwords do not match",
-          path: ["confirmPassword"],
+          message: "KRA PIN is required for Tenderers",
+          path: ["kra_pin"],
+        });
+      } else if (!/^[AP]\d{9}[A-Za-z]$/.test(data.kra_pin)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Invalid KRA PIN format. e.g AP123456789A",
+          path: ["kra_pin"],
         });
       }
-    });
+    }
+
+    // Password match validation
+    if (data.password !== data.confirmPassword) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Passwords do not match",
+        path: ["confirmPassword"],
+      });
+    }
+  });
 
 
 
 export default function Signup() {
   const navigate = useNavigate();
 
-  const [userType, setUserType] = useState("Bidder");
+  const [userType, setUserType] = useState("Patient");
   const [inputValue, setInputValue] = useState("");
 
   const [showPassword, setShowPassword] = useState(false);
@@ -106,7 +117,7 @@ export default function Signup() {
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      user_type: "Bidder",
+      user_type: "Patient",
       industries: [],
       company_name: "",
       email: "",
@@ -186,8 +197,8 @@ export default function Signup() {
                         <label htmlFor="Doctor">Doctor</label>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="patient" id="patient" />
-                        <label htmlFor="patient">Patient</label>
+                        <RadioGroupItem value="Patient" id="Patient" />
+                        <label htmlFor="Patient">Patient</label>
                       </div>
                     </RadioGroup>
                   </FormControl>
@@ -196,27 +207,51 @@ export default function Signup() {
               )}
             />
 
-            {/* Company Name */}
-            <FormField
-              control={form.control}
-              name="company_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <UserCircle className="text-emerald-700 absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5" />
-                      <Input
-                        {...field}
-                        placeholder="Enter your Name"
-                        className="pl-10"
-                      />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="flex gap-2 justify-between">
+              {/* Company Name */}
+              <FormField
+                control={form.control}
+                name="first_name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>First Name</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <UserCircle className="text-emerald-700 absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5" />
+                        <Input
+                          {...field}
+                          placeholder="Enter your first name"
+                          className="pl-10"
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Company Name */}
+              <FormField
+                control={form.control}
+                name="last_name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Last Name</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <UserCircle className="text-emerald-700 absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5" />
+                        <Input
+                          {...field}
+                          placeholder="Enter your Last Name"
+                          className="pl-10"
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             {/* Email Address */}
             <FormField
@@ -264,33 +299,49 @@ export default function Signup() {
             />
 
             {/* Company Type */}
-            {userType === "Tenderer" && (
+            {userType === "Doctor" && (
               <FormField
                 control={form.control}
-                name="company_type"
+                name="specialization"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Company Type</FormLabel>
+                    <FormLabel>Specialization</FormLabel>
                     <FormControl>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select Company Type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="private">Private</SelectItem>
-                          <SelectItem value="Government">Government</SelectItem>
-                          <SelectItem value="ngo">
-                            Non-Governmental Organization
-                          </SelectItem>
-                          <SelectItem value="partnership">
-                            Partnership
-                          </SelectItem>
-                          <SelectItem value="others">Others</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <div className="relative">
+                        {/* <Key className="text-emerald-800 mr-2 absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5" /> */}
+
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <SelectTrigger>
+                            <SelectValue
+                              className="mr-40"
+                              placeholder="Select Specialization"
+                            />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="cardiology">
+                              Cardiology
+                            </SelectItem>
+                            <SelectItem value="neurology">Neurology</SelectItem>
+                            <SelectItem value="orthopedics">
+                              Orthopedics
+                            </SelectItem>
+                            <SelectItem value="pediatrics">
+                              Pediatrics
+                            </SelectItem>
+                            <SelectItem value="dermatology">
+                              Dermatology
+                            </SelectItem>
+                            <SelectItem value="psychiatry">
+                              Psychiatry
+                            </SelectItem>
+                            <SelectItem value="radiology">Radiology</SelectItem>
+                            <SelectItem value="general">General</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -298,38 +349,8 @@ export default function Signup() {
               />
             )}
 
-            {/* Sector Type */}
-            <FormField
-              control={form.control}
-              name="sector"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Sector</FormLabel>
-                  <FormControl>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Enter your sector" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="private">Private</SelectItem>
-                        <SelectItem value="Government">Government</SelectItem>
-                        <SelectItem value="ngo">
-                          Non-Governmental Organization
-                        </SelectItem>
-                        <SelectItem value="partnership">Partnership</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             {/* KRA Pin */}
-            {userType === "Tenderer" && (
+            {userType === "Doctor" && (
               <FormField
                 control={form.control}
                 name="kra_pin"
@@ -337,12 +358,39 @@ export default function Signup() {
                   <FormItem>
                     <FormLabel>KRA PIN Number</FormLabel>
                     <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="KRA Number"
-                        startIcon={<Key className="text-emerald-800 mr-2" />}
-                        maxLength={11}
-                      />
+                      <div className="relative">
+                        <Key className="text-emerald-800 mr-2 absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5" />
+                        <Input
+                          {...field}
+                          placeholder="KRA Number"
+                          className="pl-10" // Add padding to prevent text overlap
+                          maxLength={11}
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            {userType === "Patient" && (
+              <FormField
+                control={form.control}
+                name="insurace"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Insurance</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <KeyRound className="text-emerald-800 mr-2 absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5" />
+                        <Input
+                          {...field}
+                          placeholder="Insurance Number"
+                          className="pl-10" // Add padding to prevent text overlap
+                          maxLength={11}
+                        />
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -374,7 +422,7 @@ export default function Signup() {
 
             {/* Industries */}
 
-            <FormField
+            {/* <FormField
               control={form.control}
               name="industries"
               render={({ field, fieldState }) => (
@@ -390,7 +438,6 @@ export default function Signup() {
                       <div className="relative">
                         <Building className="text-emerald-800 absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5" />
                         <Input
-                          // {...field}
                           value={inputValue} // Separate state for current input
                           placeholder="e.g. Technology, Healthcare, Finance"
                           onChange={(e) => setInputValue(e.target.value)}
@@ -400,7 +447,6 @@ export default function Signup() {
                               if (inputValue.trim()) {
                                 const newIndustry = inputValue.trim();
 
-                                // setIndustries(newIndustries);
                                 form.setValue("industries", [
                                   ...industries,
                                   newIndustry,
@@ -416,7 +462,6 @@ export default function Signup() {
                         />
                       </div>
 
-                      {/* Industries Tags */}
                       {industries.length > 0 && (
                         <div className="flex flex-wrap gap-2">
                           {industries.map((industry, index) => (
@@ -446,7 +491,7 @@ export default function Signup() {
                   <FormMessage className="text-red-500" />
                 </FormItem>
               )}
-            />
+            /> */}
 
             {/* <MultiSelect/> */}
             {/* Password */}

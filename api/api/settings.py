@@ -91,10 +91,10 @@ MIDDLEWARE = [
 
 REST_FRAMEWORK = {
        'DEFAULT_AUTHENTICATION_CLASSES': (
+        #    'profiles.permissions.CookieJWTAuthentication',
            'rest_framework_simplejwt.authentication.JWTAuthentication',
        ),
    }
-
 
 
 # If you need to allow dynamic ports, use CORS_ALLOWED_ORIGIN_REGEXES instead:
