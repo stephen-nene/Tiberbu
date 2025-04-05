@@ -2,11 +2,12 @@ from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
 from django.core.validators import RegexValidator
 from .models import HealthcareUser, Doctor, Patient, ClinicalImage,Gender,UserRole,UserStatus
-
+from management.serializers import SpecializationSerializer
 
 class DoctorProfileSerializer(serializers.ModelSerializer):
-    specializations = serializers.StringRelatedField(many=True)
-    
+    # specializations = serializers.StringRelatedField(many=True)
+    specializations = SpecializationSerializer(many=True, read_only=True)
+
     class Meta:
         model = Doctor
         fields = [
@@ -38,6 +39,7 @@ class PatientProfileSerializer(serializers.ModelSerializer):
         
 
 class DoctorSerializer(serializers.ModelSerializer):
+    specializations = SpecializationSerializer(many=True, read_only=True)
 
     class Meta:
         model = Doctor

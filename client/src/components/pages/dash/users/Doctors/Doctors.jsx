@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Search,
   Filter,
@@ -10,6 +10,11 @@ import {
   MoreVertical,
   Edit,
   Trash2,
+  Plus,
+  User,
+  Clock,
+  MapPin,
+  Briefcase
 } from "lucide-react";
 import { Button } from "@/components/shadcn/button";
 import { Input } from "@/components/shadcn/input";
@@ -22,116 +27,73 @@ import {
 } from "@/components/shadcn/dropdown-menu";
 import { Badge } from "@/components/shadcn/badge";
 import { staffStore } from "@/store/staffStore";
+import { useNavigate } from "react-router-dom";
 
 export default function DoctorsPage() {
-
   const filters = {
     role: "clinician",
     // status: "active",
     // gender: "female",
     // blood_group: "O+",
   };
+  
+  const navigate = useNavigate();
 
   const fetchUsers = staffStore((state) => state.fetchUsers);
-  useEffect(() => {
-    fetchUsers(filters);
-  }, [filters]);
+  const doctors = staffStore((state) => state.doctors);
 
-  // Dummy doctor data
-  const [doctors, setDoctors] = useState([
-    {
-      id: 1,
-      name: "Dr. Amara Ibrahim",
-      specialty: "Cardiology",
-      experience: "15 years",
-      availability: "Mon, Wed, Fri",
-      contact: "202-555-0134",
-      email: "a.ibrahim@tiberbu.com",
-      status: "Available",
-      rating: 4.8,
-      image: "/placeholder/150/150",
-    },
-    {
-      id: 2,
-      name: "Dr. Richard Wong",
-      specialty: "Neurology",
-      experience: "12 years",
-      availability: "Tue, Thu, Sat",
-      contact: "202-555-0145",
-      email: "r.wong@tiberbu.com",
-      status: "Available",
-      rating: 4.7,
-      image: "/placeholder/150/150",
-    },
-    {
-      id: 3,
-      name: "Dr. Elena Rodriguez",
-      specialty: "Pediatrics",
-      experience: "10 years",
-      availability: "Mon, Tue, Thu, Fri",
-      contact: "202-555-0156",
-      email: "e.rodriguez@tiberbu.com",
-      status: "On Leave",
-      rating: 4.9,
-      image: "/placeholder/150/150",
-    },
-    {
-      id: 4,
-      name: "Dr. Samuel Okafor",
-      specialty: "Orthopedics",
-      experience: "18 years",
-      availability: "Mon, Wed, Fri",
-      contact: "202-555-0167",
-      email: "s.okafor@tiberbu.com",
-      status: "Available",
-      rating: 4.6,
-      image: "/placeholder/150/150",
-    },
-    {
-      id: 5,
-      name: "Dr. Priya Sharma",
-      specialty: "Dermatology",
-      experience: "8 years",
-      availability: "Tue, Wed, Thu",
-      contact: "202-555-0178",
-      email: "p.sharma@tiberbu.com",
-      status: "Available",
-      rating: 4.8,
-      image: "/placeholder/150/150",
-    },
-    {
-      id: 6,
-      name: "Dr. James Wilson",
-      specialty: "Psychiatry",
-      experience: "14 years",
-      availability: "Mon, Tue, Thu",
-      contact: "202-555-0189",
-      email: "j.wilson@tiberbu.com",
-      status: "Available",
-      rating: 4.5,
-      image: "/placeholder/150/150",
-    },
-  ]);
+  useEffect(() => {
+    if (doctors.length === 0) {
+      fetchUsers(filters);
+    }
+  }, [fetchUsers, doctors.length]);
 
   const [searchTerm, setSearchTerm] = useState("");
 
   const filteredDoctors = doctors.filter(
     (doctor) =>
-      doctor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      doctor.specialty.toLowerCase().includes(searchTerm.toLowerCase())
+      doctor.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      doctor.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      doctor.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      doctor.profile?.specializations?.some(spec => 
+        spec.name.toLowerCase().includes(searchTerm.toLowerCase())
+      )
   );
 
   const getStatusColor = (status) => {
-    return status === "Available" ? "bg-green-500" : "bg-amber-500";
+    switch (status?.toLowerCase()) {
+      case "active":
+        return "bg-green-500 text-white";
+      case "pending":
+        return "bg-yellow-500 text-white";
+      case "suspended":
+        return "bg-red-500 text-white";
+      default:
+        return "bg-gray-500 text-white";
+    }
+  };
+
+  const getFullName = (doctor) => {
+    if (doctor.first_name && doctor.last_name) {
+      return `Dr. ${doctor.first_name} ${doctor.last_name}`;
+    } else if (doctor.first_name) {
+      return `Dr. ${doctor.first_name}`;
+    } else if (doctor.username) {
+      return doctor.username;
+    }
+    return "Doctor";
   };
 
   return (
-    <div className=" ">
+    <div className="r mx-auto px-4 py-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
           Doctors Directory
         </h1>
-        <Button className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600">
+        <Button
+          onClick={() => navigate("/dashboard/staff/doctors/new")}
+          className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600"
+        >
           <UserPlus size={16} className="mr-2" />
           Add New Doctor
         </Button>
@@ -166,39 +128,80 @@ export default function DoctorsPage() {
         </CardContent>
       </Card>
 
+      {filteredDoctors.length === 0 && (
+        <div className="flex flex-col items-center mx-auto gap-4 text-center py-8">
+          <p className="text-gray-500">No doctors found matching your criteria</p>
+          <Button
+            onClick={() => navigate("/dashboard/staff/doctors/new")}
+            variant="outline"
+            className="mt-4"
+          >
+            <Plus className="mr-2 h-4 w-4" /> Add New Doctor
+          </Button>
+        </div>
+      )}
+      
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredDoctors.map((doctor) => (
           <Card
             key={doctor.id}
-            className="overflow-hidden bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+            className="overflow-hidden bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow duration-300"
           >
             <div className="p-6">
               <div className="flex items-start">
-                <img
-                  src={
-                    "https://images.unsplash.com/photo-1567446537708-ac4aa75c9c28?q=80&w=1287&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                  }
-                  alt={doctor.name}
-                  className="h-16 w-16 rounded-full object-cover mr-4"
-                />
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                    {doctor.name}
-                  </h3>
-                  <Badge className="mt-1 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                    {doctor.specialty}
-                  </Badge>
-                  <div className="flex items-center mt-1 text-amber-500">
-                    <Star size={16} className="fill-current" />
-                    <span className="ml-1 text-sm">{doctor.rating}</span>
-                    <span className="ml-1 text-xs text-gray-500 dark:text-gray-400">
-                      ({Math.floor(Math.random() * 100) + 50} reviews)
-                    </span>
+                {doctor.profile_image ? (
+                  <img
+                    src={doctor.profile_image}
+                    alt={getFullName(doctor)}
+                    className="h-16 w-16 rounded-full object-cover mr-4 border-2 border-blue-100"
+                  />
+                ) : (
+                  <div className="h-16 w-16 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center mr-4">
+                    <User size={24} className="text-blue-600 dark:text-blue-300" />
                   </div>
+                )}
+                
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white truncate">
+                    {getFullName(doctor)}
+                  </h3>
+
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {doctor?.profile?.specializations?.length > 0 ? (
+                      doctor.profile.specializations.slice(0, 2).map((spec) => (
+                        <Badge key={spec.id} variant="outline" className="bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-300 border-blue-200 dark:border-blue-800">
+                          {spec.name}
+                        </Badge>
+                      ))
+                    ) : (
+                      <Badge variant="outline" className="bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-300 border-blue-200 dark:border-blue-800">
+                        General Practitioner
+                      </Badge>
+                    )}
+                    
+                    {doctor?.profile?.specializations?.length > 2 && (
+                      <Badge variant="outline" className="bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                        +{doctor.profile.specializations.length - 2} more
+                      </Badge>
+                    )}
+                  </div>
+
+                  {doctor?.profile?.rating && (
+                    <div className="flex items-center mt-1 text-amber-500">
+                      <Star size={16} className="fill-current" />
+                      <span className="ml-1 text-sm font-medium">
+                        {doctor.profile.rating}
+                      </span>
+                      <span className="ml-1 text-xs text-gray-500 dark:text-gray-400">
+                        ({Math.floor(Math.random() * 100) + 50} reviews)
+                      </span>
+                    </div>
+                  )}
                 </div>
+                
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="h-8 w-8 p-0 ml-auto">
+                    <Button variant="ghost" className="h-8 w-8 p-0 ml-2">
                       <MoreVertical
                         size={16}
                         className="text-gray-500 dark:text-gray-400"
@@ -225,48 +228,80 @@ export default function DoctorsPage() {
                 </DropdownMenu>
               </div>
 
-              <div className="mt-4 space-y-2 text-sm">
+              <div className="mt-4 grid grid-cols-2 gap-2 text-sm">
+                {/* Experience */}
                 <div className="flex items-center text-gray-600 dark:text-gray-400">
-                  <Badge variant="outline" className="mr-2">
-                    Experience
-                  </Badge>
-                  {doctor.experience}
+                  <Briefcase size={14} className="mr-2" />
+                  <span>{doctor?.profile?.experience || "New"} {doctor?.profile?.experience === 1 ? "year" : "years"}</span>
                 </div>
+
+                {/* Gender */}
+                {doctor?.gender && (
+                  <div className="flex items-center text-gray-600 dark:text-gray-400">
+                    <User size={14} className="mr-2" />
+                    <span className="capitalize">{doctor.gender}</span>
+                  </div>
+                )}
+
+                {/* Status */}
                 <div className="flex items-center text-gray-600 dark:text-gray-400">
-                  <Badge variant="outline" className="mr-2">
-                    Availability
-                  </Badge>
-                  {doctor.availability}
-                </div>
-                <div className="flex items-center text-gray-600 dark:text-gray-400">
-                  <span
-                    className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(
-                      doctor.status
-                    )} text-white ml-auto`}
-                  >
-                    {doctor.status}
+                  <Clock size={14} className="mr-2" />
+                  <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${getStatusColor(doctor?.status)}`}>
+                    {doctor?.status || "Unknown"}
                   </span>
                 </div>
+
+                {/* Department */}
+                {doctor?.profile?.specializations?.length > 0 && doctor.profile.specializations[0].department && (
+                  <div className="flex items-center text-gray-600 dark:text-gray-400">
+                    <MapPin size={14} className="mr-2" />
+                    <span>{doctor.profile.specializations[0].department}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Availability Badges */}
+              <div className="mt-3 flex flex-wrap gap-2">
+                {doctor?.profile?.is_available !== undefined && (
+                  <Badge variant={doctor.profile.is_available ? "success" : "destructive"} className="font-normal">
+                    {doctor.profile.is_available ? "Available" : "Not Available"}
+                  </Badge>
+                )}
+                
+                {doctor?.profile?.accepting_new_patients !== undefined && (
+                  <Badge variant={doctor.profile.accepting_new_patients ? "success" : "destructive"} className="font-normal">
+                    {doctor.profile.accepting_new_patients ? "Accepting Patients" : "Not Accepting Patients"}
+                  </Badge>
+                )}
+                
+                {doctor?.profile?.emergency_availability && (
+                  <Badge variant="warning" className="font-normal">
+                    Emergency Available
+                  </Badge>
+                )}
               </div>
 
               <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-between">
                 <Button
-                  // variant="outline"
+                  variant="outline"
                   size="sm"
-                  className=""
+                  className="border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   <Phone size={14} className="mr-1" />
                   Call
                 </Button>
                 <Button
-                  variant="warning"
+                  variant="outline"
                   size="sm"
-                  className="flex items-center border-gray-300 dark:border-gray-600"
+                  className="border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   <Mail size={14} className="mr-1" />
                   Email
                 </Button>
-                <Button className="flex items-center bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-white">
+                <Button 
+                  size="sm" 
+                  className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-white"
+                >
                   <Calendar size={14} className="mr-1" />
                   Book
                 </Button>
@@ -286,6 +321,7 @@ export default function DoctorsPage() {
             variant="outline"
             size="sm"
             className="border-gray-300 dark:border-gray-600"
+            disabled={filteredDoctors.length === 0}
           >
             Previous
           </Button>
@@ -293,6 +329,7 @@ export default function DoctorsPage() {
             variant="outline"
             size="sm"
             className="border-gray-300 dark:border-gray-600"
+            disabled={filteredDoctors.length === 0}
           >
             Next
           </Button>

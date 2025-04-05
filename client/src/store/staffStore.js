@@ -7,7 +7,7 @@ export const staffStore = create(
   devtools(
     persist(
       (set, get) => ({
-        doctors: null,
+        doctors: [],
         specializations: [],
         patients: null,
         loading: false,
@@ -20,8 +20,10 @@ export const staffStore = create(
               params: filters,
             });
 
+
+
             // Log the response for debugging
-            console.log("Response:", response);
+            console.log("Response:", response.data);
 
             if (response.status === 200 || response.status === 202) {
               set({ doctors: response.data });

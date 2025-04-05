@@ -44,6 +44,7 @@ const DashRoutes = {
   Security: lazy(() => import("../pages/dash/Security.jsx")),
 
   Doctors: lazy(() => import("../pages/dash/users/Doctors/Doctors.jsx")),
+  NewDoctor: lazy(()=>import("../pages/dash/users/Doctors/NewDoctor.jsx")),
   Patients: lazy(() => import("../pages/dash/users/Patients/Patients.jsx")),
   NewPatients: lazy(()=>import("../pages/dash/users/Patients/NewPatients.jsx")),
   Records: lazy(() => import("../pages/dash/users/Records/Records.jsx")),
@@ -221,6 +222,12 @@ export const routes = [
           {
             path: "doctors",
             element: DashRoutes.Doctors,
+            protected: true,
+            roles: ["system_admin"],
+          },
+          {
+            path: "doctors/new",
+            element: DashRoutes.NewDoctor,
             protected: true,
             roles: ["system_admin"],
           },
