@@ -68,12 +68,46 @@ export const staffStore = create(
             set({ loading: false });
           }
         },
+
+        // save specialization and add to the list
+        saveSpecialization: async (data) => {
+          const toastId = toast.loading("Saving specialization...");
+          set({ loading: true });
+          try {
+            const response = await apiClient1.post(
+              "/management/specializations/",
+              data
+            );
+
+            // Log the response for debugging
+            console.log("Response:", response);
+            if (response.status === 201) {
+       set((state) => ({
+         specializations: [...state.specializations, response.data],
+       }));
+              
+              toast.success("Specialization saved successfully!", {
+                id: toastId,
+              });
+              return response.status;
+            }
+
+          } catch (error) {
+            console.error("Error saving specialization:", error);
+            toast.error("Failed to save specialization", { id: toastId });
+          } finally {
+            toast.dismiss(toastId);
+            set({ loading: false });
+          }
+        },
+
+
       }),
       {
         name: "staff-storage",
         partialize: (state) => ({
         //   doctors: state.doctors,
-          specializations: state.specializations,
+          // specializations: state.specializations,
         //   loading: state.loading,
         }),
       }

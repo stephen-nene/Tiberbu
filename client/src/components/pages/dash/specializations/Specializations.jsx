@@ -44,7 +44,7 @@ export default function Specializations() {
   const loading = staffStore((state) => state.loading);
 
   useEffect(() => {
-    if (!specializations) {
+    if (specializations.length === 0) {
       fetchSpecializations();
     }
   }, [fetchSpecializations]);
@@ -127,26 +127,17 @@ export default function Specializations() {
                       <TableCell>
                         <div className="flex flex-col gap-1">
                           {spec.is_surgical && (
-                            <Badge
-                              variant="outline"
-                              className="bg-blue-50 text-blue-700 border-blue-200"
-                            >
+                            <Badge variant="destructive" className="w-fit">
                               Surgical
                             </Badge>
                           )}
                           {spec.is_primary_care && (
-                            <Badge
-                              variant="outline"
-                              className="bg-green-50 text-green-700 border-green-200"
-                            >
+                            <Badge variant="success" className="w-fit">
                               Primary Care
                             </Badge>
                           )}
                           {!spec.is_surgical && !spec.is_primary_care && (
-                            <Badge
-                              variant="outline"
-                              className="bg-gray-50 text-gray-700 border-gray-200"
-                            >
+                            <Badge variant="info" className="w-fit">
                               Consultation
                             </Badge>
                           )}
@@ -158,15 +149,13 @@ export default function Specializations() {
                       <TableCell>
                         {spec.is_active ? (
                           <Badge
-                            variant="outline"
-                            className="bg-green-50 text-green-700 border-green-200"
+                            variant="success"
                           >
                             Active
                           </Badge>
                         ) : (
                           <Badge
-                            variant="outline"
-                            className="bg-red-50 text-red-700 border-red-200"
+                            variant="destructive"
                           >
                             Inactive
                           </Badge>
