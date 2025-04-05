@@ -33,6 +33,14 @@ def send_welcome_email(user, activation_url):
     email.attach_alternative(html_content, "text/html")
     email.send()
     
+def send_password_reset_email(user, reset_link):
+    subject = "Password Reset Request"
+    message = f"Click the link to reset your password: {reset_link}"
+    from_email = settings.EMAIL_HOST_USER
+    recipient_list = [user.email]
+
+    send_mail(subject, message, from_email, recipient_list)
+    
 def send_login_email(user_email, username):
     subject = "Login Notification"
     message = f"Hello {username},\n\nYou have successfully logged into your account."

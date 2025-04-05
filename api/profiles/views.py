@@ -6,17 +6,18 @@ from django.db import transaction
 
 from django.contrib.auth.hashers import check_password
 
+from django.db.models import Q
 
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import status, viewsets
+from rest_framework import filters,status, viewsets
 
 from rest_framework_simplejwt.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken,AccessToken
-# from rest_framework.exceptions import AuthenticationFailed
-
+from rest_framework.permissions import IsAuthenticated
+from .permissions import IsAdmin, IsDoctor, IsPatient
 
 import requests
 from decouple import config
@@ -319,7 +320,47 @@ class AllUserView(APIView,AuthenticationMixin):
 # ----------------------- DRF’s Generic Views for all users
 
 class UserList(viewsets.ModelViewSet):
-    queryset = HealthcareUser.objects.all()
+    # doc strings
+    """
+    Example usage in URL:
+GET /users/?role=DOCTOR
+
+GET /users/?role=DOCTOR&status=ACTIVE
+
+GET /users/?search=jane
+
+GET /users/?ordering=date_of_birth
+    A viewset for viewing and editing user instances.
+    """
+    
+    # permission_classes = [IsAuthenticated, IsAdmin]
     serializer_class = UserSerializer
+    def get_queryset(self):
+        queryset = HealthcareUser.objects.all()
+        role = self.request.query_params.get('role', None)
+        status = self.request.query_params.get('status', None)
+        gender = self.request.query_params.get('gender', None)
+        blood_group = self.request.query_params.get('blood_group', None)
+        
+        if role:
+            queryset = queryset.filter(role=role)
+        if status:
+            queryset = queryset.filter(status=status)
+        if gender:
+            queryset = queryset.filter(gender=gender)
+        if blood_group:
+            queryset = queryset.filter(blood_group=blood_group)
+            
+        search = self.request.query_params.get('search', None)
+        if search:
+            queryset = queryset.filter(
+                Q(username__icontains=search) |
+                Q(email__icontains=search) |
+                Q(first_name__icontains=search) |
+                Q(last_name__icontains=search)
+            )
+        
+
+        return queryset
     
             
