@@ -9,12 +9,11 @@ let BASE_URL = "";
 // if env === dev use ai else use ul
 if (env === "development") { 
   BASE_URL = `/api/`;
-  console.log(" Environment");
 } else {
   BASE_URL = url || `https://tiberbu.onrender.com/api/v1.0/`;
 }
 
-console.log(env)
+// console.log(env)
 
 // === Factory Function for Creating Axios Instances ===
 const createApiClient = (baseURL, contentType = "application/json") => {
