@@ -23,6 +23,19 @@ import {
 import { Badge } from "@/components/shadcn/badge";
 
 export default function DoctorsPage() {
+
+  const filters = {
+    role: "doctor",
+    status: "active",
+    gender: "female",
+    blood_group: "O+",
+  };
+
+  const fetchDoctors = useStaffStore((state) => state.fetchDoctors);
+  useEffect(() => {
+    fetchDoctors(filters);
+  }, [filters]);
+
   // Dummy doctor data
   const [doctors, setDoctors] = useState([
     {
