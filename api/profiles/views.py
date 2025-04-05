@@ -318,25 +318,26 @@ class AllUserView(APIView,AuthenticationMixin):
             return response
         
 # ----------------------- DRF’s Generic Views for all users
-
 class UserList(viewsets.ModelViewSet):
-    # doc strings
     """
     Example usage in URL:
-GET /users/?role=DOCTOR
-
-GET /users/?role=DOCTOR&status=ACTIVE
-
-GET /users/?search=jane
-
-GET /users/?ordering=date_of_birth
+    GET /users/?role=DOCTOR
+    GET /users/?role=DOCTOR&status=ACTIVE
+    GET /users/?search=jane
+    GET /users/?ordering=date_of_birth
+    
     A viewset for viewing and editing user instances.
     """
-    
-    # permission_classes = [IsAuthenticated, IsAdmin]
     serializer_class = UserSerializer
+    
     def get_queryset(self):
-        queryset = HealthcareUser.objects.all()
+        queryset = HealthcareUser.objects.all().select_related(
+            'patient_profile', 'clinician_profile','profile_image'
+        ).prefetch_related(
+            'clinician_profile__specializations'  # Prefetch many-to-many relationship
+        )
+        
+        # Apply filters
         role = self.request.query_params.get('role', None)
         status = self.request.query_params.get('status', None)
         gender = self.request.query_params.get('gender', None)
@@ -359,8 +360,5 @@ GET /users/?ordering=date_of_birth
                 Q(first_name__icontains=search) |
                 Q(last_name__icontains=search)
             )
-        
-
-        return queryset
-    
             
+        return queryset

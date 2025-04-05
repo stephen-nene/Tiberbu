@@ -4,19 +4,94 @@ from django.core.validators import RegexValidator
 from .models import HealthcareUser, Doctor, Patient, ClinicalImage,Gender,UserRole,UserStatus
 
 
+class DoctorProfileSerializer(serializers.ModelSerializer):
+    specializations = serializers.StringRelatedField(many=True)
+    
+    class Meta:
+        model = Doctor
+        fields = [
+            'license_number',
+            'specializations',
+            'medical_license',
+            'license_jurisdiction',
+            'certifications',
+            'accepting_new_patients',
+            'emergency_availability',
+            'experience',
+            'bio',
+            'rating',
+            'is_available',
+            'fees'
+        ]
+
+class PatientProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Patient
+        fields = [
+            'gender',
+            'medical_history',
+            'known_allergies',
+            'permanent_medications',
+            'emergency_contacts',
+            'primary_insurance'
+        ]
+        
+
+class DoctorSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Doctor
+        fields = [
+            'user', 'license_number', 'specializations', 'medical_license',
+            'license_jurisdiction', 'certifications', 'accepting_new_patients',
+            'emergency_availability', 'experience', 'bio', 'rating', 'is_available', 'fees'
+        ]
+    
+
+    
+class PatientSerializer(serializers.ModelSerializer):
+
+
+    class Meta:
+        model = Patient
+        fields = [
+            'user', 'gender', 'medical_history', 'known_allergies',
+            'permanent_medications', 'emergency_contacts', 'primary_insurance'
+        ]
+
+
+
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8)
     
     # Optional nested data for patient or doctor info
     patient_profile = serializers.DictField(write_only=True, required=False)
     clinician_profile = serializers.DictField(write_only=True, required=False)
+    
+    # Read-only fields for retrieval
+    # patient = PatientSerializer(read_only=True)
+    # doctor = DoctorSerializer(read_only=True)
+    profile = serializers.SerializerMethodField()
+
     class Meta:
         model = HealthcareUser
         fields = [
             'id', 'username', 'first_name', 'last_name', 'email',
             'phone_number', 'password', 'status', 'role', 'date_of_birth',
-            'gender', 'address', 'profile_image', 'mfa_enabled', 'patient_profile', 'clinician_profile'
+            'gender', 'address', 'profile_image', 'mfa_enabled', 'patient_profile', 'clinician_profile',
+            'profile'  
+
         ]
+           
+    def get_profile(self, obj):
+        """
+        Returns the appropriate profile based on user role
+        """
+        if obj.role == UserRole.CLINICIAN and hasattr(obj, 'clinician_profile'):
+            return DoctorProfileSerializer(obj.clinician_profile).data
+        elif obj.role == UserRole.PATIENT and hasattr(obj, 'patient_profile'):
+            return PatientProfileSerializer(obj.patient_profile).data
+        return None
 
     def create(self, validated_data):
         try:
@@ -69,39 +144,6 @@ class UserSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(f"Invalid gender. Choose from: {', '.join(allowed_genders)}")
         return value
     
-class DoctorSerializer(serializers.ModelSerializer):
-    user = UserSerializer()  # Nest user details
-
-    class Meta:
-        model = Doctor
-        fields = [
-            'user', 'license_number', 'specializations', 'medical_license',
-            'license_jurisdiction', 'certifications', 'accepting_new_patients',
-            'emergency_availability', 'experience', 'bio', 'rating', 'is_available', 'fees'
-        ]
-    
-    def create(self, validated_data):
-        user_data = validated_data.pop('user')
-        user = HealthcareUser.objects.create(**user_data)
-        doctor = Doctor.objects.create(user=user, **validated_data)
-        return doctor
-    
-class PatientSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
-
-    class Meta:
-        model = Patient
-        fields = [
-            'user', 'gender', 'medical_history', 'known_allergies',
-            'permanent_medications', 'emergency_contacts', 'primary_insurance'
-        ]
-
-    def create(self, validated_data):
-        user_data = validated_data.pop('user')
-        user = HealthcareUser.objects.create(**user_data)
-        patient = Patient.objects.create(user=user, **validated_data)
-        return patient
-
 class ClinicalImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClinicalImage

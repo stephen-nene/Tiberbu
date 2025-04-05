@@ -73,6 +73,9 @@ class Specialization(BaseUUIDModel, TimeStampedModel):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.name)
+        if self.display_order == 0:  # or: if not self.display_order
+            max_order = Specialization.objects.aggregate(models.Max("display_order"))["display_order__max"] or 0
+            self.display_order = max_order + 1
         super().save(*args, **kwargs)
 
     def __str__(self):
