@@ -46,10 +46,7 @@ import { Checkbox } from "@/components/shadcn/checkbox";
 
 // Define login form schema with Zod
 const loginSchema = z.object({
-  identifier: z
-    .string()
-    .min(1, "Email is required")
-    .email("Invalid email format"),
+  identifier: z.string().min(1, "Email is required").email("Invalid email format"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   rememberMe: z.boolean().default(false),
 });
@@ -83,11 +80,8 @@ export default function Login() {
         });
       }
     } catch (error) {
-      console.error("Login error:", error?.response?.data);
-      const errorMessage =
-        error?.response?.data?.detail ||
-        error?.response?.data?.error ||
-        "Failed to login";
+      // console.error("Login error:", error?.response?.data);
+      const errorMessage = error?.response?.data?.detail || error?.response?.data?.error || "Failed to login";
       setServerError(errorMessage);
     } finally {
       setLoading(false);
@@ -130,10 +124,7 @@ export default function Login() {
       }
     } catch (error) {
       console.error("Dummy login failed:", error?.response);
-      const errorMessage =
-        error?.response?.data?.error ||
-        error?.response?.data?.detail ||
-        "Failed to login";
+      const errorMessage = error?.response?.data?.error || error?.response?.data?.detail || "Failed to login";
       setServerError(errorMessage);
     } finally {
       setLoading(false);
@@ -168,10 +159,7 @@ export default function Login() {
             )}
 
             <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(handleSubmit)}
-                className="space-y-6"
-              >
+              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
                 {/* Email Input */}
                 <FormField
                   control={form.control}
