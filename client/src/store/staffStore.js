@@ -13,7 +13,7 @@ export const staffStore = create(
         loading: false,
 
         fetchUsers: async (filters) => {
-          const toastId = toast.loading("Fetching users...");
+          const toastId = toast.loading(`Fetching ${filters.role}...`);
           set({ loading: true });
           try {
             const response = await apiClient1.get("/profiles/users/", {
@@ -32,15 +32,18 @@ export const staffStore = create(
               } else if (filters.role === "patient") {
                       set({ patients: response.data });
                     }
-              toast.success("Users fetched successfully!", { id: toastId });
+              toast.success(`${filters.role} fetched successfully!`, { id: toastId });
             } else {
-              toast.error(`Failed to fetch users. Status: ${response.status}`, {
-                id: toastId,
-              });
+              toast.error(
+                `Failed to fetch ${filters.role}. Status: ${response.status}`,
+                {
+                  id: toastId,
+                }
+              );
             }
           } catch (error) {
-            console.error("Error fetching users:", error);
-            toast.error("Failed to fetch users", { id: toastId });
+            console.error(`Error fetching ${filters.role}`, error);
+            toast.error(`Failed to fetch ${filters.role}`, { id: toastId });
           } finally {
             set({ loading: false });
           }

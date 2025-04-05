@@ -113,7 +113,11 @@ export default function Patients() {
           </p>
         </div>
         <Button
-          onClick={() => navigate("new")}
+          onClick={() =>
+            navigate("new", {
+              state: { formMode : "create" },
+            })
+          }
           className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600"
         >
           <UserPlus className="mr-2 h-4 w-4" />
@@ -173,7 +177,11 @@ export default function Patients() {
                         No patients found matching your criteria
                       </p>
                       <Button
-                        onClick={() => navigate("/dashboard/patients/new")}
+                        onClick={() =>
+                          navigate("/dashboard/patients/new", {
+                            state: { formMode: "create" },
+                          })
+                        }
                         variant="outline"
                       >
                         <Plus className="mr-2 h-4 w-4" />
@@ -248,7 +256,12 @@ export default function Patients() {
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem
                             onClick={() =>
-                              navigate(`/dashboard/patients/${patient.id}`)
+                              navigate(`/dashboard/patients/${patient.id}`, {
+                                state: {
+                                  patientData: patient,
+                                  formMode: "view",
+                                },
+                              })
                             }
                           >
                             <FileText className="mr-2 h-4 w-4" />
@@ -256,7 +269,15 @@ export default function Patients() {
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() =>
-                              navigate(`/dashboard/patients/${patient.id}/edit`)
+                              navigate(
+                                `/dashboard/patients/${patient.id}/edit`,
+                                {
+                                  state: {
+                                    patientData: patient,
+                                    formMode: "edit",
+                                  },
+                                }
+                              )
                             }
                           >
                             <Edit className="mr-2 h-4 w-4" />

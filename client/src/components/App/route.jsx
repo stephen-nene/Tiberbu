@@ -46,6 +46,8 @@ const DashRoutes = {
   Doctors: lazy(() => import("../pages/dash/users/Doctors/Doctors.jsx")),
   NewDoctor: lazy(()=>import("../pages/dash/users/Doctors/NewDoctor.jsx")),
   Patients: lazy(() => import("../pages/dash/users/Patients/Patients.jsx")),
+ViewPatient: lazy(() => import("../pages/dash/users/Patients/NewPatients.jsx")),
+
   NewPatients: lazy(()=>import("../pages/dash/users/Patients/NewPatients.jsx")),
   Records: lazy(() => import("../pages/dash/users/Records/Records.jsx")),
   NewRecords: lazy(()=>import("../pages/dash/users/Records/NewRecords.jsx")),
@@ -64,6 +66,7 @@ import Error404 from "../pages/utils/Error404.jsx";
 import ComingSoon from "../pages/utils/ComminSoon.jsx";
 import ComingSoon2 from "../pages/utils/ComminSoon copy.jsx";
 import NewSpecialization from "../pages/dash/specializations/NewSpecialization.jsx";
+import { View } from "lucide-react";
 
 // Route configurations
 export const routes = [
@@ -177,6 +180,19 @@ export const routes = [
             protected: true,
             roles: ["system_admin", "clinician"],
           },
+          {
+            path: ":id",
+            element: DashRoutes.ViewPatient,
+            protected: true,
+            roles: ["system_admin", "clinician"],
+          },
+          {
+            path: ":id/edit",
+            element: DashRoutes.ViewPatient,
+            protected: true,
+            roles: ["system_admin", "clinician"],
+          }
+          ,
           {
             path: "records",
             element: DashRoutes.Records,
