@@ -4,6 +4,9 @@ from django.core.validators import RegexValidator
 from .models import HealthcareUser, Doctor, Patient, ClinicalImage,Gender,UserRole,UserStatus
 from management.serializers import SpecializationSerializer
 
+from django.db import transaction
+
+
 class DoctorProfileSerializer(serializers.ModelSerializer):
     # specializations = serializers.StringRelatedField(many=True)
     specializations = SpecializationSerializer(many=True, read_only=True)
@@ -102,22 +105,25 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         try:
-            patient_data = validated_data.pop('patient_profile', {})
-            doctor_data = validated_data.pop('clinician_profile', {})
-            validated_data['password'] = make_password(validated_data['password'])
+            with transaction.atomic():
+                patient_data = validated_data.pop('patient_profile', None)
+                doctor_data = validated_data.pop('clinician_profile', None)
+                validated_data['password'] = make_password(validated_data['password'])
 
-            # Create user instance without saving yet
-            user = HealthcareUser(**validated_data)
+                # Create user instance without saving yet
+                user = HealthcareUser(**validated_data)
 
-            # Attach the role-specific data to be used in signal
-            if user.role == UserRole.PATIENT:
-                user._profile_data = patient_data
-            elif user.role == UserRole.CLINICIAN:
-                user._profile_data = doctor_data
+                # Attach the role-specific data to be used in signal
+                if user.role == UserRole.PATIENT:
+                    user._profile_data = patient_data or {}
+                elif user.role == UserRole.CLINICIAN:
+                    user._profile_data = doctor_data or {}
 
-            user.save()
-            return user
+                user.save()
+                return user
         except Exception as e:
+            # if user.pk:
+            #     user.delete()
             raise serializers.ValidationError({"error": "Failed to create user", "details": str(e)})
 
     def update(self, instance, validated_data):
@@ -132,6 +138,7 @@ class UserSerializer(serializers.ModelSerializer):
         # Update nested patient profile if present
         if patient_data and instance.role == UserRole.PATIENT and hasattr(instance, 'patient_profile'):
             patient_instance = instance.patient_profile
+
             for attr, value in patient_data.items():
                 setattr(patient_instance, attr, value)
             patient_instance.save()
@@ -139,9 +146,15 @@ class UserSerializer(serializers.ModelSerializer):
         # Update nested clinician profile if present
         if doctor_data and instance.role == UserRole.CLINICIAN and hasattr(instance, 'clinician_profile'):
             doctor_instance = instance.clinician_profile
+            specializations_data = doctor_data.pop('specializations', None)
+            print(specializations_data)
             for attr, value in doctor_data.items():
                 setattr(doctor_instance, attr, value)
             doctor_instance.save()
+            
+           
+        # if specializations_data is not None:
+        #     doctor_instance.specializations.set(specializations_data)  # <- THIS is key
 
         # Continue updating user
         return super().update(instance, validated_data)
