@@ -48,20 +48,20 @@ const formSchema = z
       .regex(/^07|01\d{8}$/, "Phone number must be in the format 0712345678"),
     company_type: z.string().optional(),
     sector: z.string().min(1, "Please select sector type"),
-    kra_pin: z
-      .string()
-      .optional()
-      .regex(
-        /^[AP]\d{9}[A-Z,a-z]$/,
-        "Invalid KRA PIN format. e.g AP123456789A"
-      ),
+    // kra_pin: z
+    //   .string()
+    //   .optional()
+    //   .regex(
+    //     /^[AP]\d{9}[A-Z,a-z]$/,
+    //     "Invalid KRA PIN format. e.g AP123456789A"
+    //   ),
     insurance: z
       .string()
-      .optional()
       .regex(
         /^[A-Z]{2}\d{8}$/,
         "Invalid Insurance Number format. e.g AB12345678"
-      ),
+      )
+      .optional(),
     first_name: z.string().min(1, "Please enter your first name"),
     last_name: z.string().min(1, "Please enter your last name"),
     location: z.string().min(1, "Please enter your location"),

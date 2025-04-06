@@ -1,10 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import { Lock, Stethoscope } from "lucide-react";
+import { Lock, ArrowLeft, Stethoscope } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { handleServerReset } from "../../../services/requests/auth";
-
-// import { Card, CardContent } from "@/components/ui/card";
+import LoginImg from "../../../assets/images/auth/Login.png";
 import { Button } from "@/components/shadcn/button";
+import { Input } from "@/components/shadcn/input";
 import {
   Form,
   FormControl,
@@ -13,14 +16,14 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/shadcn/form";
-import { Input } from "@/components/shadcn/input";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/shadcn/card";
 import { Alert, AlertTitle, AlertDescription } from "@/components/shadcn/alert";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-
-import pic from "../../../assets/images/Hero.png";
-import profile from "../../../assets/images/Learn.jpeg";
 
 const formSchema = z
   .object({
@@ -47,8 +50,8 @@ export default function PasswordResetForm() {
   const [loading, setLoading] = useState(false);
   const { otp } = useParams();
   const navigate = useNavigate();
-  const [error, setError] = useState("");
-  const [msg, setMsg] = useState("");
+  const [serverError, setServerError] = useState("");
+  const [success, setSuccess] = useState(false);
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -60,72 +63,86 @@ export default function PasswordResetForm() {
 
   const onSubmit = async (values) => {
     setLoading(true);
-    setError("");
-    setMsg("");
+    setServerError("");
+    setSuccess(false);
 
     try {
-      const response = await handleServerReset(
+      await handleServerReset(
         {
           ...values,
           otp: otp,
         },
         navigate
       );
-
-      setMsg(response?.data?.info);
+      setSuccess(true);
     } catch (error) {
-      const errorMsg =
-        error.response?.data?.detail ||
-        "Failed to reset password. Please try again.";
-      setError(errorMsg);
+      setServerError(
+        error?.response?.data?.detail ||
+          "Failed to reset password. Please try again."
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    // Initial check - removed empty function call
-    // as it seemed like a potential bug in the original
-  }, []);
-
   return (
-    <div className="min-h-screen grid lg:grid-cols-2 items-center gap-4 bg-white shadow-md rounded-md overflow-hidden w-full">
-      {/* Right Side - Form */}
-      <div className="p-6 sm:max-w-md w-full">
-        <div className="mb-8">
-          <h3 className="text-2xl font-bold text-gray-800">
-            Procure<span className="text-green-500">365</span>
-          </h3>
-          <h3 className="text-2xl font-bold text-gray-800">
-            Reset Your Password
-          </h3>
-          <p className="text-sm text-gray-600 mt-2">
-            Enter your new password and confirm it below.
-          </p>
-        </div>
+    <div className="font-sans min-h-screen flex items-center justify-center w-full p-4 lg:p-0">
+      <Card className="w-full max-w-screen-xl border shadow-lg rounded-xl overflow-hidden">
+        <div className="grid lg:grid-cols-2 gap-0">
+          {/* Left Side - Form */}
+          <div className="p-6 sm:p-8 flex flex-col justify-center">
+            <CardHeader className="px-0 pb-6">
+              <div className="mb-4">
+                <Link
+                  to="/login"
+                  className="inline-flex items-center text-blue-600 hover:text-blue-800"
+                >
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back to Login
+                </Link>
+              </div>
+              <CardTitle className="text-gray-800 text-4xl font-extrabold">
+                tib<span className="text-rose-600">ER</span>bu HMS
+              </CardTitle>
+              <CardTitle className="text-gray-800 text-2xl mt-2">
+                Set New Password
+              </CardTitle>
+              <CardDescription className="mt-4">
+                Create a new password for your account.
+              </CardDescription>
+            </CardHeader>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit(e))} className="space-y-4">
-            {msg && (
-              <Alert
-                variant="success"
-                className="mb-4 bg-green-50 border-green-500 text-green-800"
-              >
-                <AlertDescription>{msg}</AlertDescription>
-              </Alert>
-            )}
-
-            {error ? (
-              <Alert variant="destructive" className="mb-8">
+            {serverError && (
+              <Alert variant="destructive" className="mb-6">
+                <AlertTitle>Error</AlertTitle>
                 <AlertDescription>
-                  {error}{" "}
+                  {serverError}{" "}
                   <Link to="/forgot" className="text-blue-500 underline">
-                    here
+                    Try again
                   </Link>
                 </AlertDescription>
               </Alert>
-            ) : (
-              <>
+            )}
+
+            {success && (
+              <Alert
+                variant="success"
+                className="mb-6 bg-green-50 text-green-800 border-green-200"
+              >
+                <AlertTitle>Success</AlertTitle>
+                <AlertDescription>
+                  Your password has been updated successfully. You can now login
+                  with your new password.
+                </AlertDescription>
+              </Alert>
+            )}
+
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-6"
+              >
+                {/* Password Input */}
                 <FormField
                   control={form.control}
                   name="password"
@@ -134,15 +151,14 @@ export default function PasswordResetForm() {
                       <FormLabel>New Password</FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <span className="absolute left-3 top-3 text-gray-400">
-                            <Lock size={18} />
-                          </span>
                           <Input
+                            {...field}
                             type="password"
                             placeholder="Enter new password"
-                            className="pl-10 rounded-md"
-                            {...field}
+                            className="pl-10"
+                            disabled={loading || success}
                           />
+                          <Lock className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                         </div>
                       </FormControl>
                       <FormMessage />
@@ -150,6 +166,7 @@ export default function PasswordResetForm() {
                   )}
                 />
 
+                {/* Confirm Password Input */}
                 <FormField
                   control={form.control}
                   name="confirmPassword"
@@ -158,15 +175,14 @@ export default function PasswordResetForm() {
                       <FormLabel>Confirm Password</FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <span className="absolute left-3 top-3 text-gray-400">
-                            <Lock size={18} />
-                          </span>
                           <Input
+                            {...field}
                             type="password"
                             placeholder="Confirm new password"
-                            className="pl-10 rounded-md"
-                            {...field}
+                            className="pl-10"
+                            disabled={loading || success}
                           />
+                          <Lock className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                         </div>
                       </FormControl>
                       <FormMessage />
@@ -174,31 +190,39 @@ export default function PasswordResetForm() {
                   )}
                 />
 
+                {/* Submit Button */}
                 <Button
                   type="submit"
-                  disabled={loading}
-                  className="w-full py-3 px-6 text-sm tracking-wide rounded-md text-white bg-btnColor hover:bg-green-700 focus:outline-none"
+                  className="w-full"
+                  variant="default"
+                  disabled={loading || success}
                 >
-                  {loading ? "Processing..." : "Reset Password"}
+                  {loading
+                    ? "Resetting..."
+                    : success
+                    ? "Password Updated"
+                    : "Reset Password"}
                 </Button>
-              </>
-            )}
-          </form>
-        </Form>
 
-        {/* Additional Links */}
-        <div className="flex justify-between mt-4">
-          <Link to="/login" className="text-green-600 font-semibold text-sm">
-            Back to Login
-          </Link>
-          <Link to="/register" className="text-green-600 font-semibold text-sm">
-            Register here
-          </Link>
+                <div className="text-center pt-4">
+                  <p className="text-sm text-gray-600">
+                    Remember your password?{" "}
+                    <Link
+                      to="/login"
+                      className="text-blue-600 font-semibold hover:underline ml-1"
+                    >
+                      Back to Login
+                    </Link>
+                  </p>
+                </div>
+              </form>
+            </Form>
+          </div>
+
+          {/* Right Side - Image */}
+          <SideImg height="full" img={LoginImg} className="hidden lg:block" />
         </div>
-      </div>
-
-      {/* Left Side - Image */}
-      <SideImg height="full" />
+      </Card>
     </div>
   );
 }
