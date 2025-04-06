@@ -1,11 +1,15 @@
+from django.db import transaction
+
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .models import Specialization
-from .serializers import SpecializationSerializer
+from .models import Specialization,Availability,Appointment 
+from .serializers import SpecializationSerializer,AvailabilitySerializer, AppointmentSerializer
 from django.shortcuts import get_object_or_404
 
 from profiles.permissions import IsAdminUserCustom
+
+from datetime import datetime, date, timedelta
 
 
 class SpecializationViewSet(viewsets.ModelViewSet):
@@ -95,3 +99,73 @@ class SpecializationViewSet(viewsets.ModelViewSet):
         specialization.is_active = False
         specialization.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class AvailabilityViewSet(viewsets.ModelViewSet):
+    queryset = Availability.objects.all()
+    serializer_class = AvailabilitySerializer
+
+
+    def create(self, request, *args, **kwargs):
+        """
+        Handles the creation of Availability slots for a doctor.
+        The creation is wrapped in a transaction to ensure atomicity.
+        """
+        try:
+            with transaction.atomic():
+                # Serialize the data but don't validate or handle the logic here
+                serializer = self.get_serializer(data=request.data)
+                serializer.is_valid(raise_exception=True)
+                # data=request.data
+                # if Availability.objects.filter(
+                #     doctor=doctor,
+                #     weekday=serializer.validated_data['weekday'],
+                #     start_time=serializer.validated_data['start_time'],
+                #     end_time=serializer.validated_data['end_time']
+                # ).exists():
+                #     return Response(
+                #         {"detail": "This availability slot already exists for this doctor."},
+                #         status=status.HTTP_400_BAD_REQUEST
+                #     )
+                # You can add business logic here to associate with the doctor, etc.
+                # Minimum duration check
+                # duration = datetime.combine(date.today(), data['end_time']) - datetime.combine(date.today(), data['start_time'])
+                # if duration < timedelta(minutes=15):
+                #     raise serializers.ValidationError({
+                #         'end_time': 'Time slot must be at least 15 minutes long.'
+                #     })
+
+                # Overlap validation
+                # if not self.instance or any(data.get(field) != getattr(self.instance, field) 
+                # for field in ['doctor', 'weekday', 'start_time', 'end_time']):
+                #     overlaps = Availability.objects.filter(
+                #         doctor=data['doctor'],
+                #         weekday=data['weekday'],
+                #         start_time__lt=data['end_time'],
+                #         end_time__gt=data['start_time']
+                #     ).exclude(pk=self.instance.pk if self.instance else None)
+
+                #     if overlaps.exists():
+                #         raise serializers.ValidationError({
+                #             'non_field_errors': ['This time slot overlaps with existing availability.']
+                #         })
+
+                # Create the availability slot without additional logic in the serializer
+                availability = serializer.save()
+
+                return Response(
+                    AvailabilitySerializer(availability).data,
+                    status=status.HTTP_201_CREATED
+                )
+
+        except Exception as e:
+            # Handle any exceptions here (e.g., unique constraint violations, etc.)
+            return Response(
+                {"detail": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+
+class AppointmentViewSet(viewsets.ModelViewSet):
+    queryset = Appointment.objects.all()
+    serializer_class = AppointmentSerializer

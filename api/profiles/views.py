@@ -367,7 +367,7 @@ class UserList(viewsets.ModelViewSet):
                 profile_image_data = validated_data.pop('profile_image', None)
                 patient_data = validated_data.pop('patient_profile', None)
                 doctor_data = validated_data.pop('clinician_profile', None)
-                print("data",doctor_data['license_number'])
+                print("data",doctor_data)
 
 
                 validated_data['password'] = make_password(validated_data['password'])

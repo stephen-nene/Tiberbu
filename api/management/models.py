@@ -5,6 +5,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils.text import slugify
 from django.core.validators import MinValueValidator, MaxValueValidator, FileExtensionValidator
 from django.utils import timezone
+# import date
+from datetime import date
 
 
 # Enums 
@@ -107,7 +109,10 @@ class Availability(BaseUUIDModel, TimeStampedModel):
 class Appointment(BaseUUIDModel, TimeStampedModel):
     patient = models.ForeignKey('profiles.Patient', on_delete=models.CASCADE)
     doctor = models.ForeignKey('profiles.Doctor', null=True, blank=True, on_delete=models.SET_NULL)
-    scheduled_time = models.DateTimeField(validators=[MinValueValidator(timezone.now)])
+    start_time = models.TimeField(null=False, blank=False)
+    end_time = models.TimeField(null=False, blank=False,)
+    # scheduled_date = models.DateField(null=False, blank=False, validators=[MinValueValidator(date.today())])
+    scheduled_date = models.DateTimeField(null=False, blank=False, validators=[MinValueValidator(timezone.now)])
     is_admin_override = models.BooleanField(default=False)
     status = models.CharField(max_length=20, choices=AppointmentStatus.choices, default=AppointmentStatus.SCHEDULED)
     chief_complaint = models.TextField(blank=True, null=True)
@@ -118,10 +123,10 @@ class Appointment(BaseUUIDModel, TimeStampedModel):
         verbose_name = "Clinical Appointment"
         verbose_name_plural = "Clinical Appointments"
         constraints = [
-            models.UniqueConstraint(fields=['doctor', 'scheduled_time'], name='unique_doctor_appointment_time',
+            models.UniqueConstraint(fields=['doctor', 'scheduled_date'], name='unique_doctor_appointment_time',
                                     condition=models.Q(status=AppointmentStatus.SCHEDULED))
         ]
-        indexes = [models.Index(fields=['scheduled_time', '-priority'])]
+        indexes = [models.Index(fields=['scheduled_date', '-priority'])]
         
     def __str__(self):
         return f"{self.patient.user.username} - {self.doctor.user.username if self.doctor else 'Unassigned'} on {self.scheduled_time} ({self.get_status_display()})"

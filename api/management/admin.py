@@ -30,10 +30,10 @@ class AvailabilityAdmin(admin.ModelAdmin):
 
 @admin.register(Appointment)
 class AppointmentAdmin(admin.ModelAdmin):
-    list_display = ('patient', 'doctor', 'scheduled_time', 'status', 'priority')
-    list_filter = ('status', 'priority', 'scheduled_time')
+    list_display = ('patient', 'doctor', 'scheduled_date', 'status', 'priority')
+    list_filter = ('status', 'priority', 'scheduled_date')
     search_fields = ('patient__user__username', 'doctor__user__username', 'chief_complaint')
-    ordering = ('-scheduled_time', 'priority')
+    ordering = ('-scheduled_date', 'priority')
     readonly_fields = ('created_at', 'updated_at')
 
     actions = ['mark_completed', 'mark_cancelled']

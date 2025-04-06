@@ -5,6 +5,8 @@ from profiles.views import FunnyAPIView
 
 router = routers.DefaultRouter()
 router.register(r'specializations', SpecializationViewSet, basename='specialization')
+router.register(r'availabilities', AvailabilityViewSet, basename='availability')
+router.register(r'appointments', AppointmentViewSet, basename='appointment')
 # router.register(r'trips', TripViewSet)
 # router.register(r'logs', LogSheetViewSet)
 
