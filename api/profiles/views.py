@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.views import View
 from django.http import JsonResponse
-from django.db import transaction
+from django.db import transaction, IntegrityError
 
 
 from django.contrib.auth.hashers import check_password
@@ -332,6 +332,7 @@ class UserList(viewsets.ModelViewSet):
     * `destroy`: Deletes the specified user.
     """
     serializer_class = UserSerializer
+    docserializer = DoctorProfileSerializer
 
     def create(self, request, *args, **kwargs):
         try:
@@ -342,6 +343,11 @@ class UserList(viewsets.ModelViewSet):
             headers = self.get_success_headers(serializer.data)
             return Response(serializer.data, status=201, headers=headers)
         
+        except IntegrityError as ie:
+            return Response({
+                "error": "Failed to create user",
+                "details": str(ie)
+            })
         except DRFValidationError as ve:
             # This will catch both serializer validation errors and our converted integrity errors
             return Response(ve.detail, status=status.HTTP_400_BAD_REQUEST)
@@ -361,14 +367,23 @@ class UserList(viewsets.ModelViewSet):
                 profile_image_data = validated_data.pop('profile_image', None)
                 patient_data = validated_data.pop('patient_profile', None)
                 doctor_data = validated_data.pop('clinician_profile', None)
-                print("data",doctor_data)
+                print("data",doctor_data['license_number'])
+
 
                 validated_data['password'] = make_password(validated_data['password'])
                 
+                # medical_license = doctor_data['medical_license']
+                # license_jurisdiction = doctor_data['license_jurisdiction']
+                
+                # if Doctor.objects.filter(medical_license=medical_license, license_jurisdiction=license_jurisdiction).exists():
+                #     raise serializers.ValidationError({
+                #         'medical_license': ['A doctor with this medical license and jurisdiction already exists.']
+                #     })
                 # Create user instance
                 user = serializer.save(**validated_data)
                 print("User Created:", user)
-
+                
+                    
                 # Handle profile image
                 if profile_image_data and profile_image_data.get('image'):
                     ProfileImage.objects.create(user=user, **profile_image_data)
@@ -378,14 +393,16 @@ class UserList(viewsets.ModelViewSet):
                     Patient.objects.create(user=user, **patient_data)
                     
                 elif user.role == UserRole.CLINICIAN and doctor_data:
-                    specializations = doctor_data.pop('specializations', [])
-                    doctor = Doctor.objects.create(
-                        user=user,
-                        **doctor_data
-                    )
-                    doctor.specializations.set([s['id'] for s in specializations])
-                    user.status = UserStatus.PENDING_VERIFICATION
-                    user.save()
+                    # doctor_data = serializer.validated_data.get('clinician_profile')
+                    # if docseri.is_valid():
+                        specializations = doctor_data.pop('specializations', [])
+                        doctor = Doctor.objects.create(
+                            user=user,
+                            **doctor_data
+                        )
+                        doctor.specializations.set([s['id'] for s in specializations])
+                        user.status = UserStatus.PENDING_VERIFICATION
+                        user.save()
                     
                 elif user.role == UserRole.SYSTEM_ADMIN:
                     # Handle admin specific logic if needed
@@ -398,6 +415,8 @@ class UserList(viewsets.ModelViewSet):
                 elif user.role == UserRole.SUPPORT_STAFF:
                     # Handle support staff specific logic if needed
                     pass
+                
+
         except serializers.ValidationError as ve:
             raise ve  # Re-raise validation errors          
         except Exception as e:

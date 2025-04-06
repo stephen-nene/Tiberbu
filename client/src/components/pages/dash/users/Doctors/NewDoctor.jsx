@@ -291,6 +291,14 @@ if (doctorData) {
             }
           );
           break;
+        } else {
+          toast.error(
+            ` Error`,
+            {
+              id: toastId,
+              description: fieldErrors,
+            }
+          )
         }
       }
     }

@@ -35,6 +35,13 @@ class DoctorProfileSerializer(serializers.ModelSerializer):
             'is_available',
             'fees'
         ]
+    def validate(self, data):
+        # Check if a Doctor with the same medical_license and license_jurisdiction already exists
+        if Doctor.objects.filter(medical_license=data['medical_license'], license_jurisdiction=data['license_jurisdiction']).exists():
+            raise serializers.ValidationError({
+                'medical_license': ['A doctor with this medical license and jurisdiction already exists.']
+            })
+        return data
 
 class PatientProfileSerializer(serializers.ModelSerializer):
     class Meta:
