@@ -28,6 +28,17 @@ const createApiClient = (baseURL, contentType = "application/json") => {
   // === Request Interceptor ===
   client.interceptors.request.use(
     (config) => {
+      
+      // You can manually add the access token from cookies if needed
+      // const accessToken = document.cookie.replace(
+      //   /(?:(?:^|.*;\s*)access_token\s*=\s*([^;]*).*$)|^.*$/,
+      //   "$1"
+      // );
+      // if (accessToken) {
+      //   config.headers.Authorization = `Bearer ${accessToken}`;
+      // }
+
+
       return config;
     },
     (error) => Promise.reject(error)

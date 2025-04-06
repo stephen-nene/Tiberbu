@@ -15,6 +15,8 @@ import { getCurrentUser } from "../../services/requests/auth.js";
 import { Toaster } from "sonner";
 
 import { useUserStore } from "../../store/useUserStore.js"
+import ComingSoon from "../pages/utils/ComminSoon.jsx";
+import ComingSoon2 from "../pages/utils/ComminSoon copy.jsx";
 
 import "../../assets/styles/App.css";
 const App = React.forwardRef((props, ref) => {
@@ -85,7 +87,9 @@ const App = React.forwardRef((props, ref) => {
       {!isDashboard && <Navbar />}
 
       <div className="bg-white dark:bg-gray-950 dark:text-white   min-h-screen ">
-        <Routes>{routes.map(renderRoute)}</Routes>
+        <ComingSoon />
+        <ComingSoon2 />
+        {/* <Routes>{routes.map(renderRoute)}</Routes> */}
       </div>
       {/* <Footer /> */}
       {!isDashboard && <Footer />}
