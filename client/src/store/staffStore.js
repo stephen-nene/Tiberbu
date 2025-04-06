@@ -118,9 +118,20 @@ export const staffStore = create(
           try {
             const response = await apiClient1.post("/profiles/users/", data);
             if (response.status === 201) {
-              set((state) => ({
-                patients: [...state.patients, response.data],
-              }));
+              // if role is patient else save to doctor
+              if (response?.data?.role === "patient") {
+                set((state) => ({
+                  patients: [...state.patients, response.data],
+                }));
+                
+              }else if (response?.data?.role === "clinician") {
+                set((state) => ({
+                  doctors: [...state.doctors, response.data],
+                }));
+              }else {
+                toast.error("Failed to save patient");
+              }
+
               return response;
             }
           } catch (error) {
