@@ -21,6 +21,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectGroup,
+  SelectLabel,
 } from "@/components/shadcn/select";
 import { Checkbox } from "@/components/shadcn/checkbox";
 import {
@@ -32,13 +34,17 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/shadcn/form";
-import {Avatar, AvatarFallback, AvatarImage} from "@/components/shadcn/avatar";
-
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/shadcn/avatar";
+import { Badge } from "@/components/shadcn/badge";
 import { toast } from "sonner";
 
 import { staffStore } from "@/store/staffStore";
 
-import { PlusCircle, X,User } from "lucide-react";
+import { PlusCircle, X, User } from "lucide-react";
 
 // Define Zod schemas for form validation
 const addressSchema = z.object({
@@ -51,14 +57,6 @@ const addressSchema = z.object({
   state: z.string().optional(),
   zip: z.string().optional(),
   country: z.string().optional(),
-});
-
-const imageFileValidator = z.custom((val) => {
-  if (val instanceof File) {
-    const isValidImage = val.type.startsWith("image/");
-    return isValidImage || "File must be an image";
-  }
-  return "No file uploaded";
 });
 
 const basicInfoSchema = z.object({
@@ -124,6 +122,16 @@ const patientInfoSchema = z.object({
   primary_insurance: z.string().optional(),
 });
 
+const clinicianInfoSchema = z.object({
+  specializations: z.array(
+    z.object({
+      id: z.string(),
+      name: z.string(),
+      department: z.string(),
+    })
+  ),
+});
+
 const attachmentSchema = z.object({
   id: z.number(),
   file: z.any(),
@@ -136,6 +144,7 @@ const attachmentSchema = z.object({
 const formSchema = z.object({
   basicInfo: basicInfoSchema,
   patientInfo: patientInfoSchema,
+  clinicianInfo: clinicianInfoSchema,
   attachments: z.array(attachmentSchema).optional().default([]),
 });
 
@@ -155,6 +164,19 @@ export default function NewUser() {
 
   const savePatient = staffStore((state) => state.savePatient);
   const patchPatient = staffStore((state) => state.patchPatient);
+
+  const specializations = staffStore((state) => state.specializations);
+
+  const fetchSpecializations = staffStore(
+    (state) => state.fetchSpecializations
+  );
+  const loading = staffStore((state) => state.loading);
+
+  useEffect(() => {
+    if (specializations.length === 0) {
+      fetchSpecializations();
+    }
+  }, [fetchSpecializations]);
 
   // Initialize form with React Hook Form and Zod
   const form = useForm({
@@ -178,16 +200,28 @@ export default function NewUser() {
           country: "",
         },
       },
-      patientInfo: {
-        medical_history: "",
-        known_allergies: [],
-        permanent_medications: [],
-        emergency_contacts: [],
-        primary_insurance: "",
+      clinician_profile: {
+        specializations: [],
+        license_number: "",
+        medical_license: "",
+        license_jurisdiction: "",
+        certifications: [],
+        accepting_new_patients: true,
+        emergency_availability: true,
+        experience: 1,
+        bio: "",
+        rating: 2,
+        is_available: true,
+        fees: 1000,
       },
+
       attachments: [],
     },
   });
+  const selectedSpecializations =
+    form.watch("clinician_profile.specializations") || [];
+
+  console.log(selectedSpecializations);
 
   // Initialize form data from location state if it exists
   useEffect(() => {
@@ -240,14 +274,13 @@ export default function NewUser() {
   // });
 
   const handleAttachmentChange = (e) => {
-    
     const { name, value, type, checked, files } = e.target;
     setNewAttachment({
       ...newAttachment,
       [name]: type === "checkbox" ? checked : files ? files[0] : value,
     });
   };
-  
+
   // This will handle file input changes and set the preview
   const handleFileChange = (e) => {
     // const file = e.target.files?.[0];
@@ -293,6 +326,33 @@ export default function NewUser() {
     form.setValue(
       "attachments",
       currentAttachments.filter((attachment) => attachment.id !== id)
+    );
+  };
+
+  const handleSpecializationSelect = (selectedName) => {
+    const specializationObj = specializations.find(
+      (s) => s.name === selectedName
+    );
+    if (!specializationObj) return;
+
+  const currentSpecializations =
+    form.getValues("clinician_profile.specializations") || [];
+
+    // Prevent duplicates
+    if (!currentSpecializations.some((s) => s.id === specializationObj.id)) {
+      form.setValue("clinician_profile.specializations", [
+        ...currentSpecializations,
+        specializationObj,
+      ]);
+    }
+  };
+
+  const handleRemoveIndustry = (idToRemove) => {
+    const currentSpecializations =
+      form.getValues("clinician_profile.specializations") || [];
+    form.setValue(
+      "clinician_profile.specializations",
+      currentSpecializations.filter((s) => s.id !== idToRemove)
     );
   };
 
@@ -689,26 +749,6 @@ export default function NewUser() {
 
                     <FormField
                       control={form.control}
-                      name="basicInfo.full_name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>profile Image</FormLabel>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              type="file"
-                              onChange={handleAttachmentChange}
-                              // accet only images
-                              className=" hover: cursor-pointer"
-                              disabled={isDisabled}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
                       name="basicInfo.profile_image"
                       render={({ field }) => (
                         <FormItem>
@@ -767,7 +807,6 @@ export default function NewUser() {
                       Allowed formats: PDF, JPG, DCM
                     </p>
                   </div>
-
 
                   <div className="mt-6">
                     <h3 className="text-lg font-medium mb-2">Address</h3>
@@ -854,6 +893,98 @@ export default function NewUser() {
                   <div className="space-y-6">
                     <FormField
                       control={form.control}
+                      name="clinician_profile.specializations"
+                      render={({ field, fieldState }) => {
+                        const selectedSpecializations = field.value || [];
+                        return (
+                          <FormItem>
+                            <FormLabel>
+                              Specializations{" "}
+                              <span className="text-muted-foreground text-xs">
+                                (Select multiple)
+                              </span>
+                            </FormLabel>
+                            <FormControl>
+                              <div className="space-y-2">
+                                <div className="relative">
+                                  {/* <Building className="text-emerald-800 absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 z-10" /> */}
+                                  <Select
+                                    onValueChange={handleSpecializationSelect}
+                                    value="" // Reset after selection
+                                  >
+                                    <SelectTrigger
+                                      className={`${
+                                        fieldState.error ? "border-red-500" : ""
+                                      } `}
+                                    >
+                                      <SelectValue placeholder="Select industries" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectGroup>
+                                        <SelectLabel>
+                                          Specialization - department
+                                          <br />
+                                          Description
+                                        </SelectLabel>
+                                        {specializations.map((spec) => (
+                                          <SelectItem
+                                            key={spec.id}
+                                            value={spec.name}
+                                            // Disable already selected industries
+                                            disabled={selectedSpecializations.some(
+                                              (s) => spec.id === s.id
+                                            )}
+                                          >
+                                              {spec.name} - {spec.department}
+                                              <p className="text-xs font-extralight">
+                                                {spec.description}
+                                              </p>
+                                          </SelectItem>
+                                        ))}
+                                      </SelectGroup>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+
+                                {/* Selected Industries Tags */}
+                                {selectedSpecializations.length > 0 && (
+                                  <div className="flex flex-wrap gap-2 my-5">
+                                    {selectedSpecializations.map(
+                                      (specialization) => (
+                                        <Badge
+                                          key={specialization.id}
+                                          variant="secondary"
+                                          size="md"
+                                          shape="pill"
+                                          shadow="sm"
+                                          hoverable="true"
+                                          className="flex items-center"
+                                        >
+                                          {specialization.name}
+                                          <button
+                                            type="button"
+                                            onClick={() =>
+                                              handleRemoveIndustry(industry)
+                                            }
+                                            className="ml-2 cursor-pointer text-rose-600 hover:text-rose-800"
+                                          >
+                                            ×
+                                          </button>
+                                        </Badge>
+                                      )
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            </FormControl>
+                            <FormMessage className="text-red-500" />
+                          </FormItem>
+                        );
+                      }}
+                    />
+
+                    <FormField
+                      control={form.control}
                       name="patientInfo.medical_history"
                       render={({ field }) => (
                         <FormItem>
@@ -884,18 +1015,6 @@ export default function NewUser() {
 
                     <FormField
                       control={form.control}
-                      name="patientInfo.permanent_medications"
-                      render={({ field }) => (
-                        <PermanentMedicationsField
-                          field={field}
-                          form={form}
-                          isDisabled={isDisabled}
-                        />
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
                       name="patientInfo.emergency_contacts"
                       render={({ field }) => (
                         <EmergencyContactsField
@@ -903,25 +1022,6 @@ export default function NewUser() {
                           form={form}
                           isDisabled={isDisabled}
                         />
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="patientInfo.primary_insurance"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Primary Insurance</FormLabel>
-                          <FormControl>
-                            <Textarea
-                              {...field}
-                              placeholder="Insurance provider, policy number, etc."
-                              rows={3}
-                              disabled={isDisabled}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
                       )}
                     />
                   </div>
@@ -1253,135 +1353,6 @@ const KnownAllergiesField = ({ field, form, isDisabled }) => {
         </div>
       </FormControl>
       <FormDescription>Add details for each allergy</FormDescription>
-      <FormMessage />
-    </FormItem>
-  );
-};
-
-// Permanent Medications Field
-const PermanentMedicationsField = ({ field, form, isDisabled }) => {
-  const [newMedication, setNewMedication] = useState({
-    name: "",
-    dosage: "",
-    frequency: "",
-  });
-
-  const addMedication = () => {
-    if (newMedication.name && newMedication.dosage && newMedication.frequency) {
-      const updatedMedications = [...field.value, newMedication];
-      form.setValue("patientInfo.permanent_medications", updatedMedications);
-      setNewMedication({ name: "", dosage: "", frequency: "" });
-    }
-  };
-
-  const removeMedication = (index) => {
-    toast.error("Are you sure you want to remove this medication?", {
-      action: {
-        label: "Confirm",
-        onClick: () => {
-          const updatedMedications = field.value.filter((_, i) => i !== index);
-          form.setValue(
-            "patientInfo.permanent_medications",
-            updatedMedications
-          );
-        },
-      },
-      cancel: {
-        label: "Cancel",
-        onClick: () => toast.dismiss(),
-      },
-      duration: Infinity,
-    });
-    // const updatedMedications = field.value.filter((_, i) => i !== index);
-    // form.setValue("patientInfo.permanent_medications", updatedMedications);
-  };
-
-  return (
-    <FormItem>
-      <FormLabel>Permanent Medications</FormLabel>
-      <FormControl>
-        <div className="space-y-4">
-          {field.value && field.value.length > 0 ? (
-            <div className="space-y-2">
-              {field.value.map((medication, index) => (
-                <Card key={index} className="p-3 relative pr-10">
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="icon"
-                    className="absolute right-2 top-2 h-6 w-6"
-                    onClick={() => removeMedication(index)}
-                    disabled={isDisabled}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div>
-                      <p className="text-xs text-gray-500">Name</p>
-                      <p className="text-sm">{medication.name}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500">Dosage</p>
-                      <p className="text-sm">{medication.dosage}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500">Frequency</p>
-                      <p className="text-sm">{medication.frequency}</p>
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-gray-500 italic">No medications added</p>
-          )}
-
-          {!isDisabled && (
-            <div className="border border-gray-200 rounded-md p-3 bg-gray-50">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <Input
-                  placeholder="Medication Name"
-                  value={newMedication.name}
-                  onChange={(e) =>
-                    setNewMedication({ ...newMedication, name: e.target.value })
-                  }
-                />
-                <Input
-                  placeholder="Dosage"
-                  value={newMedication.dosage}
-                  onChange={(e) =>
-                    setNewMedication({
-                      ...newMedication,
-                      dosage: e.target.value,
-                    })
-                  }
-                />
-                <Input
-                  placeholder="Frequency"
-                  value={newMedication.frequency}
-                  onChange={(e) =>
-                    setNewMedication({
-                      ...newMedication,
-                      frequency: e.target.value,
-                    })
-                  }
-                />
-              </div>
-              <Button
-                type="button"
-                variant="info"
-                size="sm"
-                className="mt-3 w-full"
-                onClick={addMedication}
-              >
-                <PlusCircle className="h-4 w-4 mr-2" />
-                Add Medication
-              </Button>
-            </div>
-          )}
-        </div>
-      </FormControl>
-      <FormDescription>Add details for each medication</FormDescription>
       <FormMessage />
     </FormItem>
   );
