@@ -175,7 +175,7 @@ export default function DoctorsPage() {
                       ))
                     ) : (
                       <Badge variant="outline" className="bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-300 border-blue-200 dark:border-blue-800">
-                        General Practitioner
+                        General
                       </Badge>
                     )}
                     

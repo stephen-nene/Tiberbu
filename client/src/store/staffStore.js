@@ -20,19 +20,19 @@ export const staffStore = create(
               params: filters,
             });
 
-
-
             // Log the response for debugging
             // console.log("Response:", response);
 
-            if (response.status === 200 ) {
+            if (response.status === 200) {
               if (filters.role === "clinician") {
                 // console.log("first")
                 set({ doctors: response.data });
               } else if (filters.role === "patient") {
-                      set({ patients: response.data });
-                    }
-              toast.success(`${filters.role} fetched successfully!`, { id: toastId });
+                set({ patients: response.data });
+              }
+              toast.success(`${filters.role} fetched successfully!`, {
+                id: toastId,
+              });
             } else {
               toast.error(
                 `Failed to fetch ${filters.role}. Status: ${response.status}`,
@@ -92,16 +92,15 @@ export const staffStore = create(
             // Log the response for debugging
             console.log("Response:", response);
             if (response.status === 201) {
-       set((state) => ({
-         specializations: [...state.specializations, response.data],
-       }));
-              
+              set((state) => ({
+                specializations: [...state.specializations, response.data],
+              }));
+
               toast.success("Specialization saved successfully!", {
                 id: toastId,
               });
               return response.status;
             }
-
           } catch (error) {
             console.error("Error saving specialization:", error);
             toast.error("Failed to save specialization", { id: toastId });
@@ -113,42 +112,53 @@ export const staffStore = create(
 
         // save doctor and add to the list
 
-
         // save atient and add to the list
         savePatient: async (data) => {
           set({ loading: true });
           try {
             const response = await apiClient1.post("/profiles/users/", data);
-
-            // Log the response for debugging
             if (response.status === 201) {
               set((state) => ({
                 patients: [...state.patients, response.data],
               }));
-              // toast.success("Patient saved successfully!", {
-              //   id: toastId,
-              // });
               return response;
             }
           } catch (error) {
-            console.error("Error saving patient:", error?.response);
-            // toast.error("Failed to save patient", { id: toastId });
             throw error;
+          } finally {
+            set({ loading: false });
           }
-          finally {
-            // toast.dismiss(toastId);
+        },
+
+        // update doctor and add to the list
+        patchPatient: async (data) => {
+          set({ loading: true });
+          try {
+            const response = await apiClient1.patch(
+              `/profiles/users/${data.id}/`,
+              data
+            );
+            if (response.status === 200) {
+              set((state) => ({
+                patients: state.patients.map((patient) =>
+                  patient.id === data.id ? response.data : patient
+                ),
+              }))
+              return response;
+            }
+          } catch (error) {
+            throw error;
+          } finally {
             set({ loading: false });
           }
         }
-
-
       }),
       {
         name: "staff-storage",
         partialize: (state) => ({
-        //   doctors: state.doctors,
+          //   doctors: state.doctors,
           // specializations: state.specializations,
-        //   loading: state.loading,
+          //   loading: state.loading,
         }),
       }
     )

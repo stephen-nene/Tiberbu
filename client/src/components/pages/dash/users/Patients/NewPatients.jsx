@@ -37,6 +37,8 @@ import { toast } from "sonner";
 
 import { staffStore } from "@/store/staffStore";
 
+import { PlusCircle, X } from "lucide-react";
+
 // Define Zod schemas for form validation
 const addressSchema = z.object({
   street: z.string().min(2, "Street is required"),
@@ -71,9 +73,39 @@ const basicInfoSchema = z.object({
 
 const patientInfoSchema = z.object({
   medical_history: z.string().optional(),
-  known_allergies: z.array(z.string()).optional().default([]),
-  permanent_medications: z.array(z.string()).optional().default([]),
-  emergency_contacts: z.array(z.string()).optional().default([]),
+  known_allergies: z
+    .array(
+      z.object({
+        substance: z.string(),
+        reaction: z.string(),
+        severity: z.enum(["mild", "moderate", "severe"]).optional(),
+      })
+    )
+    .optional()
+    .default([]),
+
+  permanent_medications: z
+    .array(
+      z.object({
+        name: z.string(),
+        dosage: z.string(),
+        frequency: z.string(),
+      })
+    )
+    .optional()
+    .default([]),
+
+  emergency_contacts: z
+    .array(
+      z.object({
+        name: z.string(),
+        relationship: z.string(),
+        phone: z.string(),
+      })
+    )
+    .optional()
+    .default([]),
+
   primary_insurance: z.string().optional(),
 });
 
@@ -105,9 +137,8 @@ export default function PatientForm() {
     is_sensitive: false,
   });
 
-
   const savePatient = staffStore((state) => state.savePatient);
-
+  const patchPatient = staffStore((state) => state.patchPatient);
 
   // Initialize form with React Hook Form and Zod
   const form = useForm({
@@ -174,17 +205,23 @@ export default function PatientForm() {
             },
           },
           patientInfo: {
-            medical_history: patientData.medical_history || "",
-            known_allergies: patientData.known_allergies || [],
-            permanent_medications: patientData.permanent_medications || [],
-            emergency_contacts: patientData.emergency_contacts || [],
-            primary_insurance: patientData.primary_insurance || "",
+            medical_history: patientData?.profile?.medical_history || "",
+            known_allergies: patientData?.profile?.known_allergies || [],
+            permanent_medications:
+              patientData?.profile?.permanent_medications || [],
+            emergency_contacts: patientData?.profile?.emergency_contacts || [],
+            primary_insurance: patientData?.profile?.primary_insurance || "",
           },
           attachments: patientData.attachments || [],
         });
       }
     }
   }, [location.state, form]);
+
+  // const { fields, append, remove } = useFieldArray({
+  //   control,
+  //   name: "patientInfo.permanent_medications",
+  // });
 
   const handleAttachmentChange = (e) => {
     const { name, value, type, checked, files } = e.target;
@@ -220,62 +257,112 @@ export default function PatientForm() {
     );
   };
 
-const processErrors = (errors, toastId) => {
-  // Iterate over the error object and extract the first error message for each field
-  for (const field in errors) {
-    if (errors.hasOwnProperty(field)) {
-      const fieldErrors = errors[field];
-      if (Array.isArray(fieldErrors) && fieldErrors.length > 0) {
-        // Dismiss the loading toast as we're showing the error now
-        toast.dismiss(toastId);
+  const processErrors = (errors, toastId) => {
+    // Iterate over the error object and extract the first error message for each field
+    for (const field in errors) {
+      if (errors.hasOwnProperty(field)) {
+        const fieldErrors = errors[field];
+        if (Array.isArray(fieldErrors) && fieldErrors.length > 0) {
+          // // Dismiss the loading toast as we're showing the error now
+          // toast.dismiss(toastId);
 
-        // Use the field name as the toast title and the first error message as the description
-        toast.error(`${field.charAt(0).toUpperCase() + field.slice(1)} Error`, {
-          description: fieldErrors[0], // Show the first error for the field
-        });
-        break; // Only show the first error for any field
+          // Use the field name as the toast title and the first error message as the description
+          toast.error(
+            `${field.charAt(0).toUpperCase() + field.slice(1)} Error`,
+            {
+              id: toastId,
+              description: fieldErrors[0], // Show the first error for the field
+            }
+          );
+          break; // Only show the first error for any field
+        }
       }
     }
-  }
-};
-
-// Submit handler
-const onSubmit = async (data) => {
-  const data2 = {
-    ...data.basicInfo,
-    password: "dummypassword", // You can remove this for actual submissions
-
-    attachments: data.attachments,
-    patient_profile: data.patientInfo,
   };
-  console.log("✅ Form submitted:", data2);
 
-  // Show a loading toast with an ID
-  const toastId = toast.loading("Saving patient...");
+  // Submit handler
+  const onSubmit = async (data) => {
 
-  try {
-    // Simulate API call (replace with your actual API request)
-    const response = await savePatient(data2);
+        const data2 = {
+          ...data.basicInfo,
+          id: location.state?.patientData?.id || '',
+          password: "dummypassword", // You can remove this for actual submissions
 
-    // Dismiss the loading toast since the operation is complete
-    toast.dismiss(toastId);
+          attachments: data.attachments,
+          patient_profile: data.patientInfo,
+        };
+        console.log("✅ Form submitted:", data2);
 
-    console.log("Response:", response);
-    navigate('/dashboard/patients');
-
-    // Show a success toast (you can customize the message as needed)
-    toast.success("Patient saved successfully!");
-  } catch (error) {
-    if (error?.response?.data) {
-      // Process the errors and display them as toast notifications
-      processErrors(error?.response?.data, toastId);
+    if (data2.id || mode === "edit") {
+      // Update existing patient
+      await updatePatient(data2);
+    } else {
+      // Create new patient
+      await createPatient(data2);
     }
-    console.error("Error saving patient:", error?.response);
-  }
-};
-  
-  const savePatient2 = async (data) => {
+  };
 
+  const updatePatient = async (data) => {
+    // if user.id then this will be used instaed since the user is already created
+    const toastId = toast.loading("updating patient...");
+     try {
+       // Simulate API call (replace with your actual API request)
+       const response = await patchPatient(data);
+
+       // // Dismiss the loading toast since the operation is complete
+       // toast.dismiss(toastId);
+
+       console.log("Response:", response);
+       navigate("/dashboard/patients");
+
+       // Show a success toast (you can customize the message as needed)
+       toast.success("Patient saved successfully!", {
+         id: toastId,
+       });
+
+     } catch (error) {
+       if (error?.response?.data) {
+         // Process the errors and display them as toast notifications
+         processErrors(error?.response?.data, toastId);
+       }
+       console.error("Error saving patient:", error?.response);
+     } finally {
+      //  toast.dismiss(toastId);
+     }
+  };
+
+  const createPatient = async (data) => {
+
+    // Show a loading toast with an ID
+    const toastId = toast.loading("Saving patient...");
+
+    try {
+      // Simulate API call (replace with your actual API request)
+      const response = await savePatient(data);
+
+      // // Dismiss the loading toast since the operation is complete
+      // toast.dismiss(toastId);
+
+      console.log("Response:", response);
+      navigate("/dashboard/patients");
+
+      // Show a success toast (you can customize the message as needed)
+      toast.success("Patient saved successfully!", {
+        id: toastId,
+      });
+    } catch (error) {
+      if (error?.response?.data) {
+        // Process the errors and display them as toast notifications
+        processErrors(error?.response?.data, toastId);
+      }
+      console.error("Error saving patient:", error?.response);
+    } finally {
+      // Dismiss the loading toast in case of an error
+      // toast.dismiss(toastId);
+    }
+  };
+
+  const savePatient2 = async (data) => {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         reject({
@@ -397,14 +484,12 @@ const onSubmit = async (data) => {
             <TabsList className="grid grid-cols-3 mb-4">
               <TabsTrigger value="basic">Basic Information</TabsTrigger>
               {/* if atimetdata is null don't show */}
-              {location?.state?.patientData?.id && (
+              <TabsTrigger value="patient">Patient Information</TabsTrigger>
+              <TabsTrigger value="attachments">Medical Attachments</TabsTrigger>
+              {/* {location?.state?.patientData?.id && (
                 <>
-                  <TabsTrigger value="patient">Patient Information</TabsTrigger>
-                  <TabsTrigger value="attachments">
-                    Medical Attachments
-                  </TabsTrigger>
                 </>
-              )}
+              )} */}
             </TabsList>
 
             {/* Basic Information Tab */}
@@ -686,27 +771,11 @@ const onSubmit = async (data) => {
                       control={form.control}
                       name="patientInfo.known_allergies"
                       render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Known Allergies</FormLabel>
-                          <FormControl>
-                            <Textarea
-                              value={field.value.join("\n")}
-                              onChange={(e) =>
-                                handleArrayFieldChange(
-                                  "patientInfo.known_allergies",
-                                  e.target.value
-                                )
-                              }
-                              placeholder="List allergies, one per line"
-                              rows={3}
-                              disabled={isDisabled}
-                            />
-                          </FormControl>
-                          <FormDescription>
-                            Enter each allergy on a new line
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
+                        <KnownAllergiesField
+                          field={field}
+                          form={form}
+                          isDisabled={isDisabled}
+                        />
                       )}
                     />
 
@@ -714,27 +783,11 @@ const onSubmit = async (data) => {
                       control={form.control}
                       name="patientInfo.permanent_medications"
                       render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Permanent Medications</FormLabel>
-                          <FormControl>
-                            <Textarea
-                              value={field.value.join("\n")}
-                              onChange={(e) =>
-                                handleArrayFieldChange(
-                                  "patientInfo.permanent_medications",
-                                  e.target.value
-                                )
-                              }
-                              placeholder="List medications, one per line"
-                              rows={3}
-                              disabled={isDisabled}
-                            />
-                          </FormControl>
-                          <FormDescription>
-                            Enter each medication on a new line
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
+                        <PermanentMedicationsField
+                          field={field}
+                          form={form}
+                          isDisabled={isDisabled}
+                        />
                       )}
                     />
 
@@ -742,28 +795,11 @@ const onSubmit = async (data) => {
                       control={form.control}
                       name="patientInfo.emergency_contacts"
                       render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Emergency Contacts</FormLabel>
-                          <FormControl>
-                            <Textarea
-                              value={field.value.join("\n")}
-                              onChange={(e) =>
-                                handleArrayFieldChange(
-                                  "patientInfo.emergency_contacts",
-                                  e.target.value
-                                )
-                              }
-                              placeholder="Name, Relationship, Phone Number (one contact per line)"
-                              rows={3}
-                              disabled={isDisabled}
-                            />
-                          </FormControl>
-                          <FormDescription>
-                            Format: Name, Relationship, Phone Number (one
-                            contact per line)
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
+                        <EmergencyContactsField
+                          field={field}
+                          form={form}
+                          isDisabled={isDisabled}
+                        />
                       )}
                     />
 
@@ -793,143 +829,154 @@ const onSubmit = async (data) => {
             {/* Medical Attachments Tab */}
             <TabsContent value="attachments">
               <Card>
-                <CardContent className="pt-6">
-                  <div className="space-y-6">
-                    {!isDisabled && (
-                      <div className="border p-4 rounded-md">
-                        <h3 className="text-lg font-medium mb-4">
-                          Add New Attachment
-                        </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="file">File</Label>
-                            <Input
-                              id="file"
-                              name="file"
-                              type="file"
-                              onChange={handleAttachmentChange}
-                              accept=".pdf,.jpg,.dcm"
-                            />
-                            <p className="text-sm text-gray-500">
-                              Allowed formats: PDF, JPG, DCM
-                            </p>
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="document_type">Document Type</Label>
-                            <Select
-                              onValueChange={(value) =>
-                                setNewAttachment({
-                                  ...newAttachment,
-                                  document_type: value,
-                                })
-                              }
-                              value={newAttachment.document_type}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select document type" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {documentTypeOptions.map((option) => (
-                                  <SelectItem key={option} value={option}>
-                                    {option.replace("_", " ")}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="caption">Caption</Label>
-                            <Input
-                              id="caption"
-                              name="caption"
-                              value={newAttachment.caption}
-                              onChange={handleAttachmentChange}
-                            />
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="description">Description</Label>
-                            <Input
-                              id="description"
-                              name="description"
-                              value={newAttachment.description}
-                              onChange={handleAttachmentChange}
-                            />
-                          </div>
-
-                          <div className="flex items-center space-x-2">
-                            <Checkbox
-                              id="is_sensitive"
-                              name="is_sensitive"
-                              checked={newAttachment.is_sensitive}
-                              onCheckedChange={(checked) =>
-                                setNewAttachment({
-                                  ...newAttachment,
-                                  is_sensitive: checked,
-                                })
-                              }
-                            />
-                            <Label htmlFor="is_sensitive">
-                              Sensitive Document
-                            </Label>
-                          </div>
-
-                          <div className="flex items-end">
-                            <Button type="button" onClick={addAttachment}>
-                              Add Attachment
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    <div>
-                      <h3 className="text-lg font-medium mb-4">
-                        Uploaded Attachments
-                      </h3>
-                      {!form.getValues("attachments") ||
-                      form.getValues("attachments").length === 0 ? (
-                        <p className="text-gray-500">
-                          No attachments uploaded yet.
-                        </p>
-                      ) : (
-                        <div className="space-y-4">
-                          {form.getValues("attachments").map((attachment) => (
-                            <div
-                              key={attachment.id}
-                              className="flex items-center justify-between border p-3 rounded-md"
-                            >
-                              <div>
-                                <p className="font-medium">
-                                  {attachment.caption || "Unnamed Document"}
-                                </p>
-                                <p className="text-sm text-gray-600">
-                                  {attachment.document_type.replace("_", " ")}
-                                </p>
-                                <p className="text-sm">
-                                  {attachment.file?.name}
-                                </p>
-                              </div>
-                              {!isDisabled && (
-                                <Button
-                                  variant="destructive"
-                                  size="sm"
-                                  onClick={() =>
-                                    removeAttachment(attachment.id)
-                                  }
-                                >
-                                  Remove
-                                </Button>
-                              )}
+                {location?.state?.patientData?.id ? (
+                  <CardContent className="pt-6">
+                    <div className="space-y-6">
+                      {!isDisabled && (
+                        <div className="border p-4 rounded-md">
+                          <h3 className="text-lg font-medium mb-4">
+                            Add New Attachment
+                          </h3>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="file">File</Label>
+                              <Input
+                                id="file"
+                                name="file"
+                                type="file"
+                                onChange={handleAttachmentChange}
+                                accept=".pdf,.jpg,.dcm"
+                              />
+                              <p className="text-sm text-gray-500">
+                                Allowed formats: PDF, JPG, DCM
+                              </p>
                             </div>
-                          ))}
+
+                            <div className="space-y-2">
+                              <Label htmlFor="document_type">
+                                Document Type
+                              </Label>
+                              <Select
+                                onValueChange={(value) =>
+                                  setNewAttachment({
+                                    ...newAttachment,
+                                    document_type: value,
+                                  })
+                                }
+                                value={newAttachment.document_type}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select document type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {documentTypeOptions.map((option) => (
+                                    <SelectItem key={option} value={option}>
+                                      {option.replace("_", " ")}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label htmlFor="caption">Caption</Label>
+                              <Input
+                                id="caption"
+                                name="caption"
+                                value={newAttachment.caption}
+                                onChange={handleAttachmentChange}
+                              />
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label htmlFor="description">Description</Label>
+                              <Input
+                                id="description"
+                                name="description"
+                                value={newAttachment.description}
+                                onChange={handleAttachmentChange}
+                              />
+                            </div>
+
+                            <div className="flex items-center space-x-2">
+                              <Checkbox
+                                id="is_sensitive"
+                                name="is_sensitive"
+                                checked={newAttachment.is_sensitive}
+                                onCheckedChange={(checked) =>
+                                  setNewAttachment({
+                                    ...newAttachment,
+                                    is_sensitive: checked,
+                                  })
+                                }
+                              />
+                              <Label htmlFor="is_sensitive">
+                                Sensitive Document
+                              </Label>
+                            </div>
+
+                            <div className="flex items-end">
+                              <Button type="button" onClick={addAttachment}>
+                                Add Attachment
+                              </Button>
+                            </div>
+                          </div>
                         </div>
                       )}
+
+                      <div>
+                        <h3 className="text-lg font-medium mb-4">
+                          Uploaded Attachments
+                        </h3>
+                        {!form.getValues("attachments") ||
+                        form.getValues("attachments").length === 0 ? (
+                          <p className="text-gray-500">
+                            No attachments uploaded yet.
+                          </p>
+                        ) : (
+                          <div className="space-y-4">
+                            {form.getValues("attachments").map((attachment) => (
+                              <div
+                                key={attachment.id}
+                                className="flex items-center justify-between border p-3 rounded-md"
+                              >
+                                <div>
+                                  <p className="font-medium">
+                                    {attachment.caption || "Unnamed Document"}
+                                  </p>
+                                  <p className="text-sm text-gray-600">
+                                    {attachment.document_type.replace("_", " ")}
+                                  </p>
+                                  <p className="text-sm">
+                                    {attachment.file?.name}
+                                  </p>
+                                </div>
+                                {!isDisabled && (
+                                  <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    onClick={() =>
+                                      removeAttachment(attachment.id)
+                                    }
+                                  >
+                                    Remove
+                                  </Button>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
+                  </CardContent>
+                ) : (
+                  <div className="flex p-6">
+                    {/* message saying cannot add attachments while creating patient */}
+                    <p className="text-gray-500">
+                      Cannot add attachments while creating patient
+                    </p>
                   </div>
-                </CardContent>
+                )}
               </Card>
             </TabsContent>
           </Tabs>
@@ -966,3 +1013,384 @@ const onSubmit = async (data) => {
     </div>
   );
 }
+
+// Known Allergies Field
+const KnownAllergiesField = ({ field, form, isDisabled }) => {
+  const [newAllergy, setNewAllergy] = useState({
+    substance: "",
+    reaction: "",
+    severity: "mild",
+  });
+
+  const addAllergy = () => {
+    if (newAllergy.substance && newAllergy.reaction) {
+      const updatedAllergies = [...field.value, newAllergy];
+      form.setValue("patientInfo.known_allergies", updatedAllergies);
+      setNewAllergy({ substance: "", reaction: "", severity: "mild" });
+    } else {
+      toast.error("Please fill in all fields before adding an allergy.");
+    }
+  };
+
+  const removeAllergy = (index) => {
+    // toast.promise before removing thats ask a user to confimr
+    toast.error("Are you sure you want to delete this allergy?", {
+      action: {
+        label: "Confirm",
+        onClick: () => {
+          const updatedAllergies = field.value.filter((_, i) => i !== index);
+          form.setValue("patientInfo.known_allergies", updatedAllergies);
+          toast.success("Allergy deleted successfully");
+          // logOut(); // Your logout function
+        },
+      },
+      cancel: {
+        label: "Cancel",
+        onClick: () => toast.dismiss(),
+      },
+      duration: Infinity, // Stays until user acts
+    });
+  };
+
+  return (
+    <FormItem>
+      <FormLabel>Known Allergies</FormLabel>
+      <FormControl>
+        <div className="space-y-4">
+          {field.value && field.value.length > 0 ? (
+            <div className="space-y-4">
+              {field.value.map((allergy, index) => (
+                <Card
+                  key={index}
+                  className="relative p-4 border border-gray-200 shadow-sm"
+                >
+                  {/* Delete Button in top right corner */}
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="icon"
+                    className="absolute right-3 top-3 h-6 w-6 te0"
+                    onClick={() => removeAllergy(index)}
+                    disabled={isDisabled}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+
+                  {/* Allergy Info Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div>
+                      <p className="text-xs text-muted-foreground">Substance</p>
+                      <p className="text-sm font-medium">{allergy.substance}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Reaction</p>
+                      <p className="text-sm font-medium">{allergy.reaction}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Severity</p>
+                      <p className="text-sm font-medium capitalize">
+                        {allergy.severity || "mild"}
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground italic">
+              No allergies added
+            </p>
+          )}
+
+          {!isDisabled && (
+            <div className="border border-gray-200 rounded-md p-3 bg-gray-50">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <Input
+                  placeholder="Substance"
+                  value={newAllergy.substance}
+                  onChange={(e) =>
+                    setNewAllergy({ ...newAllergy, substance: e.target.value })
+                  }
+                />
+                <Input
+                  placeholder="Reaction"
+                  value={newAllergy.reaction}
+                  onChange={(e) =>
+                    setNewAllergy({ ...newAllergy, reaction: e.target.value })
+                  }
+                />
+                <Select
+                  value={newAllergy.severity}
+                  onValueChange={(value) =>
+                    setNewAllergy({ ...newAllergy, severity: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Severity" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="mild">Mild</SelectItem>
+                    <SelectItem value="moderate">Moderate</SelectItem>
+                    <SelectItem value="severe">Severe</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="mt-3 w-full"
+                onClick={addAllergy}
+              >
+                <PlusCircle className="h-4 w-4 mr-2" />
+                Add Allergy
+              </Button>
+            </div>
+          )}
+        </div>
+      </FormControl>
+      <FormDescription>Add details for each allergy</FormDescription>
+      <FormMessage />
+    </FormItem>
+  );
+};
+
+// Permanent Medications Field
+const PermanentMedicationsField = ({ field, form, isDisabled }) => {
+  const [newMedication, setNewMedication] = useState({
+    name: "",
+    dosage: "",
+    frequency: "",
+  });
+
+  const addMedication = () => {
+    if (newMedication.name && newMedication.dosage && newMedication.frequency) {
+      const updatedMedications = [...field.value, newMedication];
+      form.setValue("patientInfo.permanent_medications", updatedMedications);
+      setNewMedication({ name: "", dosage: "", frequency: "" });
+    }
+  };
+
+  const removeMedication = (index) => {
+    toast.error("Are you sure you want to remove this medication?", {
+      action: {
+        label: "Confirm",
+        onClick: () => {
+          const updatedMedications = field.value.filter((_, i) => i !== index);
+          form.setValue(
+            "patientInfo.permanent_medications",
+            updatedMedications
+          );
+        },
+      },
+      cancel: {
+        label: "Cancel",
+        onClick: () => toast.dismiss(),
+      },
+      duration: Infinity,
+    });
+    // const updatedMedications = field.value.filter((_, i) => i !== index);
+    // form.setValue("patientInfo.permanent_medications", updatedMedications);
+  };
+
+  return (
+    <FormItem>
+      <FormLabel>Permanent Medications</FormLabel>
+      <FormControl>
+        <div className="space-y-4">
+          {field.value && field.value.length > 0 ? (
+            <div className="space-y-2">
+              {field.value.map((medication, index) => (
+                <Card key={index} className="p-3 relative pr-10">
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="icon"
+                    className="absolute right-2 top-2 h-6 w-6"
+                    onClick={() => removeMedication(index)}
+                    disabled={isDisabled}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div>
+                      <p className="text-xs text-gray-500">Name</p>
+                      <p className="text-sm">{medication.name}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Dosage</p>
+                      <p className="text-sm">{medication.dosage}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Frequency</p>
+                      <p className="text-sm">{medication.frequency}</p>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-500 italic">No medications added</p>
+          )}
+
+          {!isDisabled && (
+            <div className="border border-gray-200 rounded-md p-3 bg-gray-50">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <Input
+                  placeholder="Medication Name"
+                  value={newMedication.name}
+                  onChange={(e) =>
+                    setNewMedication({ ...newMedication, name: e.target.value })
+                  }
+                />
+                <Input
+                  placeholder="Dosage"
+                  value={newMedication.dosage}
+                  onChange={(e) =>
+                    setNewMedication({
+                      ...newMedication,
+                      dosage: e.target.value,
+                    })
+                  }
+                />
+                <Input
+                  placeholder="Frequency"
+                  value={newMedication.frequency}
+                  onChange={(e) =>
+                    setNewMedication({
+                      ...newMedication,
+                      frequency: e.target.value,
+                    })
+                  }
+                />
+              </div>
+              <Button
+                type="button"
+                variant="info"
+                size="sm"
+                className="mt-3 w-full"
+                onClick={addMedication}
+              >
+                <PlusCircle className="h-4 w-4 mr-2" />
+                Add Medication
+              </Button>
+            </div>
+          )}
+        </div>
+      </FormControl>
+      <FormDescription>Add details for each medication</FormDescription>
+      <FormMessage />
+    </FormItem>
+  );
+};
+
+// Emergency Contacts Field
+const EmergencyContactsField = ({ field, form, isDisabled }) => {
+  const [newContact, setNewContact] = useState({
+    name: "",
+    relationship: "",
+    phone: "",
+  });
+
+  const addContact = () => {
+    if (newContact.name && newContact.relationship && newContact.phone) {
+      const updatedContacts = [...field.value, newContact];
+      form.setValue("patientInfo.emergency_contacts", updatedContacts);
+      setNewContact({ name: "", relationship: "", phone: "" });
+    }
+  };
+
+  const removeContact = (index) => {
+    const updatedContacts = field.value.filter((_, i) => i !== index);
+    form.setValue("patientInfo.emergency_contacts", updatedContacts);
+  };
+
+  return (
+    <FormItem>
+      <FormLabel>Emergency Contacts</FormLabel>
+      <FormControl>
+        <div className="space-y-4">
+          {field.value && field.value.length > 0 ? (
+            <div className="space-y-2">
+              {field.value.map((contact, index) => (
+                <Card key={index} className="p-3 relative pr-10">
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="icon"
+                    className="absolute right-2 top-2 h-6 w-6"
+                    onClick={() => removeContact(index)}
+                    disabled={isDisabled}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div>
+                      <p className="text-xs text-gray-500">Name</p>
+                      <p className="text-sm">{contact.name}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Relationship</p>
+                      <p className="text-sm">{contact.relationship}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Phone</p>
+                      <p className="text-sm">{contact.phone}</p>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-500 italic">
+              No emergency contacts added
+            </p>
+          )}
+
+          {!isDisabled && (
+            <div className="border border-gray-200 rounded-md p-3 bg-gray-50">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <Input
+                  placeholder="Contact Name"
+                  value={newContact.name}
+                  onChange={(e) =>
+                    setNewContact({ ...newContact, name: e.target.value })
+                  }
+                />
+                <Input
+                  placeholder="Relationship"
+                  value={newContact.relationship}
+                  onChange={(e) =>
+                    setNewContact({
+                      ...newContact,
+                      relationship: e.target.value,
+                    })
+                  }
+                />
+                <Input
+                  placeholder="Phone Number"
+                  value={newContact.phone}
+                  onChange={(e) =>
+                    setNewContact({ ...newContact, phone: e.target.value })
+                  }
+                />
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="mt-3 w-full"
+                onClick={addContact}
+              >
+                <PlusCircle className="h-4 w-4 mr-2" />
+                Add Contact
+              </Button>
+            </div>
+          )}
+        </div>
+      </FormControl>
+      <FormDescription>Add emergency contact details</FormDescription>
+      <FormMessage />
+    </FormItem>
+  );
+};
