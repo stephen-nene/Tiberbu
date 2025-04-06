@@ -157,7 +157,7 @@ class Doctor(TimeStampedModel):
 
 class Patient(TimeStampedModel):
     user = models.OneToOneField(HealthcareUser, on_delete=models.CASCADE, primary_key=True, related_name='patient_profile')
-    gender = models.CharField(max_length=20, choices=Gender.choices, null=True, blank=True)
+    # gender = models.CharField(max_length=20, choices=Gender.choices, null=True, blank=True)
 
     medical_history = models.TextField(null=True, blank=True)
     known_allergies = models.JSONField(default=list, help_text="List of known allergies and reactions")

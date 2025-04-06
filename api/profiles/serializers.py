@@ -29,7 +29,7 @@ class PatientProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Patient
         fields = [
-            'gender',
+            
             'medical_history',
             'known_allergies',
             'permanent_medications',
@@ -57,7 +57,7 @@ class PatientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Patient
         fields = [
-            'user', 'gender', 'medical_history', 'known_allergies',
+            'user',  'medical_history', 'known_allergies',
             'permanent_medications', 'emergency_contacts', 'primary_insurance'
         ]
 
@@ -94,6 +94,11 @@ class UserSerializer(serializers.ModelSerializer):
         elif obj.role == UserRole.PATIENT and hasattr(obj, 'patient_profile'):
             return PatientProfileSerializer(obj.patient_profile).data
         return None
+    def update_nested(instance, data: dict):
+        for attr, value in data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
 
     def create(self, validated_data):
         try:
@@ -116,8 +121,29 @@ class UserSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"error": "Failed to create user", "details": str(e)})
 
     def update(self, instance, validated_data):
+        # Handle password
         if 'password' in validated_data:
             validated_data['password'] = make_password(validated_data['password'])
+
+        # Pop nested data
+        patient_data = validated_data.pop("patient_profile", None)
+        doctor_data = validated_data.pop("clinician_profile", None)
+
+        # Update nested patient profile if present
+        if patient_data and instance.role == UserRole.PATIENT and hasattr(instance, 'patient_profile'):
+            patient_instance = instance.patient_profile
+            for attr, value in patient_data.items():
+                setattr(patient_instance, attr, value)
+            patient_instance.save()
+
+        # Update nested clinician profile if present
+        if doctor_data and instance.role == UserRole.CLINICIAN and hasattr(instance, 'clinician_profile'):
+            doctor_instance = instance.clinician_profile
+            for attr, value in doctor_data.items():
+                setattr(doctor_instance, attr, value)
+            doctor_instance.save()
+
+        # Continue updating user
         return super().update(instance, validated_data)
 
     def validate_phone_number(self, value):

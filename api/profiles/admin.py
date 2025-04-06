@@ -35,11 +35,11 @@ class DoctorAdmin(admin.ModelAdmin):
 # Patient Admin
 @admin.register(Patient)
 class PatientAdmin(admin.ModelAdmin):
-    list_display = ('user', 'gender')
+    list_display = ('user', 'user__gender')
     search_fields = ('user__username', 'user__email')
     ordering = ('user__username',)
     fieldsets = (
-        ('Patient Info', {'fields': ('user', 'gender', 'medical_history')}),
+        ('Patient Info', {'fields': ('user', 'user__gender', 'medical_history')}),
         ('Health Data', {'fields': ('known_allergies', 'permanent_medications', 'emergency_contacts', 'primary_insurance')}),
     )
 
