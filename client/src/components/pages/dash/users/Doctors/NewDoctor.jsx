@@ -309,7 +309,23 @@ if (doctorData) {
       attachments: data.attachments,
       clinician_profile: data.clinician_profile,
     };
+
     console.log("✅ Form submitted:", data2);
+  const formData = new FormData();
+
+  // Append the image file (ensure it's the actual File object)
+  if (
+    data.basicInfo.profile_image &&
+    data.basicInfo.profile_image instanceof File
+  ) {
+    formData.append("profile_image", data.basicInfo.profile_image);
+  }
+
+  // Append other structured data (convert complex objects to JSON strings)
+  formData.append("basicInfo", JSON.stringify(data.basicInfo)); // All the basic info
+  formData.append("clinician_profile", JSON.stringify(data.clinician_profile)); // The clinician profile
+
+
 
     if (data2.id || mode === "edit") {
       // Update existing patient
@@ -356,8 +372,8 @@ if (doctorData) {
     } catch (error) {
       if (error?.response?.data) {
         processErrors(error?.response?.data, toastId);
+        console.error("Error saving patient:", error?.response?.data);
       }
-      console.error("Error saving patient:", error?.response);
     } 
   };
 

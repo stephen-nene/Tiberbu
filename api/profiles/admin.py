@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import gettext_lazy as _
-from .models import HealthcareUser, Doctor, Patient, ClinicalImage
+from .models import HealthcareUser, Doctor, Patient
 
 
 # Customizing UserAdmin for HealthcareUser
@@ -45,13 +45,13 @@ class PatientAdmin(admin.ModelAdmin):
 
 
 # Clinical Image Admin
-@admin.register(ClinicalImage)
-class ClinicalImageAdmin(admin.ModelAdmin):
-    list_display = ('content_object', 'caption', 'sensitivity_level', 'image')
-    search_fields = ('caption', 'content_object__username')
-    list_filter = ('sensitivity_level',)
-    ordering = ('-id',)
-    fieldsets = (
-        ('Image Details', {'fields': ('content_object', 'image', 'caption', 'clinical_context')}),
-        ('Security', {'fields': ('sensitivity_level', 'access_log')}),
-    )
+# @admin.register(ClinicalImage)
+# class ClinicalImageAdmin(admin.ModelAdmin):
+#     list_display = ('content_object', 'caption', 'sensitivity_level', 'image')
+#     search_fields = ('caption', 'content_object__username')
+#     list_filter = ('sensitivity_level',)
+#     ordering = ('-id',)
+#     fieldsets = (
+#         ('Image Details', {'fields': ('content_object', 'image', 'caption', 'clinical_context')}),
+#         ('Security', {'fields': ('sensitivity_level', 'access_log')}),
+#     )

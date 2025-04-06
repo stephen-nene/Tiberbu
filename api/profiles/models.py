@@ -78,7 +78,7 @@ class HealthcareUser(AbstractUser):
     gender = models.CharField(max_length=20, choices=Gender.choices, default=Gender.UNDISCLOSED)
 
     address = models.JSONField(null=True, blank=True)
-    profile_image = models.ForeignKey('ClinicalImage', null=True, blank=True, on_delete=models.SET_NULL)
+    profile_image = models.ForeignKey('ProfileImage', null=True, blank=True, on_delete=models.SET_NULL,related_name="user_profile_image")
     
     email = models.EmailField(max_length=255, unique=True, db_index=True)
     phone_number = models.CharField(
@@ -174,28 +174,63 @@ class Patient(TimeStampedModel):
         return f"Patient: {self.user.username}"
 
 
-class ClinicalImage(models.Model):
+# class ClinicalImage(models.Model):
+#     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+#     object_id = models.UUIDField()
+#     content_object = GenericForeignKey('content_type', 'object_id')
+    
+#     image = models.ImageField(
+#         upload_to='clinical_images/%Y/%m/',
+#         validators=[FileExtensionValidator(allowed_extensions=['jpg', 'png', 'dcm']), validate_image_size]
+#     )
+#     caption = models.CharField(max_length=255, blank=True)
+#     clinical_context = models.TextField(blank=True)
+
+#     sensitivity_level = models.PositiveSmallIntegerField(
+#         choices=[(1, 'Public'), (2, 'Internal'), (3, 'Restricted')],
+#         default=2
+#     )
+#     access_log = models.JSONField(default=list)
+
+#     class Meta:
+#         verbose_name = "Clinical Image"
+#         verbose_name_plural = "Clinical Images"
+#         indexes = [models.Index(fields=['content_type', 'object_id'])]
+
+#     def __str__(self):
+#         return f"Image for {self.content_object} - {self.caption or 'No Caption'}"
+
+
+# models.py
+class ProfileImage(models.Model):
+    """
+    Dedicated model for user profile pictures (avatars)
+    Simplified compared to clinical images
+    """
+    # user = models.OneToOneField(
+    #     HealthcareUser, 
+    #     on_delete=models.CASCADE,
+    #     related_name='profile_image_rel'  # Different from clinical images
+    # )
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.UUIDField()
-    content_object = GenericForeignKey('content_type', 'object_id')
-    
     image = models.ImageField(
-        upload_to='clinical_images/%Y/%m/',
-        validators=[FileExtensionValidator(allowed_extensions=['jpg', 'png', 'dcm']), validate_image_size]
+        upload_to='profile_images/%Y/%m/',
+        validators=[
+            FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png']),
+            validate_image_size
+        ]
     )
-    caption = models.CharField(max_length=255, blank=True)
-    clinical_context = models.TextField(blank=True)
-
-    sensitivity_level = models.PositiveSmallIntegerField(
-        choices=[(1, 'Public'), (2, 'Internal'), (3, 'Restricted')],
-        default=2
-    )
-    access_log = models.JSONField(default=list)
+    thumbnail = models.ImageField(upload_to='profile_thumbs/%Y/%m/', blank=True)
+    last_updated = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = "Clinical Image"
-        verbose_name_plural = "Clinical Images"
-        indexes = [models.Index(fields=['content_type', 'object_id'])]
+        verbose_name = "Profile Image"
+        verbose_name_plural = "Profile Images"
 
     def __str__(self):
-        return f"Image for {self.content_object} - {self.caption or 'No Caption'}"
+        return f"Profile image for {self.user.username}"
+
+    def save(self, *args, **kwargs):
+        # Add thumbnail generation logic here if needed
+        super().save(*args, **kwargs)

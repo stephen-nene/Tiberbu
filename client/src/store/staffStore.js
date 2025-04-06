@@ -1,6 +1,6 @@
 import {create} from "zustand";
 import { devtools, persist } from "zustand/middleware";
-import { apiClient1 } from "../services/apiClient";
+import { apiClient1, apiClient2 } from "../services/apiClient";
 import { toast } from "sonner";
 
 export const staffStore = create(
@@ -128,8 +128,6 @@ export const staffStore = create(
                 set((state) => ({
                   doctors: [...state.doctors, response.data],
                 }));
-              }else {
-                toast.error("Failed to save patient");
               }
 
               return response;
