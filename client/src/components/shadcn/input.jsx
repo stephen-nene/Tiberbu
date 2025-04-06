@@ -28,7 +28,7 @@ function Input({
   className,
   type = "text",
   variant = "default",
-  size = "md",
+  size = "lg",
   disabled = false,
   ...props
 }) {
@@ -43,11 +43,7 @@ function Input({
         "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900",
 
         // File input styles
-        "file:border-0 file:bg-gray-100 dark:file:bg-gray-700 file:text-gray-700 dark:file:text-gray-200",
-        "file:rounded-md file:px-3 file:py-1.5 file:text-sm file:font-medium",
-        "file:hover:bg-gray-200 dark:file:hover:bg-gray-600",
-
-        // States
+        "file:border-2 file:border-indigo-500 dark:file:border-indigo-300 file:bg-transparent file:text-indigo-500 dark:file:text-indigo-300 file:rounded-md file:px-2 file:py-0.5 file:text-sm hover:file:bg-indigo-100 dark:hover:file:bg-indigo-700",
         "disabled:bg-gray-100 disabled:text-gray-500 dark:disabled:bg-gray-700 dark:disabled:text-gray-400",
         "aria-invalid:border-red-500 aria-invalid:ring-red-500/20 dark:aria-invalid:border-red-500",
 

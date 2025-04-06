@@ -32,13 +32,12 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/shadcn/form";
-import {Avatar, AvatarFallback, AvatarImage} from "@/components/shadcn/avatar";
 
 import { toast } from "sonner";
 
 import { staffStore } from "@/store/staffStore";
 
-import { PlusCircle, X,User } from "lucide-react";
+import { PlusCircle, X } from "lucide-react";
 
 // Define Zod schemas for form validation
 const addressSchema = z.object({
@@ -51,14 +50,6 @@ const addressSchema = z.object({
   state: z.string().optional(),
   zip: z.string().optional(),
   country: z.string().optional(),
-});
-
-const imageFileValidator = z.custom((val) => {
-  if (val instanceof File) {
-    const isValidImage = val.type.startsWith("image/");
-    return isValidImage || "File must be an image";
-  }
-  return "No file uploaded";
 });
 
 const basicInfoSchema = z.object({
@@ -75,12 +66,6 @@ const basicInfoSchema = z.object({
   date_of_birth: z.string().refine((val) => !val || !isNaN(Date.parse(val)), {
     message: "Please enter a valid date",
   }),
-  profile_image: z
-    .instanceof(File)
-    .refine((file) => file.type.startsWith("image/"), {
-      message: "File must be an image",
-    })
-    .optional(),
   gender: z.string().optional(),
   blood_group: z.string().optional(),
   address: addressSchema,
@@ -151,7 +136,6 @@ export default function NewUser() {
     description: "",
     is_sensitive: false,
   });
-  const [imagePreview, setImagePreview] = useState(null); // State to store image preview
 
   const savePatient = staffStore((state) => state.savePatient);
   const patchPatient = staffStore((state) => state.patchPatient);
@@ -240,34 +224,11 @@ export default function NewUser() {
   // });
 
   const handleAttachmentChange = (e) => {
-    
     const { name, value, type, checked, files } = e.target;
     setNewAttachment({
       ...newAttachment,
       [name]: type === "checkbox" ? checked : files ? files[0] : value,
     });
-  };
-  
-  // This will handle file input changes and set the preview
-  const handleFileChange = (e) => {
-    // const file = e.target.files?.[0];
-    // if (file) {
-    //   // Validate image file
-    //   if (!file.type.startsWith("image/")) {
-    //     form.setError("basicInfo.full_name", {
-    //       type: "manual",
-    //       message: "Please upload an image file",
-    //     });
-    //     return;
-    //   }
-    //   field.onChange(file);
-    // }
-    const file = e.target.files[0]; // Get the selected file
-    if (file && file.type.startsWith("image/")) {
-      // Check if it's an image
-      setImagePreview(URL.createObjectURL(file)); // Set the image preview URL
-      form.setValue("basicInfo.profile_image", file); // Update form with the selected file
-    }
   };
 
   const addAttachment = () => {
@@ -321,15 +282,16 @@ export default function NewUser() {
 
   // Submit handler
   const onSubmit = async (data) => {
-    const data2 = {
-      ...data.basicInfo,
-      id: location.state?.patientData?.id || "",
-      password: "dummypassword", // You can remove this for actual submissions
 
-      attachments: data.attachments,
-      clinician_profile: data.patientInfo,
-    };
-    console.log("✅ Form submitted:", data2);
+        const data2 = {
+          ...data.basicInfo,
+          id: location.state?.patientData?.id || '',
+          password: "dummypassword", // You can remove this for actual submissions
+
+          attachments: data.attachments,
+          patient_profile: data.patientInfo,
+        };
+        console.log("✅ Form submitted:", data2);
 
     if (data2.id || mode === "edit") {
       // Update existing patient
@@ -343,32 +305,34 @@ export default function NewUser() {
   const updatePatient = async (data) => {
     // if user.id then this will be used instaed since the user is already created
     const toastId = toast.loading("updating patient...");
-    try {
-      // Simulate API call (replace with your actual API request)
-      const response = await patchPatient(data);
+     try {
+       // Simulate API call (replace with your actual API request)
+       const response = await patchPatient(data);
 
-      // // Dismiss the loading toast since the operation is complete
-      // toast.dismiss(toastId);
+       // // Dismiss the loading toast since the operation is complete
+       // toast.dismiss(toastId);
 
-      console.log("Response:", response);
-      navigate("/dashboard/patients");
+       console.log("Response:", response);
+       navigate("/dashboard/patients");
 
-      // Show a success toast (you can customize the message as needed)
-      toast.success("Patient saved successfully!", {
-        id: toastId,
-      });
-    } catch (error) {
-      if (error?.response?.data) {
-        // Process the errors and display them as toast notifications
-        processErrors(error?.response?.data, toastId);
-      }
-      console.error("Error saving patient:", error?.response);
-    } finally {
+       // Show a success toast (you can customize the message as needed)
+       toast.success("Patient saved successfully!", {
+         id: toastId,
+       });
+
+     } catch (error) {
+       if (error?.response?.data) {
+         // Process the errors and display them as toast notifications
+         processErrors(error?.response?.data, toastId);
+       }
+       console.error("Error saving patient:", error?.response);
+     } finally {
       //  toast.dismiss(toastId);
-    }
+     }
   };
 
   const createPatient = async (data) => {
+
     // Show a loading toast with an ID
     const toastId = toast.loading("Saving patient...");
 
@@ -520,7 +484,7 @@ export default function NewUser() {
             <TabsList className="grid grid-cols-3 mb-4">
               <TabsTrigger value="basic">Basic Information</TabsTrigger>
               {/* if atimetdata is null don't show */}
-              <TabsTrigger value="patient">Doctor Information</TabsTrigger>
+              <TabsTrigger value="patient">Patient Information</TabsTrigger>
               <TabsTrigger value="attachments">Medical Attachments</TabsTrigger>
               {/* {location?.state?.patientData?.id && (
                 <>
@@ -611,6 +575,20 @@ export default function NewUser() {
                       )}
                     />
 
+                    {/* <FormField
+                      control={form.control}
+                      name="basicInfo.full_name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Full Name</FormLabel>
+                          <FormControl>
+                            <Input {...field} disabled={isDisabled} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    /> */}
+
                     <FormField
                       control={form.control}
                       name="basicInfo.date_of_birth"
@@ -686,88 +664,7 @@ export default function NewUser() {
                         </FormItem>
                       )}
                     />
-
-                    <FormField
-                      control={form.control}
-                      name="basicInfo.full_name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>profile Image</FormLabel>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              type="file"
-                              onChange={handleAttachmentChange}
-                              // accet only images
-                              className=" hover: cursor-pointer"
-                              disabled={isDisabled}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="basicInfo.profile_image"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Profile Image</FormLabel>
-                          {isDisabled ? (
-                            // View mode - show avatar
-                            <div className="flex items-center gap-4">
-                              <Avatar className="h-16 w-16">
-                                <AvatarImage
-                                  src={
-                                    field.value
-                                      ? URL.createObjectURL(field.value)
-                                      : "/default-avatar.png"
-                                  }
-                                  alt="Profile"
-                                />
-                                <AvatarFallback>
-                                  <User className="h-8 w-8" />
-                                </AvatarFallback>
-                              </Avatar>
-                              <span className="text-sm text-gray-500">
-                                {field.value?.name || "No image selected"}
-                              </span>
-                            </div>
-                          ) : (
-                            // Edit mode - show file input
-                            <FormControl>
-                              <div className="flex flex-col text-center">
-                                {imagePreview && (
-                                  <Avatar className="h-44 w-44  mx-a to">
-                                    <AvatarImage
-                                      src={imagePreview}
-                                      alt="Preview"
-                                      className="rounded -full object-cover"
-                                    />
-                                    <AvatarFallback>
-                                      <User className="h-8 w-8" />
-                                    </AvatarFallback>
-                                  </Avatar>
-                                )}
-                                <Input
-                                  type="file"
-                                  accept="image/*"
-                                  onChange={handleFileChange}
-                                  className="mt-4 hover:cursor-pointer file:text-sm file:font-medium"
-                                  disabled={isDisabled}
-                                />
-                              </div>
-                            </FormControl>
-                          )}
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <p className="text-sm text-gray-500">
-                      Allowed formats: PDF, JPG, DCM
-                    </p>
                   </div>
-
 
                   <div className="mt-6">
                     <h3 className="text-lg font-medium mb-2">Address</h3>
@@ -932,7 +829,7 @@ export default function NewUser() {
             {/* Medical Attachments Tab */}
             <TabsContent value="attachments">
               <Card>
-                {!location?.state?.patientData?.id ? (
+                {location?.state?.patientData?.id ? (
                   <CardContent className="pt-6">
                     <div className="space-y-6">
                       {!isDisabled && (
