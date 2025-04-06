@@ -107,14 +107,14 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173", 
      'https://tiberbuke.vercel.app',
-    'https://tiberbu.onrender.com'   
+    'https://tiberbu.onrender.com', 
     'https://tiberbuke-git-develop-stephennenes-projects.vercel.app'  
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
     "https://tiberbuke.vercel.app",
-    'https://tiberbu.onrender.com'
+    'https://tiberbu.onrender.com',
     'https://tiberbuke.onrender.com',
     'https://tiberbuke-git-develop-stephennenes-projects.vercel.app'
 ]
