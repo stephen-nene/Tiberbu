@@ -1,9 +1,20 @@
 from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
 from django.core.validators import RegexValidator
-from .models import HealthcareUser, Doctor, Patient, ClinicalImage,Gender,UserRole,UserStatus
+from .models import HealthcareUser, Doctor, Patient, Gender,UserRole,UserStatus,ProfileImage
 from management.serializers import SpecializationSerializer
 
+from django.db import transaction
+
+
+class ProfileImageSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField(required=False, allow_null=True)
+
+    class Meta:
+        model = ProfileImage
+        fields = ['image', 'thumbnail']
+        read_only_fields = ['thumbnail']
+        
 class DoctorProfileSerializer(serializers.ModelSerializer):
     # specializations = serializers.StringRelatedField(many=True)
     specializations = SpecializationSerializer(many=True, read_only=True)
@@ -64,8 +75,14 @@ class PatientSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, min_length=8)
-    
+    password = serializers.CharField(
+        write_only=True, 
+        min_length=8,
+        required=True,  # Explicitly mark as required
+        style={'input_type': 'password'}  # For browsable API
+    )
+    # email = serializers.EmailField(required=True)
+    # username = serializers.CharField(required=True)
     # Optional nested data for patient or doctor info
     patient_profile = serializers.DictField(write_only=True, required=False)
     clinician_profile = serializers.DictField(write_only=True, required=False)
@@ -73,6 +90,7 @@ class UserSerializer(serializers.ModelSerializer):
     # Read-only fields for retrieval
     # patient = PatientSerializer(read_only=True)
     # doctor = DoctorSerializer(read_only=True)
+    profile_image = ProfileImageSerializer(required=False)
     profile = serializers.SerializerMethodField()
 
     class Meta:
@@ -80,11 +98,14 @@ class UserSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'username', 'first_name', 'last_name', 'email',
             'phone_number', 'password', 'status', 'role', 'date_of_birth',
-            'gender', 'address', 'profile_image', 'mfa_enabled', 'patient_profile', 'clinician_profile',
-            'profile'  
-
+            'gender', 'address', 'profile_image', 'mfa_enabled', 
+            'patient_profile', 'clinician_profile', 'profile'
         ]
-           
+    def create(self, validated_data):
+        # This will be called by perform_create
+        validated_data['password'] = make_password(validated_data['password'])
+        return super().create(validated_data)
+      
     def get_profile(self, obj):
         """
         Returns the appropriate profile based on user role
@@ -94,57 +115,6 @@ class UserSerializer(serializers.ModelSerializer):
         elif obj.role == UserRole.PATIENT and hasattr(obj, 'patient_profile'):
             return PatientProfileSerializer(obj.patient_profile).data
         return None
-    def update_nested(instance, data: dict):
-        for attr, value in data.items():
-            setattr(instance, attr, value)
-        instance.save()
-
-
-    def create(self, validated_data):
-        try:
-            patient_data = validated_data.pop('patient_profile', {})
-            doctor_data = validated_data.pop('clinician_profile', {})
-            validated_data['password'] = make_password(validated_data['password'])
-
-            # Create user instance without saving yet
-            user = HealthcareUser(**validated_data)
-
-            # Attach the role-specific data to be used in signal
-            if user.role == UserRole.PATIENT:
-                user._profile_data = patient_data
-            elif user.role == UserRole.CLINICIAN:
-                user._profile_data = doctor_data
-
-            user.save()
-            return user
-        except Exception as e:
-            raise serializers.ValidationError({"error": "Failed to create user", "details": str(e)})
-
-    def update(self, instance, validated_data):
-        # Handle password
-        if 'password' in validated_data:
-            validated_data['password'] = make_password(validated_data['password'])
-
-        # Pop nested data
-        patient_data = validated_data.pop("patient_profile", None)
-        doctor_data = validated_data.pop("clinician_profile", None)
-
-        # Update nested patient profile if present
-        if patient_data and instance.role == UserRole.PATIENT and hasattr(instance, 'patient_profile'):
-            patient_instance = instance.patient_profile
-            for attr, value in patient_data.items():
-                setattr(patient_instance, attr, value)
-            patient_instance.save()
-
-        # Update nested clinician profile if present
-        if doctor_data and instance.role == UserRole.CLINICIAN and hasattr(instance, 'clinician_profile'):
-            doctor_instance = instance.clinician_profile
-            for attr, value in doctor_data.items():
-                setattr(doctor_instance, attr, value)
-            doctor_instance.save()
-
-        # Continue updating user
-        return super().update(instance, validated_data)
 
     def validate_phone_number(self, value):
         phone_validator = RegexValidator(
@@ -172,10 +142,13 @@ class UserSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(f"Invalid gender. Choose from: {', '.join(allowed_genders)}")
         return value
     
-class ClinicalImageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ClinicalImage
-        fields = [
-            'id', 'content_type', 'object_id', 'image', 'caption',
-            'clinical_context', 'sensitivity_level', 'access_log'
-        ]
+    
+     
+# class ClinicalImageSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = ClinicalImage
+#         fields = [
+#             'id', 'content_type', 'object_id', 'image', 'caption',
+#             'clinical_context', 'sensitivity_level', 'access_log'
+#         ]
+

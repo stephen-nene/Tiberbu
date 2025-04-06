@@ -14,13 +14,15 @@ import { Button } from "@/components/shadcn/button";
 import { Input } from "@/components/shadcn/input";
 import { Label } from "@/components/shadcn/label";
 import { Textarea } from "@/components/shadcn/textarea";
-import { Card, CardContent } from "@/components/shadcn/card";
+import { Card, CardContent, CardFooter } from "@/components/shadcn/card";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectGroup,
+  SelectLabel,
 } from "@/components/shadcn/select";
 import { Checkbox } from "@/components/shadcn/checkbox";
 import {
@@ -32,13 +34,17 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/shadcn/form";
-import {Avatar, AvatarFallback, AvatarImage} from "@/components/shadcn/avatar";
-
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/shadcn/avatar";
+import { Badge } from "@/components/shadcn/badge";
 import { toast } from "sonner";
 
 import { staffStore } from "@/store/staffStore";
 
-import { PlusCircle, X,User } from "lucide-react";
+import { PlusCircle, X, User } from "lucide-react";
 
 // Define Zod schemas for form validation
 const addressSchema = z.object({
@@ -53,14 +59,6 @@ const addressSchema = z.object({
   country: z.string().optional(),
 });
 
-const imageFileValidator = z.custom((val) => {
-  if (val instanceof File) {
-    const isValidImage = val.type.startsWith("image/");
-    return isValidImage || "File must be an image";
-  }
-  return "No file uploaded";
-});
-
 const basicInfoSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),
   email: z.string().email("Please enter a valid email address"),
@@ -71,7 +69,6 @@ const basicInfoSchema = z.object({
     .or(z.literal("")),
   first_name: z.string().optional(),
   last_name: z.string().optional(),
-  // full_name: z.string().min(2, "Name must be at least 2 characters"),
   date_of_birth: z.string().refine((val) => !val || !isNaN(Date.parse(val)), {
     message: "Please enter a valid date",
   }),
@@ -86,57 +83,46 @@ const basicInfoSchema = z.object({
   address: addressSchema,
 });
 
-const patientInfoSchema = z.object({
-  medical_history: z.string().optional(),
-  known_allergies: z
+
+
+const clinicianInfoSchema = z.object({
+  specializations: z
     .array(
       z.object({
-        substance: z.string(),
-        reaction: z.string(),
-        severity: z.enum(["mild", "moderate", "severe"]).optional(),
+        id: z.string(),
+        name: z.string(),
+        department: z.string().optional(),
+        description: z.string().optional(),
       })
     )
-    .optional()
-    .default([]),
-
-  permanent_medications: z
+    .min(1, { message: "At least one specialization is required" }),
+  license_number: z.string().optional(),
+  medical_license: z.string().optional(),
+  license_jurisdiction: z.string().optional(),
+  certifications: z
     .array(
       z.object({
         name: z.string(),
-        dosage: z.string(),
-        frequency: z.string(),
+        issuing_body: z.string(),
+        issued_date: z.string(),
       })
     )
-    .optional()
     .default([]),
-
-  emergency_contacts: z
-    .array(
-      z.object({
-        name: z.string(),
-        relationship: z.string(),
-        phone: z.string(),
-      })
-    )
-    .optional()
-    .default([]),
-
-  primary_insurance: z.string().optional(),
+  accepting_new_patients: z.boolean().default(true),
+  emergency_availability: z.boolean().default(true),
+  experience: z.number().default(1),
+  bio: z.string().optional(),
+  rating: z.number().default(2),
+  is_available: z.boolean().default(true),
+  fees: z.number().default(1000),
 });
 
-const attachmentSchema = z.object({
-  id: z.number(),
-  file: z.any(),
-  document_type: z.string().min(1, "Document type is required"),
-  caption: z.string().optional(),
-  description: z.string().optional(),
-  is_sensitive: z.boolean().default(false),
-});
+
+
 
 const formSchema = z.object({
   basicInfo: basicInfoSchema,
-  patientInfo: patientInfoSchema,
-  attachments: z.array(attachmentSchema).optional().default([]),
+  clinician_profile: clinicianInfoSchema,
 });
 
 export default function NewUser() {
@@ -144,17 +130,24 @@ export default function NewUser() {
   const navigate = useNavigate();
   const [mode, setMode] = useState("create"); // 'create', 'edit', or 'view'
   const [activeTab, setActiveTab] = useState("basic");
-  const [newAttachment, setNewAttachment] = useState({
-    file: null,
-    document_type: "",
-    caption: "",
-    description: "",
-    is_sensitive: false,
-  });
+
   const [imagePreview, setImagePreview] = useState(null); // State to store image preview
 
   const savePatient = staffStore((state) => state.savePatient);
   const patchPatient = staffStore((state) => state.patchPatient);
+
+  const specializations = staffStore((state) => state.specializations);
+
+  const fetchSpecializations = staffStore(
+    (state) => state.fetchSpecializations
+  );
+  const loading = staffStore((state) => state.loading);
+
+  useEffect(() => {
+    if (specializations.length === 0) {
+      fetchSpecializations();
+    }
+  }, [fetchSpecializations]);
 
   // Initialize form with React Hook Form and Zod
   const form = useForm({
@@ -166,7 +159,6 @@ export default function NewUser() {
         phone_number: "",
         first_name: "",
         last_name: "",
-        // full_name: "",
         date_of_birth: "",
         gender: "undisclosed",
         blood_group: "",
@@ -178,121 +170,110 @@ export default function NewUser() {
           country: "",
         },
       },
-      patientInfo: {
-        medical_history: "",
-        known_allergies: [],
-        permanent_medications: [],
-        emergency_contacts: [],
-        primary_insurance: "",
+      clinician_profile: {
+        specializations: [],
+        license_number: "",
+        medical_license: "",
+        license_jurisdiction: "",
+        certifications: [],
+        accepting_new_patients: true,
+        emergency_availability: true,
+        experience: 1,
+        bio: "",
+        rating: 2,
+        is_available: true,
+        fees: 1000,
       },
-      attachments: [],
+
     },
   });
+  const selectedSpecializations =
+    form.watch("clinician_profile.specializations") || [];
+
 
   // Initialize form data from location state if it exists
   useEffect(() => {
     if (location.state) {
       console.log(location.state);
-      const { patientData, formMode } = location.state;
+      const { doctorData,patientData, formMode } = location.state;
 
       if (formMode && ["create", "edit", "view"].includes(formMode)) {
         setMode(formMode);
       }
 
-      if (patientData) {
-        // Reset form with patient data
-        form.reset({
-          basicInfo: {
-            username: patientData.username || "",
-            email: patientData.email || "",
-            phone_number: patientData.phone_number || "",
-            first_name: patientData.first_name || "",
-            last_name: patientData.last_name || "",
-            // full_name: patientData.get_full_name || "",
-            date_of_birth: patientData.date_of_birth || "",
-            gender: patientData.gender || "",
-            blood_group: patientData.blood_group || "",
-            address: patientData.address || {
-              street: "",
-              city: "",
-              state: "",
-              zip: "",
-              country: "",
-            },
-          },
-          patientInfo: {
-            medical_history: patientData?.profile?.medical_history || "",
-            known_allergies: patientData?.profile?.known_allergies || [],
-            permanent_medications:
-              patientData?.profile?.permanent_medications || [],
-            emergency_contacts: patientData?.profile?.emergency_contacts || [],
-            primary_insurance: patientData?.profile?.primary_insurance || "",
-          },
-          attachments: patientData.attachments || [],
-        });
-      }
+if (doctorData) {
+  form.reset({
+    basicInfo: {
+      username: doctorData.username || "",
+      email: doctorData.email || "",
+      phone_number: doctorData.phone_number || "",
+      first_name: doctorData.first_name || "",
+      last_name: doctorData.last_name || "",
+      date_of_birth: doctorData.date_of_birth || "",
+      gender: doctorData.gender || "",
+      blood_group: doctorData.blood_group || "",
+      address: doctorData.address || {
+        street: "",
+        city: "",
+        state: "",
+        zip: "",
+        country: "",
+      },
+    },
+    clinician_profile: {
+      specializations: doctorData.clinician_profile?.specializations || [],
+      license_number: doctorData.clinician_profile?.license_number || "",
+      medical_license: doctorData.clinician_profile?.medical_license || "",
+      license_jurisdiction:
+        doctorData.clinician_profile?.license_jurisdiction || "",
+      certifications: doctorData.clinician_profile?.certifications || [],
+      accepting_new_patients:
+        doctorData.clinician_profile?.accepting_new_patients ?? true,
+      emergency_availability:
+        doctorData.clinician_profile?.emergency_availability ?? true,
+      experience: doctorData.clinician_profile?.experience ?? 1,
+      bio: doctorData.clinician_profile?.bio || "",
+      rating: doctorData.clinician_profile?.rating ?? 2,
+      is_available: doctorData.clinician_profile?.is_available ?? true,
+      fees: doctorData.clinician_profile?.fees ?? 1000,
+    },
+  });
+}
+
     }
   }, [location.state, form]);
 
-  // const { fields, append, remove } = useFieldArray({
-  //   control,
-  //   name: "patientInfo.permanent_medications",
-  // });
 
-  const handleAttachmentChange = (e) => {
-    
-    const { name, value, type, checked, files } = e.target;
-    setNewAttachment({
-      ...newAttachment,
-      [name]: type === "checkbox" ? checked : files ? files[0] : value,
-    });
-  };
-  
-  // This will handle file input changes and set the preview
   const handleFileChange = (e) => {
-    // const file = e.target.files?.[0];
-    // if (file) {
-    //   // Validate image file
-    //   if (!file.type.startsWith("image/")) {
-    //     form.setError("basicInfo.full_name", {
-    //       type: "manual",
-    //       message: "Please upload an image file",
-    //     });
-    //     return;
-    //   }
-    //   field.onChange(file);
-    // }
-    const file = e.target.files[0]; // Get the selected file
+
+    const file = e.target.files[0]; 
     if (file && file.type.startsWith("image/")) {
-      // Check if it's an image
-      setImagePreview(URL.createObjectURL(file)); // Set the image preview URL
-      form.setValue("basicInfo.profile_image", file); // Update form with the selected file
+
+      setImagePreview(URL.createObjectURL(file)); 
+      form.setValue("basicInfo.profile_image", file); 
     }
   };
 
-  const addAttachment = () => {
-    if (newAttachment.file && newAttachment.document_type) {
-      const currentAttachments = form.getValues("attachments") || [];
-      form.setValue("attachments", [
-        ...currentAttachments,
-        { ...newAttachment, id: Date.now() },
+
+
+  const handleSpecializationSelect = (selectedName) => {
+    const specializationObj = specializations.find(
+      (s) => s.name === selectedName
+    );
+    if (!specializationObj) return;
+    // Prevent duplicates
+    if (!selectedSpecializations.some((s) => s.id === specializationObj.id)) {
+      form.setValue("clinician_profile.specializations", [
+        ...selectedSpecializations,
+        specializationObj,
       ]);
-
-      setNewAttachment({
-        file: null,
-        document_type: "",
-        caption: "",
-        description: "",
-        is_sensitive: false,
-      });
     }
   };
 
-  const removeAttachment = (id) => {
-    const currentAttachments = form.getValues("attachments") || [];
+  const handleRemoveIndustry = (spec) => {
     form.setValue(
-      "attachments",
-      currentAttachments.filter((attachment) => attachment.id !== id)
+      "clinician_profile.specializations",
+      selectedSpecializations.filter((s) => s.id !== spec.id)
     );
   };
 
@@ -302,34 +283,49 @@ export default function NewUser() {
       if (errors.hasOwnProperty(field)) {
         const fieldErrors = errors[field];
         if (Array.isArray(fieldErrors) && fieldErrors.length > 0) {
-          // // Dismiss the loading toast as we're showing the error now
-          // toast.dismiss(toastId);
-
-          // Use the field name as the toast title and the first error message as the description
           toast.error(
             `${field.charAt(0).toUpperCase() + field.slice(1)} Error`,
             {
               id: toastId,
-              description: fieldErrors[0], // Show the first error for the field
+              description: fieldErrors[0],
             }
           );
-          break; // Only show the first error for any field
+          break;
         }
       }
     }
   };
 
-  // Submit handler
+  
   const onSubmit = async (data) => {
+
+
     const data2 = {
       ...data.basicInfo,
       id: location.state?.patientData?.id || "",
-      password: "dummypassword", // You can remove this for actual submissions
+      role: "clinician",
+      password: "dummypassword",
 
       attachments: data.attachments,
-      clinician_profile: data.patientInfo,
+      clinician_profile: data.clinician_profile,
     };
+
     console.log("✅ Form submitted:", data2);
+  const formData = new FormData();
+
+  // Append the image file (ensure it's the actual File object)
+  if (
+    data.basicInfo.profile_image &&
+    data.basicInfo.profile_image instanceof File
+  ) {
+    formData.append("profile_image", data.basicInfo.profile_image);
+  }
+
+  // Append other structured data (convert complex objects to JSON strings)
+  formData.append("basicInfo", JSON.stringify(data.basicInfo)); // All the basic info
+  formData.append("clinician_profile", JSON.stringify(data.clinician_profile)); // The clinician profile
+
+
 
     if (data2.id || mode === "edit") {
       // Update existing patient
@@ -341,61 +337,44 @@ export default function NewUser() {
   };
 
   const updatePatient = async (data) => {
-    // if user.id then this will be used instaed since the user is already created
     const toastId = toast.loading("updating patient...");
     try {
-      // Simulate API call (replace with your actual API request)
       const response = await patchPatient(data);
 
-      // // Dismiss the loading toast since the operation is complete
-      // toast.dismiss(toastId);
+
 
       console.log("Response:", response);
-      navigate("/dashboard/patients");
+      // navigate("/dashboard/patients");
 
-      // Show a success toast (you can customize the message as needed)
       toast.success("Patient saved successfully!", {
         id: toastId,
       });
     } catch (error) {
       if (error?.response?.data) {
-        // Process the errors and display them as toast notifications
         processErrors(error?.response?.data, toastId);
       }
       console.error("Error saving patient:", error?.response);
-    } finally {
-      //  toast.dismiss(toastId);
-    }
+    } 
   };
 
   const createPatient = async (data) => {
-    // Show a loading toast with an ID
     const toastId = toast.loading("Saving patient...");
 
     try {
-      // Simulate API call (replace with your actual API request)
       const response = await savePatient(data);
 
-      // // Dismiss the loading toast since the operation is complete
-      // toast.dismiss(toastId);
-
       console.log("Response:", response);
-      navigate("/dashboard/patients");
+      // navigate("/dashboard/patients");
 
-      // Show a success toast (you can customize the message as needed)
       toast.success("Patient saved successfully!", {
         id: toastId,
       });
     } catch (error) {
       if (error?.response?.data) {
-        // Process the errors and display them as toast notifications
         processErrors(error?.response?.data, toastId);
+        console.error("Error saving patient:", error?.response?.data);
       }
-      console.error("Error saving patient:", error?.response);
-    } finally {
-      // Dismiss the loading toast in case of an error
-      // toast.dismiss(toastId);
-    }
+    } 
   };
 
   const savePatient2 = async (data) => {
@@ -423,7 +402,6 @@ export default function NewUser() {
     }
   };
 
-  // Helper to find the first error message (deep or flat)
   const getFirstErrorMessage = (errorObject) => {
     for (const key in errorObject) {
       const value = errorObject[key];
@@ -440,62 +418,14 @@ export default function NewUser() {
 
     return null;
   };
-  // Error handler
-  const onError2 = (errors) => {
-    console.error("❌ Validation errors:", errors);
 
-    const flatErrors = flattenErrors(errors);
 
-    // Show all validation errors (or just the first one if you prefer)
-    flatErrors.forEach((msg) => {
-      toast.error(msg);
-    });
-  };
 
-  // Helper to flatten nested errors (like basicInfo.full_name)
-  const flattenErrors = (errors) => {
-    const messages = [];
 
-    const extract = (errObj) => {
-      Object.values(errObj).forEach((val) => {
-        if (val?.message) {
-          messages.push(val.message);
-        } else if (typeof val === "object") {
-          extract(val);
-        }
-      });
-    };
-
-    extract(errors);
-
-    return messages;
-  };
-
-  // Handle form fields for array data (allergies, medications, contacts)
-  const handleArrayFieldChange = (field, value) => {
-    form.setValue(
-      field,
-      value.split("\n").filter((item) => item.trim() !== "")
-    );
-  };
-
-  // Options for dropdowns
-  // class Gender(models.TextChoices):
-  //   MALE = 'male', 'Male'
-  //   FEMALE = 'female', 'Female'
-  //   NON_BINARY = 'non_binary', 'Non-binary'
-  //   UNDISCLOSED = 'undisclosed', 'Prefer not to say'
 
   const genderOptions = ["male", "female", "non_binary", "undisclosed"];
   const bloodGroupOptions = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
-  const documentTypeOptions = [
-    "MEDICAL_RECORD",
-    "LAB_RESULT",
-    "IMAGING",
-    "PRESCRIPTION",
-    "CONSENT_FORM",
-    "OTHER",
-  ];
+
 
   // Check if form should be disabled (view mode)
   const isDisabled = mode === "view";
@@ -504,10 +434,10 @@ export default function NewUser() {
     <div className="p-6 max-w-5xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">
         {mode === "create"
-          ? "New Patient Registration"
+          ? "New Doctor Registration"
           : mode === "edit"
-          ? "Edit Patient Information"
-          : "Patient Details"}
+          ? "Edit Doctor Information"
+          : "Doctor Details"}
       </h1>
 
       <Form {...form}>
@@ -517,15 +447,9 @@ export default function NewUser() {
             onValueChange={setActiveTab}
             className="w-full"
           >
-            <TabsList className="grid grid-cols-3 mb-4">
+            <TabsList className="grid grid-cols-2 mb-4">
               <TabsTrigger value="basic">Basic Information</TabsTrigger>
-              {/* if atimetdata is null don't show */}
-              <TabsTrigger value="patient">Doctor Information</TabsTrigger>
-              <TabsTrigger value="attachments">Medical Attachments</TabsTrigger>
-              {/* {location?.state?.patientData?.id && (
-                <>
-                </>
-              )} */}
+              <TabsTrigger value="doctor">Doctor Information</TabsTrigger>
             </TabsList>
 
             {/* Basic Information Tab */}
@@ -689,26 +613,6 @@ export default function NewUser() {
 
                     <FormField
                       control={form.control}
-                      name="basicInfo.full_name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>profile Image</FormLabel>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              type="file"
-                              onChange={handleAttachmentChange}
-                              // accet only images
-                              className=" hover: cursor-pointer"
-                              disabled={isDisabled}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
                       name="basicInfo.profile_image"
                       render={({ field }) => (
                         <FormItem>
@@ -767,7 +671,6 @@ export default function NewUser() {
                       Allowed formats: PDF, JPG, DCM
                     </p>
                   </div>
-
 
                   <div className="mt-6">
                     <h3 className="text-lg font-medium mb-2">Address</h3>
@@ -844,24 +747,187 @@ export default function NewUser() {
                     </div>
                   </div>
                 </CardContent>
+                {/* card footer */}
+                <CardFooter className="flex justify-between">
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    onClick={() => navigate(-1 || "/dashboard/staff/doctors")}
+                  >
+                    {isDisabled ? "Back" : "Cancel"}
+                  </Button>
+                  {/* onclick go the the second tab */}
+                  <Button
+                    type="button"
+                    onClick={() => setActiveTab("doctor")}
+                    disabled={isDisabled}
+                  >
+                    Doctor's Profile
+                  </Button>
+                </CardFooter>
               </Card>
             </TabsContent>
 
             {/* Patient Information Tab */}
-            <TabsContent value="patient">
+            <TabsContent value="doctor">
               <Card>
                 <CardContent className="pt-6">
                   <div className="space-y-6">
                     <FormField
                       control={form.control}
-                      name="patientInfo.medical_history"
+                      name="clinician_profile.specializations"
+                      render={({ field, fieldState }) => {
+                        const selectedSpecializations = field.value || [];
+                        return (
+                          <FormItem>
+                            <FormLabel>
+                              Specializations{" "}
+                              <span className="text-muted-foreground text-xs">
+                                (Select multiple)
+                              </span>
+                            </FormLabel>
+                            <FormControl>
+                              <div className="space-y-2">
+                                <div className="relative">
+                                  {/* <Building className="text-emerald-800 absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 z-10" /> */}
+                                  <Select
+                                    onValueChange={handleSpecializationSelect}
+                                    value="" // Reset after selection
+                                  >
+                                    <SelectTrigger
+                                      className={`${
+                                        fieldState.error ? "border-red-500" : ""
+                                      } `}
+                                    >
+                                      <SelectValue placeholder="Select specializations" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectGroup>
+                                        <SelectLabel>
+                                          Specialization - department
+                                          <br />
+                                          Description
+                                        </SelectLabel>
+                                        {specializations.map((spec) => (
+                                          <SelectItem
+                                            key={spec.id}
+                                            value={spec.name}
+                                            // Disable already selected industries
+                                            disabled={selectedSpecializations.some(
+                                              (s) => spec.id === s.id
+                                            )}
+                                          >
+                                            {spec.name} - {spec.department}
+                                            <p className="text-xs font-extralight">
+                                              {spec.description}
+                                            </p>
+                                          </SelectItem>
+                                        ))}
+                                      </SelectGroup>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+
+                                {/* Selected Industries Tags */}
+                                {selectedSpecializations.length > 0 && (
+                                  <div className="flex flex-wrap gap-2 my-5">
+                                    {selectedSpecializations.map((spec) => (
+                                      <Badge
+                                        key={spec.id}
+                                        variant="secondary"
+                                        size="md"
+                                        shape="pill"
+                                        shadow="sm"
+                                        hoverable="true"
+                                        className="flex items-center"
+                                      >
+                                        {spec.name}
+                                        <button
+                                          type="button"
+                                          onClick={() =>
+                                            handleRemoveIndustry(spec)
+                                          }
+                                          className="ml-2 cursor-pointer text-rose-600 hover:text-rose-800"
+                                        >
+                                          ×
+                                        </button>
+                                      </Badge>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            </FormControl>
+                            <FormMessage className="text-red-500" />
+                          </FormItem>
+                        );
+                      }}
+                    />
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="clinician_profile.license_number"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>License Number</FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                placeholder="Enter your license number"
+                                disabled={isDisabled}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      {/* medical_license field*/}
+                      <FormField
+                        control={form.control}
+                        name="clinician_profile.medical_license"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Medical License Number</FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                placeholder="Enter your medical license number"
+                                disabled={isDisabled}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      {/* license_jurisdiction */}
+                      <FormField
+                        control={form.control}
+                        name="clinician_profile.license_jurisdiction"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>License Jurisdiction</FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                placeholder="Enter the Issuing authority for medical license"
+                                disabled={isDisabled}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <FormField
+                      control={form.control}
+                      name="clinician_profile.bio"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Medical History</FormLabel>
+                          <FormLabel>Bio</FormLabel>
                           <FormControl>
                             <Textarea
                               {...field}
                               rows={4}
+                              placeholder="Enter your bio"
                               disabled={isDisabled}
                             />
                           </FormControl>
@@ -870,11 +936,128 @@ export default function NewUser() {
                       )}
                     />
 
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="clinician_profile.accepting_new_patients"
+                        render={({ field }) => (
+                          <FormItem className="flex">
+                            <FormControl>
+                              <Checkbox
+                                {...field}
+                                disabled={isDisabled}
+                                checked={field.value}
+                              />
+                            </FormControl>
+                            <FormLabel>Accepting new patients</FormLabel>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="clinician_profile.is_available"
+                        render={({ field }) => (
+                          <FormItem className="flex">
+                            <FormControl>
+                              <Checkbox
+                                {...field}
+                                disabled={isDisabled}
+                                checked={field.value}
+                              />
+                            </FormControl>
+                            <FormLabel>Is Available</FormLabel>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="clinician_profile.emergency_availability"
+                        render={({ field }) => (
+                          <FormItem className="flex">
+                            <FormControl>
+                              <Checkbox
+                                {...field}
+                                disabled={isDisabled}
+                                checked={field.value}
+                              />
+                            </FormControl>
+                            <FormLabel>Available for emergencies</FormLabel>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3  gap-4 ">
+                      <FormField
+                        control={form.control}
+                        name="clinician_profile.experience"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Experience</FormLabel>
+                            <FormControl>
+                              {/* number input for experience */}
+                              <Input
+                                {...field}
+                                type="number"
+                                placeholder="Enter your experience"
+                                disabled={isDisabled}
+                                max={70}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="clinician_profile.fees"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>hourly/Fees</FormLabel>
+                            <FormControl>
+                              {/* number input for experience */}
+                              <Input
+                                {...field}
+                                type="currency"
+                                placeholder="Enter your hourly charges"
+                                disabled={isDisabled}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="clinician_profile.rating"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Rating</FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                type="number"
+                                placeholder="Enter doctors rating"
+                                disabled={isDisabled}
+                                max={5}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    {/* certifications */}
                     <FormField
                       control={form.control}
-                      name="patientInfo.known_allergies"
+                      name="clinician_profile.certifications"
                       render={({ field }) => (
-                        <KnownAllergiesField
+                        <CertificationsField
                           field={field}
                           form={form}
                           isDisabled={isDisabled}
@@ -882,221 +1065,27 @@ export default function NewUser() {
                       )}
                     />
 
-                    <FormField
-                      control={form.control}
-                      name="patientInfo.permanent_medications"
-                      render={({ field }) => (
-                        <PermanentMedicationsField
-                          field={field}
-                          form={form}
-                          isDisabled={isDisabled}
-                        />
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="patientInfo.emergency_contacts"
-                      render={({ field }) => (
-                        <EmergencyContactsField
-                          field={field}
-                          form={form}
-                          isDisabled={isDisabled}
-                        />
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="patientInfo.primary_insurance"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Primary Insurance</FormLabel>
-                          <FormControl>
-                            <Textarea
-                              {...field}
-                              placeholder="Insurance provider, policy number, etc."
-                              rows={3}
-                              disabled={isDisabled}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
                   </div>
                 </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Medical Attachments Tab */}
-            <TabsContent value="attachments">
-              <Card>
-                {!location?.state?.patientData?.id ? (
-                  <CardContent className="pt-6">
-                    <div className="space-y-6">
-                      {!isDisabled && (
-                        <div className="border p-4 rounded-md">
-                          <h3 className="text-lg font-medium mb-4">
-                            Add New Attachment
-                          </h3>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <Label htmlFor="file">File</Label>
-                              <Input
-                                id="file"
-                                name="file"
-                                type="file"
-                                onChange={handleAttachmentChange}
-                                accept=".pdf,.jpg,.dcm"
-                              />
-                              <p className="text-sm text-gray-500">
-                                Allowed formats: PDF, JPG, DCM
-                              </p>
-                            </div>
-
-                            <div className="space-y-2">
-                              <Label htmlFor="document_type">
-                                Document Type
-                              </Label>
-                              <Select
-                                onValueChange={(value) =>
-                                  setNewAttachment({
-                                    ...newAttachment,
-                                    document_type: value,
-                                  })
-                                }
-                                value={newAttachment.document_type}
-                              >
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select document type" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {documentTypeOptions.map((option) => (
-                                    <SelectItem key={option} value={option}>
-                                      {option.replace("_", " ")}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-
-                            <div className="space-y-2">
-                              <Label htmlFor="caption">Caption</Label>
-                              <Input
-                                id="caption"
-                                name="caption"
-                                value={newAttachment.caption}
-                                onChange={handleAttachmentChange}
-                              />
-                            </div>
-
-                            <div className="space-y-2">
-                              <Label htmlFor="description">Description</Label>
-                              <Input
-                                id="description"
-                                name="description"
-                                value={newAttachment.description}
-                                onChange={handleAttachmentChange}
-                              />
-                            </div>
-
-                            <div className="flex items-center space-x-2">
-                              <Checkbox
-                                id="is_sensitive"
-                                name="is_sensitive"
-                                checked={newAttachment.is_sensitive}
-                                onCheckedChange={(checked) =>
-                                  setNewAttachment({
-                                    ...newAttachment,
-                                    is_sensitive: checked,
-                                  })
-                                }
-                              />
-                              <Label htmlFor="is_sensitive">
-                                Sensitive Document
-                              </Label>
-                            </div>
-
-                            <div className="flex items-end">
-                              <Button type="button" onClick={addAttachment}>
-                                Add Attachment
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      <div>
-                        <h3 className="text-lg font-medium mb-4">
-                          Uploaded Attachments
-                        </h3>
-                        {!form.getValues("attachments") ||
-                        form.getValues("attachments").length === 0 ? (
-                          <p className="text-gray-500">
-                            No attachments uploaded yet.
-                          </p>
-                        ) : (
-                          <div className="space-y-4">
-                            {form.getValues("attachments").map((attachment) => (
-                              <div
-                                key={attachment.id}
-                                className="flex items-center justify-between border p-3 rounded-md"
-                              >
-                                <div>
-                                  <p className="font-medium">
-                                    {attachment.caption || "Unnamed Document"}
-                                  </p>
-                                  <p className="text-sm text-gray-600">
-                                    {attachment.document_type.replace("_", " ")}
-                                  </p>
-                                  <p className="text-sm">
-                                    {attachment.file?.name}
-                                  </p>
-                                </div>
-                                {!isDisabled && (
-                                  <Button
-                                    variant="destructive"
-                                    size="sm"
-                                    onClick={() =>
-                                      removeAttachment(attachment.id)
-                                    }
-                                  >
-                                    Remove
-                                  </Button>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                ) : (
-                  <div className="flex p-6">
-                    {/* message saying cannot add attachments while creating patient */}
-                    <p className="text-gray-500">
-                      Cannot add attachments while creating patient
-                    </p>
-                  </div>
-                )}
+                <CardFooter className="flex justify-between ">
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    onClick={() => navigate(-1 || "/dashboard/staff/doctors")}
+                  >
+                    {isDisabled ? "Back" : "Cancel"}
+                  </Button>
+                  {!isDisabled && (
+                    <Button type="submit">
+                      {mode === "create" ? "Create Doctor" : "Update Doctor"}
+                    </Button>
+                  )}
+                </CardFooter>
               </Card>
             </TabsContent>
           </Tabs>
 
           <div className="mt-6 flex justify-end space-x-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => navigate(-1)}
-            >
-              {isDisabled ? "Back" : "Cancel"}
-            </Button>
-            {!isDisabled && (
-              <Button type="submit">
-                {mode === "create" ? "Create Patient" : "Update Patient"}
-              </Button>
-            )}
             {isDisabled && (
               <Button
                 type="button"
@@ -1118,172 +1107,31 @@ export default function NewUser() {
 }
 
 // Known Allergies Field
-const KnownAllergiesField = ({ field, form, isDisabled }) => {
-  const [newAllergy, setNewAllergy] = useState({
-    substance: "",
-    reaction: "",
-    severity: "mild",
-  });
-
-  const addAllergy = () => {
-    if (newAllergy.substance && newAllergy.reaction) {
-      const updatedAllergies = [...field.value, newAllergy];
-      form.setValue("patientInfo.known_allergies", updatedAllergies);
-      setNewAllergy({ substance: "", reaction: "", severity: "mild" });
-    } else {
-      toast.error("Please fill in all fields before adding an allergy.");
-    }
-  };
-
-  const removeAllergy = (index) => {
-    // toast.promise before removing thats ask a user to confimr
-    toast.error("Are you sure you want to delete this allergy?", {
-      action: {
-        label: "Confirm",
-        onClick: () => {
-          const updatedAllergies = field.value.filter((_, i) => i !== index);
-          form.setValue("patientInfo.known_allergies", updatedAllergies);
-          toast.success("Allergy deleted successfully");
-          // logOut(); // Your logout function
-        },
-      },
-      cancel: {
-        label: "Cancel",
-        onClick: () => toast.dismiss(),
-      },
-      duration: Infinity, // Stays until user acts
-    });
-  };
-
-  return (
-    <FormItem>
-      <FormLabel>Known Allergies</FormLabel>
-      <FormControl>
-        <div className="space-y-4">
-          {field.value && field.value.length > 0 ? (
-            <div className="space-y-4">
-              {field.value.map((allergy, index) => (
-                <Card
-                  key={index}
-                  className="relative p-4 border border-gray-200 shadow-sm"
-                >
-                  {/* Delete Button in top right corner */}
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="icon"
-                    className="absolute right-3 top-3 h-6 w-6 te0"
-                    onClick={() => removeAllergy(index)}
-                    disabled={isDisabled}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-
-                  {/* Allergy Info Grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div>
-                      <p className="text-xs text-muted-foreground">Substance</p>
-                      <p className="text-sm font-medium">{allergy.substance}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Reaction</p>
-                      <p className="text-sm font-medium">{allergy.reaction}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Severity</p>
-                      <p className="text-sm font-medium capitalize">
-                        {allergy.severity || "mild"}
-                      </p>
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground italic">
-              No allergies added
-            </p>
-          )}
-
-          {!isDisabled && (
-            <div className="border border-gray-200 rounded-md p-3 bg-gray-50">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <Input
-                  placeholder="Substance"
-                  value={newAllergy.substance}
-                  onChange={(e) =>
-                    setNewAllergy({ ...newAllergy, substance: e.target.value })
-                  }
-                />
-                <Input
-                  placeholder="Reaction"
-                  value={newAllergy.reaction}
-                  onChange={(e) =>
-                    setNewAllergy({ ...newAllergy, reaction: e.target.value })
-                  }
-                />
-                <Select
-                  value={newAllergy.severity}
-                  onValueChange={(value) =>
-                    setNewAllergy({ ...newAllergy, severity: value })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Severity" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="mild">Mild</SelectItem>
-                    <SelectItem value="moderate">Moderate</SelectItem>
-                    <SelectItem value="severe">Severe</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="mt-3 w-full"
-                onClick={addAllergy}
-              >
-                <PlusCircle className="h-4 w-4 mr-2" />
-                Add Allergy
-              </Button>
-            </div>
-          )}
-        </div>
-      </FormControl>
-      <FormDescription>Add details for each allergy</FormDescription>
-      <FormMessage />
-    </FormItem>
-  );
-};
-
-// Permanent Medications Field
-const PermanentMedicationsField = ({ field, form, isDisabled }) => {
-  const [newMedication, setNewMedication] = useState({
+const CertificationsField = ({ field, form, isDisabled }) => {
+  const [newCert, setNewCert] = useState({
     name: "",
-    dosage: "",
-    frequency: "",
+    issuing_body: "",
+    issued_date: "",
   });
 
-  const addMedication = () => {
-    if (newMedication.name && newMedication.dosage && newMedication.frequency) {
-      const updatedMedications = [...field.value, newMedication];
-      form.setValue("patientInfo.permanent_medications", updatedMedications);
-      setNewMedication({ name: "", dosage: "", frequency: "" });
+  const addCertification = () => {
+    if (newCert.name && newCert.issuing_body && newCert.issued_date) {
+      const updatedCerts = [...field.value, newCert];
+      form.setValue("clinician_profile.certifications", updatedCerts);
+      setNewCert({ name: "", issuing_body: "", issued_date: "" });
+    } else {
+      toast.error("Please fill in all fields before adding a certification.");
     }
   };
 
-  const removeMedication = (index) => {
-    toast.error("Are you sure you want to remove this medication?", {
+  const removeCertification = (index) => {
+    toast.error("Are you sure you want to delete this certification?", {
       action: {
         label: "Confirm",
         onClick: () => {
-          const updatedMedications = field.value.filter((_, i) => i !== index);
-          form.setValue(
-            "patientInfo.permanent_medications",
-            updatedMedications
-          );
+          const updated = field.value.filter((_, i) => i !== index);
+          form.setValue("clinician_profile.certifications", updated);
+          toast.success("Certification removed");
         },
       },
       cancel: {
@@ -1292,161 +1140,57 @@ const PermanentMedicationsField = ({ field, form, isDisabled }) => {
       },
       duration: Infinity,
     });
-    // const updatedMedications = field.value.filter((_, i) => i !== index);
-    // form.setValue("patientInfo.permanent_medications", updatedMedications);
   };
 
   return (
     <FormItem>
-      <FormLabel>Permanent Medications</FormLabel>
+      <FormLabel>Certifications</FormLabel>
       <FormControl>
         <div className="space-y-4">
           {field.value && field.value.length > 0 ? (
-            <div className="space-y-2">
-              {field.value.map((medication, index) => (
-                <Card key={index} className="p-3 relative pr-10">
+            <div className="space-y-4">
+              {field.value.map((cert, index) => (
+                <Card
+                  key={index}
+                  className="relative p-4 border border-gray-200 shadow-sm"
+                >
                   <Button
                     type="button"
                     variant="destructive"
                     size="icon"
-                    className="absolute right-2 top-2 h-6 w-6"
-                    onClick={() => removeMedication(index)}
+                    className="absolute right-3 top-3 h-6 w-6"
+                    onClick={() => removeCertification(index)}
                     disabled={isDisabled}
                   >
                     <X className="h-4 w-4" />
                   </Button>
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div>
-                      <p className="text-xs text-gray-500">Name</p>
-                      <p className="text-sm">{medication.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        Certification
+                      </p>
+                      <p className="text-sm font-medium">{cert.name}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500">Dosage</p>
-                      <p className="text-sm">{medication.dosage}</p>
+                      <p className="text-xs text-muted-foreground">
+                        Issuing Body
+                      </p>
+                      <p className="text-sm font-medium">{cert.issuing_body}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500">Frequency</p>
-                      <p className="text-sm">{medication.frequency}</p>
+                      <p className="text-xs text-muted-foreground">
+                        Issued Date
+                      </p>
+                      <p className="text-sm font-medium">{cert.issued_date}</p>
                     </div>
                   </div>
                 </Card>
               ))}
             </div>
           ) : (
-            <p className="text-sm text-gray-500 italic">No medications added</p>
-          )}
-
-          {!isDisabled && (
-            <div className="border border-gray-200 rounded-md p-3 bg-gray-50">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <Input
-                  placeholder="Medication Name"
-                  value={newMedication.name}
-                  onChange={(e) =>
-                    setNewMedication({ ...newMedication, name: e.target.value })
-                  }
-                />
-                <Input
-                  placeholder="Dosage"
-                  value={newMedication.dosage}
-                  onChange={(e) =>
-                    setNewMedication({
-                      ...newMedication,
-                      dosage: e.target.value,
-                    })
-                  }
-                />
-                <Input
-                  placeholder="Frequency"
-                  value={newMedication.frequency}
-                  onChange={(e) =>
-                    setNewMedication({
-                      ...newMedication,
-                      frequency: e.target.value,
-                    })
-                  }
-                />
-              </div>
-              <Button
-                type="button"
-                variant="info"
-                size="sm"
-                className="mt-3 w-full"
-                onClick={addMedication}
-              >
-                <PlusCircle className="h-4 w-4 mr-2" />
-                Add Medication
-              </Button>
-            </div>
-          )}
-        </div>
-      </FormControl>
-      <FormDescription>Add details for each medication</FormDescription>
-      <FormMessage />
-    </FormItem>
-  );
-};
-
-// Emergency Contacts Field
-const EmergencyContactsField = ({ field, form, isDisabled }) => {
-  const [newContact, setNewContact] = useState({
-    name: "",
-    relationship: "",
-    phone: "",
-  });
-
-  const addContact = () => {
-    if (newContact.name && newContact.relationship && newContact.phone) {
-      const updatedContacts = [...field.value, newContact];
-      form.setValue("patientInfo.emergency_contacts", updatedContacts);
-      setNewContact({ name: "", relationship: "", phone: "" });
-    }
-  };
-
-  const removeContact = (index) => {
-    const updatedContacts = field.value.filter((_, i) => i !== index);
-    form.setValue("patientInfo.emergency_contacts", updatedContacts);
-  };
-
-  return (
-    <FormItem>
-      <FormLabel>Emergency Contacts</FormLabel>
-      <FormControl>
-        <div className="space-y-4">
-          {field.value && field.value.length > 0 ? (
-            <div className="space-y-2">
-              {field.value.map((contact, index) => (
-                <Card key={index} className="p-3 relative pr-10">
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="icon"
-                    className="absolute right-2 top-2 h-6 w-6"
-                    onClick={() => removeContact(index)}
-                    disabled={isDisabled}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div>
-                      <p className="text-xs text-gray-500">Name</p>
-                      <p className="text-sm">{contact.name}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500">Relationship</p>
-                      <p className="text-sm">{contact.relationship}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500">Phone</p>
-                      <p className="text-sm">{contact.phone}</p>
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-gray-500 italic">
-              No emergency contacts added
+            <p className="text-sm text-muted-foreground italic">
+              No certifications added
             </p>
           )}
 
@@ -1454,27 +1198,25 @@ const EmergencyContactsField = ({ field, form, isDisabled }) => {
             <div className="border border-gray-200 rounded-md p-3 bg-gray-50">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <Input
-                  placeholder="Contact Name"
-                  value={newContact.name}
+                  placeholder="Certification Name"
+                  value={newCert.name}
                   onChange={(e) =>
-                    setNewContact({ ...newContact, name: e.target.value })
+                    setNewCert({ ...newCert, name: e.target.value })
                   }
                 />
                 <Input
-                  placeholder="Relationship"
-                  value={newContact.relationship}
+                  placeholder="Issuing Body"
+                  value={newCert.issuing_body}
                   onChange={(e) =>
-                    setNewContact({
-                      ...newContact,
-                      relationship: e.target.value,
-                    })
+                    setNewCert({ ...newCert, issuing_body: e.target.value })
                   }
                 />
                 <Input
-                  placeholder="Phone Number"
-                  value={newContact.phone}
+                  type="date"
+                  placeholder="Issued Date"
+                  value={newCert.issued_date}
                   onChange={(e) =>
-                    setNewContact({ ...newContact, phone: e.target.value })
+                    setNewCert({ ...newCert, issued_date: e.target.value })
                   }
                 />
               </div>
@@ -1483,17 +1225,20 @@ const EmergencyContactsField = ({ field, form, isDisabled }) => {
                 variant="outline"
                 size="sm"
                 className="mt-3 w-full"
-                onClick={addContact}
+                onClick={addCertification}
               >
                 <PlusCircle className="h-4 w-4 mr-2" />
-                Add Contact
+                Add Certification
               </Button>
             </div>
           )}
         </div>
       </FormControl>
-      <FormDescription>Add emergency contact details</FormDescription>
+      <FormDescription>
+        Add board certifications and qualifications.
+      </FormDescription>
       <FormMessage />
     </FormItem>
   );
 };
+

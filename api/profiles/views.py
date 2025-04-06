@@ -12,6 +12,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import filters,status, viewsets
+from rest_framework.exceptions import ValidationError as DRFValidationError
+from rest_framework.pagination import PageNumberPagination
 
 from rest_framework_simplejwt.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -20,11 +22,12 @@ from rest_framework.permissions import IsAuthenticated
 from .permissions import IsAdmin, IsDoctor, IsPatient
 
 import requests
+import json
 from decouple import config
 
 
 from profiles.services.emails import send_login_email,send_custom_email,send_welcome_email
-from .models import HealthcareUser
+from .models import HealthcareUser, Patient, Doctor
 from .serializers import *
 
 ENVIRONMENT = config('ENVIRONMENT', default="development")
@@ -320,15 +323,158 @@ class AllUserView(APIView,AuthenticationMixin):
 # ----------------------- DRF’s Generic Views for all users
 class UserList(viewsets.ModelViewSet):
     """
-    Example usage in URL:
-    GET /users/?role=DOCTOR
-    GET /users/?role=DOCTOR&status=ACTIVE
-    GET /users/?search=jane
-    GET /users/?ordering=date_of_birth
-    
-    A viewset for viewing and editing user instances.
+    API endpoint that allows users to be viewed or edited.
+
+    * `list`: Returns a list of all users.
+    * `retrieve`: Returns the specified user.
+    * `create`: Creates a new user.
+    * `update`: Updates the specified user.
+    * `destroy`: Deletes the specified user.
     """
     serializer_class = UserSerializer
+
+    def create(self, request, *args, **kwargs):
+        try:
+            data = request.data.copy()
+            serializer = self.get_serializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+            return Response(serializer.data, status=201, headers=headers)
+        
+        except DRFValidationError as ve:
+            # This will catch both serializer validation errors and our converted integrity errors
+            return Response(ve.detail, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({
+                "error": "Failed to create user",
+                "details": str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
+            
+    
+    def perform_create(self, serializer):
+        print("perform_create method is called")
+        try:
+            with transaction.atomic():
+                validated_data = serializer.validated_data
+                
+                profile_image_data = validated_data.pop('profile_image', None)
+                patient_data = validated_data.pop('patient_profile', None)
+                doctor_data = validated_data.pop('clinician_profile', None)
+                print("data",doctor_data)
+
+                validated_data['password'] = make_password(validated_data['password'])
+                
+                # Create user instance
+                user = serializer.save(**validated_data)
+                print("User Created:", user)
+
+                # Handle profile image
+                if profile_image_data and profile_image_data.get('image'):
+                    ProfileImage.objects.create(user=user, **profile_image_data)
+                
+                # Handle role-specific profiles
+                if user.role == UserRole.PATIENT and patient_data:
+                    Patient.objects.create(user=user, **patient_data)
+                    
+                elif user.role == UserRole.CLINICIAN and doctor_data:
+                    specializations = doctor_data.pop('specializations', [])
+                    doctor = Doctor.objects.create(
+                        user=user,
+                        **doctor_data
+                    )
+                    doctor.specializations.set([s['id'] for s in specializations])
+                    user.status = UserStatus.PENDING_VERIFICATION
+                    user.save()
+                    
+                elif user.role == UserRole.SYSTEM_ADMIN:
+                    # Handle admin specific logic if needed
+                    pass
+                    
+                elif user.role == UserRole.NURSE:
+                    # Handle nurse specific logic if needed
+                    pass
+                    
+                elif user.role == UserRole.SUPPORT_STAFF:
+                    # Handle support staff specific logic if needed
+                    pass
+        except serializers.ValidationError as ve:
+            raise ve  # Re-raise validation errors          
+        except Exception as e:
+            raise serializers.ValidationError({
+                "error": "Failed to create user", 
+                "details": str(e)
+            })
+            
+            
+                        # Parse JSON strings if they exist
+            # if 'user_data' in data:
+            #     try:
+            #         user_data = json.loads(data['user_data'])
+            #         data.update(user_data)
+            #         del data['user_data']
+            #     except json.JSONDecodeError as e:
+            #         return Response({"error": "Invalid user_data JSON"}, status=400)
+
+            # if 'clinician_profile' in data and isinstance(data['clinician_profile'], str):
+            #     try:
+            #         data['clinician_profile'] = json.loads(data['clinician_profile'])
+            #     except json.JSONDecodeError as e:
+            #         return Response({"error": "Invalid clinician_profile JSON"}, status=400)
+
+            # if 'patient_profile' in data and isinstance(data['patient_profile'], str):
+            #     try:
+            #         data['patient_profile'] = json.loads(data['patient_profile'])
+            #     except json.JSONDecodeError as e:
+            #         return Response({"error": "Invalid patient_profile JSON"}, status=400)
+
+    
+    def perform_update(self, serializer):
+        instance = serializer.instance
+        validated_data = serializer.validated_data
+        
+        try:
+            with transaction.atomic():
+                # Handle profile image updates
+                profile_image_data = validated_data.pop('profile_image', None)
+                if profile_image_data:
+                    if instance.profile_image:
+                        # Update existing
+                        for attr, value in profile_image_data.items():
+                            setattr(instance.profile_image, attr, value)
+                        instance.profile_image.save()
+                    else:
+                        # Create new
+                        ProfileImage.objects.create(user=instance, **profile_image_data)
+                
+                # Handle role-specific profile updates
+                if instance.role == UserRole.PATIENT:
+                    patient_data = validated_data.pop('patient_profile', None)
+                    if patient_data and hasattr(instance, 'patient_profile'):
+                        for attr, value in patient_data.items():
+                            setattr(instance.patient_profile, attr, value)
+                        instance.patient_profile.save()
+                        
+                elif instance.role == UserRole.CLINICIAN:
+                    doctor_data = validated_data.pop('clinician_profile', None)
+                    if doctor_data and hasattr(instance, 'clinician_profile'):
+                        specializations_data = doctor_data.pop('specializations', None)
+                        for attr, value in doctor_data.items():
+                            setattr(instance.clinician_profile, attr, value)
+                        instance.clinician_profile.save()
+                        if specializations_data:
+                            instance.clinician_profile.specializations.set(
+                                [s['id'] for s in specializations_data]
+                            )
+                
+                # Update the user instance
+                serializer.save()
+                
+        except Exception as e:
+            raise serializers.ValidationError({
+                "error": "Failed to update user", 
+                "details": str(e)
+            })
     
     def get_queryset(self):
         queryset = HealthcareUser.objects.all().select_related(
@@ -362,3 +508,6 @@ class UserList(viewsets.ModelViewSet):
             )
             
         return queryset
+    
+    
+        

@@ -1,6 +1,6 @@
 import {create} from "zustand";
 import { devtools, persist } from "zustand/middleware";
-import { apiClient1 } from "../services/apiClient";
+import { apiClient1, apiClient2 } from "../services/apiClient";
 import { toast } from "sonner";
 
 export const staffStore = create(
@@ -118,9 +118,18 @@ export const staffStore = create(
           try {
             const response = await apiClient1.post("/profiles/users/", data);
             if (response.status === 201) {
-              set((state) => ({
-                patients: [...state.patients, response.data],
-              }));
+              // if role is patient else save to doctor
+              if (response?.data?.role === "patient") {
+                set((state) => ({
+                  patients: [...state.patients, response.data],
+                }));
+                
+              }else if (response?.data?.role === "clinician") {
+                set((state) => ({
+                  doctors: [...state.doctors, response.data],
+                }));
+              }
+
               return response;
             }
           } catch (error) {

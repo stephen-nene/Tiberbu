@@ -84,7 +84,7 @@ function SelectContent({ className, children, position = "popper", ...props }) {
         data-slot="select-content"
         className={cn(
           // Base styles
-          "relative z-50 min-w-[8rem] overflow-hidden rounded-md border shadow-md",
+          "relative z-50 min-w-[8rem] max-h-100 overflow-y-auto overflow-hidden rounded-md border shadow-md",
           "bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100",
 
           // Animations
