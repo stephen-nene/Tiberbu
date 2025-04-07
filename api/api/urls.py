@@ -29,11 +29,11 @@ from django.conf import settings
 
 schema_view = get_schema_view(
    openapi.Info(
-      title="Your API Title",
+      title="tibERbu API",
       default_version='v1',
-      description="API documentation for your backend",
-      terms_of_service="https://yourwebsite.com/terms/",
-      contact=openapi.Contact(email="contact@example.com"),
+      description="API documentation for tibERbu hospital management System",
+      terms_of_service="https://stevenene.vercel.app",
+      contact=openapi.Contact(email="stevekid705@gmail.com"),
       license=openapi.License(name="MIT License"),
    ),
    public=True,

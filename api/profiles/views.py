@@ -12,13 +12,13 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import filters,status, viewsets
-from rest_framework.exceptions import ValidationError as DRFValidationError
+from rest_framework.exceptions import ValidationError as DRFValidationError, NotFound
 from rest_framework.pagination import PageNumberPagination
 
 from rest_framework_simplejwt.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken,AccessToken
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, IsAuthenticatedOrReadOnly
 from .permissions import IsAdmin, IsDoctor, IsPatient
 
 import requests
@@ -29,6 +29,9 @@ from decouple import config
 from profiles.services.emails import send_login_email,send_custom_email,send_welcome_email
 from .models import HealthcareUser, Patient, Doctor
 from .serializers import *
+
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 ENVIRONMENT = config('ENVIRONMENT', default="development")
 
@@ -138,6 +141,7 @@ class FunnyAPIView(View):
 # ----------------- Authentication Views -----------------
 
 class AuthenticationMixin:
+
     def get_authenticated_user(self, request):
         # Try with access token first
         access_token = request.COOKIES.get('access')
@@ -176,16 +180,66 @@ class AuthenticationMixin:
 # ---------------------   login   ---------------------
 
 class CustomLoginView(AuthenticationMixin,APIView):
+
+
+    @swagger_auto_schema(
+        operation_summary="Retrieve authenticated user info with tokens",
+        tags=["Authentication"],
+        responses={
+            200: openapi.Response(
+                description="User info with JWT tokens",
+                examples={
+                    "application/json": {
+                        "message": "User authenticated.",
+                        "User": {"id": "...", "username": "..."},
+                        "access": "jwt_access_token",
+                        "refresh": "jwt_refresh_token"
+                    }
+                }
+            ),
+            401: "Unauthorized, please log in."
+        }
+    )
     def get(self, request):
         user, response = self.get_authenticated_user(request) 
         serialized_user = UserSerializer(user).data
+
+                # Always issue new tokens in response
+        refresh = RefreshToken.for_user(user)
+        access = str(refresh.access_token)
+        refresh = str(refresh)
+
+        data = {
+            "message": "User authenticated.",
+            'User': serialized_user,
+            'access': access,
+            'refresh': refresh
+        }
+
         
         if response:
-            response.data = {'User': serialized_user}
+            response.set_cookie('refresh', refresh, httponly=True, samesite='None' if is_production else 'None', secure=True)
+            response.set_cookie('access', access, httponly=True, samesite='None' if is_production else 'None', secure=True)
+            response.data = data
             return response
         
-        return Response({'User': serialized_user})
-      
+        return Response(data)
+    @swagger_auto_schema(
+        operation_description="Login a user",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['identifier', 'password'],
+            properties={
+                'identifier': openapi.Schema(type=openapi.TYPE_STRING, description='Email, phone or username'),
+                'password': openapi.Schema(type=openapi.TYPE_STRING, description='User password'),
+            },
+        ),
+        responses={200: 'Login successful'},
+        tags=["Authentication"]
+    )
+    # @swagger_auto_schema(
+    #     operation_description="Login a user",
+    # )
     def post(self, request):
         # Get the login credentials
         # print(request.data)
@@ -198,7 +252,7 @@ class CustomLoginView(AuthenticationMixin,APIView):
         # user = HealthcareUser.objects.filter(email=identifier).first() or \
         #        HealthcareUser.objects.filter(phone_number=identifier).first() or \
         #        HealthcareUser.objects.filter(username=identifier).first()
-        
+
         user = HealthcareUser.objects.filter(
             Q(email=identifier) | Q(phone_number=identifier) | Q(username=identifier)
         ).first()
@@ -219,7 +273,9 @@ class CustomLoginView(AuthenticationMixin,APIView):
         serialized_user = UserSerializer(user).data
         response = Response({
             "message": "Login successful.",
-            "User": serialized_user
+            "User": serialized_user,
+            "access": str(refresh.access_token),
+            "refresh": str(refresh)
         })
         response.set_cookie(
             key='access',
@@ -239,6 +295,11 @@ class CustomLoginView(AuthenticationMixin,APIView):
         return response
     
 class UserCreateView(APIView):
+    @swagger_auto_schema(
+        operation_description="Create a new user",
+        tags=["Authentication"]
+    )
+    # @swagger_auto_schema(auto_schema=None)
     def post(self, request):
         try:
             serializer = UserSerializer(data=request.data)
@@ -256,11 +317,23 @@ class UserCreateView(APIView):
             )
 
 class ResetPasswordView(APIView):
+    @swagger_auto_schema(
+        operation_description="Reset a user's password",
+        tags=["Authentication"]
+    )
+    # @swagger_auto_schema(auto_schema=None)
     def post(self, request):
         # take the token and the new passwords all over again
         pass
     
 class ForgotPasswordView(APIView):
+    @swagger_auto_schema(
+        operation_description="Forgot a user's password",
+        tags=["Authentication"],
+        
+    )
+    # @swagger_auto_schema(auto_schema=None)
+
     def post(self, request):
         # take the email and then chack in db and send email with reset instaructiosn and link
         pass
@@ -268,6 +341,10 @@ class ForgotPasswordView(APIView):
 # ---------------------   logout   ---------------------
 
 class LogoutView(APIView):
+    @swagger_auto_schema(
+        operation_description="Logout a user",
+        tags=["Authentication"]
+    )
     def post(self, request):
         try:
             response = Response({"message": "Logout successful."}, status=status.HTTP_200_OK)
@@ -300,6 +377,10 @@ def signup(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class MeView(APIView, AuthenticationMixin):
+    @swagger_auto_schema(
+        operation_description="Gets logged in User",
+        tags=["Authentication"]
+    )
     def get(self, request):
         user, response = self.get_authenticated_user(request) 
         serialized_user = UserSerializer(user).data
@@ -337,7 +418,45 @@ class UserList(viewsets.ModelViewSet):
     """
     serializer_class = UserSerializer
     docserializer = DoctorProfileSerializer
+    permission_classes = [IsAuthenticated,IsAdmin]
 
+    # -------------------------
+    # 🟩 LIST
+    # -------------------------
+    @swagger_auto_schema(
+        operation_summary="List healthcare users",
+        operation_description="Returns a list of healthcare users filtered by optional query params.",
+        manual_parameters=[
+            openapi.Parameter('role', openapi.IN_QUERY, description="Filter by role", type=openapi.TYPE_STRING),
+            openapi.Parameter('status', openapi.IN_QUERY, description="Filter by status", type=openapi.TYPE_STRING),
+            openapi.Parameter('gender', openapi.IN_QUERY, description="Filter by gender", type=openapi.TYPE_STRING),
+            openapi.Parameter('blood_group', openapi.IN_QUERY, description="Filter by blood group", type=openapi.TYPE_STRING),
+            openapi.Parameter('search', openapi.IN_QUERY, description="Search in name/email/username", type=openapi.TYPE_STRING),
+        ],
+        tags=["Healthcare Users"]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    # -------------------------
+    # 🟨 RETRIEVE
+    # -------------------------
+    @swagger_auto_schema(
+        operation_summary="Retrieve a specific user",
+        operation_description="Returns the details of a user by ID.",
+        tags=["Healthcare Users"]
+    )
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+    
+    # -------------------------
+    # 🟦 CREATE
+    # -------------------------
+    @swagger_auto_schema(
+        operation_summary="Create a new user",
+        operation_description="Creates a new user (doctor/patient) with required details.",
+        tags=["Healthcare Users"]
+    )
     def create(self, request, *args, **kwargs):
         try:
             data = request.data.copy()
@@ -451,8 +570,15 @@ class UserList(viewsets.ModelViewSet):
             #     except json.JSONDecodeError as e:
             #         return Response({"error": "Invalid patient_profile JSON"}, status=400)
 
-    
-    def perform_update(self, serializer):
+   # -------------------------
+    # 🟧 UPDATE (PUT)
+    # -------------------------
+    @swagger_auto_schema(
+        operation_summary="Update a user (full)",
+        operation_description="Fully updates a user by replacing all fields.",
+        tags=["Healthcare Users"]
+    )
+    def update(self, serializer):
         instance = serializer.instance
         validated_data = serializer.validated_data
         
@@ -499,29 +625,44 @@ class UserList(viewsets.ModelViewSet):
                 "details": str(e)
             })
     
+        
+    # -------------------------
+    # 🟫 PARTIAL UPDATE (PATCH)
+    # -------------------------
+    @swagger_auto_schema(
+        operation_summary="Update a user (partial)",
+        operation_description="Partially updates user fields (PATCH).",
+        tags=["Healthcare Users"]
+    )
+    def partial_update(self, request, *args, **kwargs):
+        return super().partial_update(request, *args, **kwargs)
+
+    # -------------------------
+    # 🟥 DELETE
+    # -------------------------
+    @swagger_auto_schema(
+        operation_summary="Delete a user",
+        operation_description="Deletes a user from the system.",
+        tags=["Healthcare Users"]
+    )
+    def destroy(self, request, *args, **kwargs):
+        return super().destroy(request, *args, **kwargs)
+    
+
     def get_queryset(self):
         queryset = HealthcareUser.objects.all().select_related(
-            'patient_profile', 'clinician_profile','profile_image'
+            'patient_profile', 'clinician_profile', 'profile_image'
         ).prefetch_related(
-            'clinician_profile__specializations'  # Prefetch many-to-many relationship
+            'clinician_profile__specializations'
         )
-        
-        # Apply filters
-        role = self.request.query_params.get('role', None)
-        status = self.request.query_params.get('status', None)
-        gender = self.request.query_params.get('gender', None)
-        blood_group = self.request.query_params.get('blood_group', None)
-        
-        if role:
-            queryset = queryset.filter(role=role)
-        if status:
-            queryset = queryset.filter(status=status)
-        if gender:
-            queryset = queryset.filter(gender=gender)
-        if blood_group:
-            queryset = queryset.filter(blood_group=blood_group)
-            
-        search = self.request.query_params.get('search', None)
+
+        filters = ['role', 'status', 'gender', 'blood_group']
+        for f in filters:
+            value = self.request.query_params.get(f)
+            if value:
+                queryset = queryset.filter(**{f: value})
+
+        search = self.request.query_params.get('search')
         if search:
             queryset = queryset.filter(
                 Q(username__icontains=search) |
@@ -529,8 +670,26 @@ class UserList(viewsets.ModelViewSet):
                 Q(first_name__icontains=search) |
                 Q(last_name__icontains=search)
             )
-            
+
+        if not queryset.exists():
+            raise NotFound(detail="No users found matching the given criteria.")
+
         return queryset
+
+    @swagger_auto_schema(
+        operation_summary="List healthcare users",
+        operation_description="Returns a list of healthcare users with optional filters like role, status, gender, blood_group, and search.",
+        manual_parameters=[
+            openapi.Parameter('role', openapi.IN_QUERY, description="Filter by user role (e.g., PATIENT, DOCTOR)", type=openapi.TYPE_STRING),
+            openapi.Parameter('status', openapi.IN_QUERY, description="Filter by account status", type=openapi.TYPE_STRING),
+            openapi.Parameter('gender', openapi.IN_QUERY, description="Filter by gender", type=openapi.TYPE_STRING),
+            openapi.Parameter('blood_group', openapi.IN_QUERY, description="Filter by blood group", type=openapi.TYPE_STRING),
+            openapi.Parameter('search', openapi.IN_QUERY, description="Search across username, email, first name, last name", type=openapi.TYPE_STRING),
+        ],
+        tags=["Healthcare Users"]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
     
     
         
