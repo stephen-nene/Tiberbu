@@ -114,17 +114,11 @@ export const manageStore = create(
               data
             );
 
-            // Log the response for debugging
-            console.log("Response:", response);
-            if (response.status === 201) {
-              toast.success("Availability saved successfully!", {
-                id: toastId,
-              });
-              return response.status;
-            }
+            return response;
           } catch (error) {
-            console.error("Error saving availability:", error);
-            toast.error("Failed to save availability", { id: toastId });
+            // console.error("Error saving availability:", error);
+            //   toast.error("Failed to save availability", { id: toastId });
+              throw error;
           } finally {
             toast.dismiss(toastId);
             set({ loading: false });

@@ -41,19 +41,29 @@ import { Switch } from "@/components/shadcn/switch";
 import { Checkbox } from "@/components/shadcn/checkbox";
 import { Textarea } from "@/components/shadcn/textarea";
 
+// const availabilitySchema = z.object({
+//   doctor: z.string({
+//     required_error: "Please select a doctor",
+//   }),
+//   weekday: z.string({
+//     required_error: "Please select a day of the week",
+//   }),
+//   start_time: z.string({
+//     required_error: "Please select a start time",
+//   }),
+//   end_time: z.string({
+//     required_error: "Please select an end time",
+//   }),
+//   is_available: z.boolean().default(true),
+//   is_recurring: z.boolean().default(true),
+//   override_reason: z.string().optional(),
+// });
+
 const availabilitySchema = z.object({
-  doctor: z.string({
-    required_error: "Please select a doctor",
-  }),
-  weekday: z.string({
-    required_error: "Please select a day of the week",
-  }),
-  start_time: z.string({
-    required_error: "Please select a start time",
-  }),
-  end_time: z.string({
-    required_error: "Please select an end time",
-  }),
+  doctor: z.string().min(1, "Please select a doctor"),
+  weekday: z.string().min(1, "Please select a day of the week"),
+  start_time: z.string().min(1, "Please select a start time"),
+  end_time: z.string().min(1, "Please select an end time"),
   is_available: z.boolean().default(true),
   is_recurring: z.boolean().default(true),
   override_reason: z.string().optional(),
@@ -125,11 +135,19 @@ export default function NewAvailability() {
         weekday: parseInt(data.weekday),
       };
 
-      console.log("Submitting availability:", formattedData);
-      await createAvailability(formattedData);
-      navigate("/dashboard/availability");
+      // console.log("Submitting availability:", formattedData);
+      const response = await createAvailability(formattedData);
+      // Log the response for debugging
+      console.log("Response:", response);
+      if (response.status === 201) {
+        toast.success("Availability saved successfully!", {
+          id: toastId,
+        });
+
+        navigate("/dashboard/availability");
+      }
     } catch (error) {
-      console.error("Failed to create availability:", error);
+      console.error("Failed to create availability:", error.response);
     } finally {
       setIsSubmitting(false);
     }
@@ -141,7 +159,7 @@ export default function NewAvailability() {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => navigate("/availabilities")}
+          onClick={() => navigate("/dashboard/availability")}
           className="mb-4"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
@@ -168,38 +186,43 @@ export default function NewAvailability() {
                 <FormField
                   control={form.control}
                   name="doctor"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Doctor</FormLabel>
-                      <Select
-                        disabled={isClinicianUser}
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a doctor" />
-                            {console.log(doctors)}
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {doctors.map((doctor) => (
-                            <SelectItem key={doctor.id} value={doctor.id}>
-                              {`${doctor.username} - ${
-                                doctor.email || doctor.id.substring(0, 8)
-                              }`}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {isClinicianUser && (
-                        <FormDescription>
-                          You can only create availabilities for yourself
-                        </FormDescription>
-                      )}
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  render={({ field }) => {
+
+                    return (
+                      <FormItem>
+                        <FormLabel>Doctor</FormLabel>
+                        <Select
+                          disabled={isClinicianUser}
+                          onValueChange={field.onChange}
+                          value={field.value}
+                          defaultValue={field.value} // Add this
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a doctor" />
+                              {/* {console.log(doctors)} */}
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {doctors.map((doctor) => (
+                              <SelectItem key={doctor.id} value={doctor.id}>
+                                {`${doctor.username} - ${
+                                  doctor.email || doctor.id.substring(0, 8)
+                                }`}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {isClinicianUser && (
+                          <FormDescription>
+                            You can only create availabilities for yourself
+                          </FormDescription>
+                        )}
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }
+                }
                 />
 
                 {/* Weekday Selection */}
@@ -337,8 +360,8 @@ export default function NewAvailability() {
               <div className="flex justify-end space-x-4">
                 <Button
                   type="button"
-                  variant="outline"
-                  onClick={() => navigate("/availabilities")}
+                  variant="destructive"
+                  onClick={() => navigate(-1||"/dashboard/availability")}
                 >
                   Cancel
                 </Button>

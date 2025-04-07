@@ -8,6 +8,7 @@ import {
   X,
   Grid,
   List,
+  Plus 
 } from "lucide-react";
 import { Button } from "@/components/shadcn/button";
 import { Input } from "@/components/shadcn/input";
@@ -34,6 +35,7 @@ import {
 } from "@/components/shadcn/select";
 import { Badge } from "@/components/shadcn/badge";
 import { manageStore } from "@/store/manageStore";
+import { useNavigate } from "react-router-dom";
 
 export default function Availability() {
   const fetchAvailabilities = manageStore((state) => state.fetchAvailabilities);
@@ -46,6 +48,8 @@ export default function Availability() {
     timeFrom: "",
     timeTo: "",
   });
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchAvailabilities();
@@ -102,7 +106,7 @@ export default function Availability() {
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Availability Schedule</h1>
+        {/* <h1 className="text-2xl font-bold">Availabilities</h1> */}
         <div className="flex gap-2">
           <div className="border-0 rounded-md flex gap-2 items-center">
             <Button
@@ -129,6 +133,10 @@ export default function Availability() {
           <Button onClick={() => fetchAvailabilities()}>
             <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
+          </Button>
+          <Button onClick={() => navigate('new') }>
+            <Plus  className="h-4 w-4 mr-2" />
+            New
           </Button>
         </div>
       </div>
@@ -316,7 +324,7 @@ export default function Availability() {
               {availabilities.map((availability) => (
                 <TableRow key={availability.id}>
                   <TableCell className="font-medium">
-                    {availability.doctor_detail.user?.username||"N/A"}
+                    {availability.doctor_detail.user?.username || "N/A"}
                     {/* {availability.doctor.substring(0, 8)}... */}
                   </TableCell>
                   <TableCell>{getWeekdayName(availability.weekday)}</TableCell>
