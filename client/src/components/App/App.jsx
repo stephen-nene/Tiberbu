@@ -87,12 +87,12 @@ const App = React.forwardRef((props, ref) => {
       {!isDashboard && <Navbar />}
 
       <div className="bg-white dark:bg-gray-950 dark:text-white   min-h-screen ">
-        {/* <ComingSoon /> */}
+        <ComingSoon />
         {/* <ComingSoon2 /> */}
-        <Routes>{routes.map(renderRoute)}</Routes>
+        {/* <Routes>{routes.map(renderRoute)}</Routes> */}
       </div>
       {/* <Footer /> */}
-      {!isDashboard && <Footer />}
+      {/* {!isDashboard && <Footer />} */}
       <Toaster
         visibleToasts={4}
         richColors={true}
