@@ -7,7 +7,7 @@ from .models import Specialization,Availability,Appointment
 from .serializers import SpecializationSerializer,AvailabilitySerializer, AppointmentSerializer
 from django.shortcuts import get_object_or_404
 
-from profiles.permissions import IsAdminUserCustom
+# from profiles.permissions import IsAdminUserCustom
 
 from datetime import datetime, date, timedelta
 from drf_yasg.utils import swagger_auto_schema
@@ -24,22 +24,55 @@ class SpecializationViewSet(viewsets.ModelViewSet):
     #     if self.action in ['create', 'update', 'partial_update', 'destroy', 'toggle_active']:
     #         return [IsAdminUserCustom()]
     #     return [permissions.AllowAny()]
-    tag = ['Specializations']
-    
+
     @swagger_auto_schema(
         operation_description="Retrieve a list of all specializations",
-        responses={200: SpecializationSerializer(many=True)}
+        responses={200: SpecializationSerializer(many=True)},
+        tags=['Specializations']
     )
+    
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
     
     @swagger_auto_schema(
         operation_description="Create a new specialization",
         request_body=SpecializationSerializer,
-        responses={201: SpecializationSerializer}
+        responses={201: SpecializationSerializer},
+        tags=['Specializations']
     )
     def create(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_summary="Partially update a specialization",
+        operation_description="Update only the provided fields of a Specialization (e.g., time, status).",
+        tags=["Specializations"]
+    )
+
+    def partial_update(self, request, *args, **kwargs):
+        return super().partial_update(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_description="Retrieve a single specialization",
+        responses={200: SpecializationSerializer},
+        tags=['Specializations']
+    )
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+    
+    @swagger_auto_schema(
+        operation_description="Update a specialization",
+        request_body=SpecializationSerializer,
+        responses={200: SpecializationSerializer},
+        tags=['Specializations']
+    )
+    def update(self, request, *args, **kwargs):
+        return super().update(request, *args, **kwargs)
+    
+    @swagger_auto_schema(
+        operation_description="Filter ",
+        tags=['Specializations']
+    )
     def get_queryset(self):
         """
         Optionally filter by department or type
@@ -67,6 +100,10 @@ class SpecializationViewSet(viewsets.ModelViewSet):
         """Automatically set the slug when creating"""
         serializer.save(slug=serializer.validated_data['name'].lower().replace(' ', '-'))
 
+    @swagger_auto_schema(
+        operation_description="Get list of all unique departments",
+        tags=['Specializations']
+    )
     @action(detail=False, methods=['get'])
     def departments(self, request):
         """
@@ -78,6 +115,10 @@ class SpecializationViewSet(viewsets.ModelViewSet):
             .distinct()
         return Response([d for d in departments if d])
 
+    @swagger_auto_schema(            
+        operation_description="Get only surgical specializations",
+        tags=['Specializations']
+    )
     @action(detail=False, methods=['get'])
     def surgical(self, request):
         """
@@ -87,6 +128,10 @@ class SpecializationViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(surgical, many=True)
         return Response(serializer.data)
 
+    @swagger_auto_schema(
+        operation_description="Get only primary care specializations",
+        tags=['Specializations']
+    )
     @action(detail=False, methods=['get'])
     def primary_care(self, request):
         """
@@ -96,6 +141,10 @@ class SpecializationViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(primary_care, many=True)
         return Response(serializer.data)
 
+    @swagger_auto_schema(
+        operation_description="Toggle is_active status of a specialization",
+        tags=['Specializations'],
+        request_body=SpecializationSerializer,)
     @action(detail=True, methods=['post'])
     def toggle_active(self, request, slug=None):
         """
@@ -106,6 +155,10 @@ class SpecializationViewSet(viewsets.ModelViewSet):
         specialization.save()
         return Response({'status': 'success', 'is_active': specialization.is_active})
 
+    @swagger_auto_schema(
+        operation_description="Toggle is_active status of a specialization",
+        tags=['Specializations'],            
+    )
     def destroy(self, request, *args, **kwargs):
         """
         Soft delete by setting is_active=False
@@ -119,6 +172,12 @@ class SpecializationViewSet(viewsets.ModelViewSet):
 class AvailabilityViewSet(viewsets.ModelViewSet):
     queryset = Availability.objects.all()
     serializer_class = AvailabilitySerializer
+    @swagger_auto_schema(
+        operation_description="Create a new availability slot for a doctor",
+        request_body=AvailabilitySerializer,
+        responses={201: AvailabilitySerializer},
+        tags=['Availability']
+    )
 
 
     def create(self, request, *args, **kwargs):
@@ -180,10 +239,144 @@ class AvailabilityViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+    @swagger_auto_schema(
+        operation_summary="List all availabilities",
+        tags=["Availability"]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_summary="Retrieve availability by ID",
+        tags=["Availability"]
+    )
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_summary="Create a new availability",
+        operation_description="Create a new availability slot for a doctor",
+        request_body=AvailabilitySerializer,
+        responses={201: AvailabilitySerializer},
+        tags=["Availability"]
+    )
+    def create(self, request, *args, **kwargs):
+        try:
+            with transaction.atomic():
+                serializer = self.get_serializer(data=request.data)
+                serializer.is_valid(raise_exception=True)
+                availability = serializer.save()
+                return Response(
+                    AvailabilitySerializer(availability).data,
+                    status=status.HTTP_201_CREATED
+                )
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @swagger_auto_schema(
+        operation_summary="Update an availability (full)",
+        request_body=AvailabilitySerializer,
+        tags=["Availability"]
+    )
+    def update(self, request, *args, **kwargs):
+        return super().update(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_summary="Partially update an availability",
+        tags=["Availability"]
+    )
+    def partial_update(self, request, *args, **kwargs):
+        return super().partial_update(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_summary="Delete an availability",
+        tags=["Availability"]
+    )
+    def destroy(self, request, *args, **kwargs):
+        return super().destroy(request, *args, **kwargs)
+    
+
+
+
 
 class AppointmentViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for handling appointment operations including booking, retrieval, and cancellation.
+    """
     queryset = Appointment.objects.all()
     serializer_class = AppointmentSerializer
+
+    @swagger_auto_schema(
+        operation_summary="List all appointments",
+        operation_description="Retrieve a list of all booked appointments. Supports pagination and filtering (if configured).",
+        tags=["Appointments"]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_summary="Retrieve an appointment",
+        operation_description="Fetch detailed information about a specific appointment using its ID.",
+        tags=["Appointments"]
+    )
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_summary="Book a new appointment",
+        operation_description="Create a new appointment. The system checks for overlapping bookings and ensures valid scheduling.",
+        request_body=AppointmentSerializer,
+        responses={201: AppointmentSerializer, 400: 'Invalid input or conflicting schedule.'},
+        tags=["Appointments"]
+    )
+    def create(self, request, *args, **kwargs):
+        try:
+            with transaction.atomic():
+                serializer = self.get_serializer(data=request.data)
+                serializer.is_valid(raise_exception=True)
+
+                # Optional: Check for schedule conflicts
+                # conflicts = Appointment.objects.filter(
+                #     doctor=serializer.validated_data['doctor'],
+                #     appointment_time=serializer.validated_data['appointment_time']
+                # )
+                # if conflicts.exists():
+                #     return Response(
+                #         {"detail": "Doctor already has an appointment at this time."},
+                #         status=status.HTTP_400_BAD_REQUEST
+                #     )
+
+                appointment = serializer.save()
+                return Response(
+                    AppointmentSerializer(appointment).data,
+                    status=status.HTTP_201_CREATED
+                )
+
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @swagger_auto_schema(
+        operation_summary="Update an appointment",
+        operation_description="Update all fields of an existing appointment.",
+        request_body=AppointmentSerializer,
+        tags=["Appointments"]
+    )
+    def update(self, request, *args, **kwargs):
+        return super().update(request, *args, **kwargs)
     
-    # def create(self, request, *args, **kwargs):
-        
+
+    @swagger_auto_schema(
+        operation_summary="Partially update an appointment",
+        operation_description="Update only the provided fields of an appointment (e.g., time, status).",
+        tags=["Appointments"]
+    )
+    def partial_update(self, request, *args, **kwargs):
+        return super().partial_update(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_summary="Cancel/Delete an appointment",
+        operation_description="Remove an appointment from the system. This action is irreversible.",
+        tags=["Appointments"]
+    )
+    def destroy(self, request, *args, **kwargs):
+        return super().destroy(request, *args, **kwargs)
