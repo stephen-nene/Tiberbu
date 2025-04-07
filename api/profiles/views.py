@@ -195,9 +195,13 @@ class CustomLoginView(AuthenticationMixin,APIView):
         if not identifier or not password:
             return Response({"error": "Both identifier and password are required."}, status=400)
         
-        user = HealthcareUser.objects.filter(email=identifier).first() or \
-               HealthcareUser.objects.filter(phone_number=identifier).first() or \
-               HealthcareUser.objects.filter(username=identifier).first()
+        # user = HealthcareUser.objects.filter(email=identifier).first() or \
+        #        HealthcareUser.objects.filter(phone_number=identifier).first() or \
+        #        HealthcareUser.objects.filter(username=identifier).first()
+        
+        user = HealthcareUser.objects.filter(
+            Q(email=identifier) | Q(phone_number=identifier) | Q(username=identifier)
+        ).first()
 
         if not user:
             raise AuthenticationFailed("User not found.")

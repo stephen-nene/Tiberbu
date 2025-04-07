@@ -76,6 +76,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'profiles',
     'management',
+    'drf_yasg'
 ]
 
 MIDDLEWARE = [

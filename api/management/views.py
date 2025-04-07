@@ -10,7 +10,7 @@ from django.shortcuts import get_object_or_404
 from profiles.permissions import IsAdminUserCustom
 
 from datetime import datetime, date, timedelta
-
+from drf_yasg.utils import swagger_auto_schema
 
 class SpecializationViewSet(viewsets.ModelViewSet):
     """
@@ -24,7 +24,22 @@ class SpecializationViewSet(viewsets.ModelViewSet):
     #     if self.action in ['create', 'update', 'partial_update', 'destroy', 'toggle_active']:
     #         return [IsAdminUserCustom()]
     #     return [permissions.AllowAny()]
-
+    tag = ['Specializations']
+    
+    @swagger_auto_schema(
+        operation_description="Retrieve a list of all specializations",
+        responses={200: SpecializationSerializer(many=True)}
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+    
+    @swagger_auto_schema(
+        operation_description="Create a new specialization",
+        request_body=SpecializationSerializer,
+        responses={201: SpecializationSerializer}
+    )
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
     def get_queryset(self):
         """
         Optionally filter by department or type
