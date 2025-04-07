@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { Search, Filter, Calendar, Clock, RefreshCw, X } from "lucide-react";
+import {
+  Search,
+  Filter,
+  Calendar,
+  Clock,
+  RefreshCw,
+  X,
+  Grid,
+  List,
+} from "lucide-react";
 import { Button } from "@/components/shadcn/button";
 import { Input } from "@/components/shadcn/input";
 import {
@@ -23,22 +32,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/shadcn/select";
-// import {
-//   Popover,
-//   PopoverContent,
-//   PopoverTrigger,
-// } from "@/components/shadcn/popover";
 import { Badge } from "@/components/shadcn/badge";
 import { manageStore } from "@/store/manageStore";
-import { useNavigate } from "react-router-dom";
 
 export default function Availability() {
   const fetchAvailabilities = manageStore((state) => state.fetchAvailabilities);
   const availabilities = manageStore((state) => state.availabilities);
   const [showFilters, setShowFilters] = useState(false);
+  const [viewMode, setViewMode] = useState("table"); // "table" or "grid"
   const [filterParams, setFilterParams] = useState({
     doctor: "",
-    weekday: "",
+    weekday: null,
     timeFrom: "",
     timeTo: "",
   });
@@ -77,13 +81,13 @@ export default function Availability() {
 
   const applyFilters = () => {
     console.log("Applying filters:", filterParams);
-    // Will be handled by backend - just logging for now
+    // Will be handled by backend
   };
 
   const resetFilters = () => {
     setFilterParams({
       doctor: "",
-      weekday: "",
+      weekday: null,
       timeFrom: "",
       timeTo: "",
     });
@@ -95,24 +99,29 @@ export default function Availability() {
     setShowFilters(!showFilters);
   };
 
-  // Group availabilities by doctor for card view
-  const doctorAvailabilities = availabilities.reduce((acc, availability) => {
-    const doctorId = availability.doctor;
-    if (!acc[doctorId]) {
-      acc[doctorId] = {
-        doctor: availability.doctor_detail,
-        schedules: [],
-      };
-    }
-    acc[doctorId].schedules.push(availability);
-    return acc;
-  }, {});
-
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Doctor Availabilities</h1>
+        <h1 className="text-2xl font-bold">Availability Schedule</h1>
         <div className="flex gap-2">
+          <div className="border-0 rounded-md flex gap-2 items-center">
+            <Button
+              variant={viewMode === "grid" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("grid")}
+              className="h-9 px-2"
+            >
+              <Grid className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={viewMode === "table" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("table")}
+              className="h-9 px-2"
+            >
+              <List className="h-4 w-4" />
+            </Button>
+          </div>
           <Button variant="outline" onClick={toggleFilters}>
             <Filter className="h-4 w-4 mr-2" />
             {showFilters ? "Hide Filters" : "Show Filters"}
@@ -145,16 +154,22 @@ export default function Availability() {
                   Day of Week
                 </label>
                 <Select
-                  value={filterParams.weekday}
+                  value={
+                    filterParams.weekday !== null
+                      ? filterParams.weekday.toString()
+                      : undefined
+                  }
                   onValueChange={(value) =>
-                    handleFilterChange("weekday", value)
+                    handleFilterChange(
+                      "weekday",
+                      value ? parseInt(value) : null
+                    )
                   }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select day" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All days</SelectItem>
                     {weekdays.map((day) => (
                       <SelectItem key={day.value} value={day.value.toString()}>
                         {day.label}
@@ -197,75 +212,14 @@ export default function Availability() {
         </Card>
       )}
 
-      {/* Card view for doctor availabilities */}
-      {availabilities.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-          {Object.values(doctorAvailabilities).map((item) => (
-            <Card key={item.doctor.user}>
-              <CardHeader>
-                <CardTitle>Dr. {item.doctor.user.substring(0, 8)}...</CardTitle>
-                <div className="flex flex-wrap gap-1 mt-2">
-                  {item.doctor.specializations.map((spec, index) => (
-                    <Badge key={index} variant="outline">
-                      {spec.name}
-                    </Badge>
-                  ))}
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-sm">
-                  <p>
-                    <span className="font-medium">Experience:</span>{" "}
-                    {item.doctor.experience} years
-                  </p>
-                  <p>
-                    <span className="font-medium">Consultation Fee:</span> $
-                    {item.doctor.fees}
-                  </p>
-                  <p>
-                    <span className="font-medium">Accepting New Patients:</span>{" "}
-                    {item.doctor.accepting_new_patients ? "Yes" : "No"}
-                  </p>
-                  <p>
-                    <span className="font-medium">Emergency Available:</span>{" "}
-                    {item.doctor.emergency_availability ? "Yes" : "No"}
-                  </p>
-
-                  <div className="mt-4">
-                    <h4 className="font-medium mb-2">Availability Schedule:</h4>
-                    <ul className="space-y-1">
-                      {item.schedules.map((schedule) => (
-                        <li
-                          key={schedule.id}
-                          className="text-sm border-l-2 border-blue-500 pl-2"
-                        >
-                          <span className="font-medium">
-                            {getWeekdayName(schedule.weekday)}:
-                          </span>{" "}
-                          {formatTime(schedule.start_time)} -{" "}
-                          {formatTime(schedule.end_time)}
-                          {schedule.is_recurring && (
-                            <Badge className="ml-2" variant="secondary">
-                              Recurring
-                            </Badge>
-                          )}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      ) : (
+      {/* No availabilities message */}
+      {availabilities.length === 0 && (
         <Card className="p-8 text-center">
           <div className="flex flex-col items-center justify-center space-y-4">
             <Calendar className="h-12 w-12 text-gray-400" />
             <h3 className="text-lg font-medium">No availabilities found</h3>
             <p className="text-sm text-gray-500">
-              There are currently no doctor availabilities matching your
-              criteria.
+              There are currently no availabilities matching your criteria.
             </p>
             <Button
               onClick={() => {
@@ -280,35 +234,116 @@ export default function Availability() {
         </Card>
       )}
 
+      {/* Grid view for availabilities */}
+      {availabilities.length > 0 && viewMode === "grid" && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {availabilities.map((availability) => (
+            <Card key={availability.id}>
+              <CardContent className="pt-6">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h3 className="font-medium text-lg">
+                      {getWeekdayName(availability.weekday)}
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      {formatTime(availability.start_time)} -{" "}
+                      {formatTime(availability.end_time)}
+                    </p>
+                  </div>
+                  <Badge
+                    className={
+                      availability.is_available
+                        ? "bg-green-100 text-green-800"
+                        : "bg-red-100 text-red-800"
+                    }
+                  >
+                    {availability.is_available ? "Available" : "Unavailable"}
+                  </Badge>
+                </div>
+
+                <div className="text-sm space-y-2 mt-4">
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Doctor ID:</span>
+                    <span className="font-medium">
+                      {availability.doctor.substring(0, 8)}...
+                    </span>
+                  </div>
+                  {/* <div className="flex justify-between">
+                    <span className="text-gray-500">Specialization:</span>
+                    <span className="font-medium">
+                      {availability.doctor_detail.specializations[0].name}
+                    </span>
+                  </div> */}
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Recurring:</span>
+                    <span>{availability.is_recurring ? "Yes" : "No"}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Fee:</span>
+                    <span>${availability.doctor_detail.fees}</span>
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-4 border-t flex flex-wrap gap-1">
+                  {availability.doctor_detail.specializations.map((spec, i) => (
+                    <Badge key={i} variant="outline" className="text-xs">
+                      {spec.name}
+                    </Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
       {/* Table view for availabilities */}
-      {availabilities.length > 0 && (
+      {availabilities.length > 0 && viewMode === "table" && (
         <div>
-          <h2 className="text-xl font-bold mb-4">Availability Details</h2>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Doctor</TableHead>
+                <TableHead>Doctor ID</TableHead>
                 <TableHead>Day</TableHead>
-                <TableHead>Start Time</TableHead>
-                <TableHead>End Time</TableHead>
+                <TableHead>Time</TableHead>
+                {/* <TableHead>Specialization</TableHead> */}
+                <TableHead>Fee</TableHead>
                 <TableHead>Recurring</TableHead>
-                <TableHead>Availability</TableHead>
+                <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {availabilities.map((availability) => (
                 <TableRow key={availability.id}>
-                  <TableCell>
-                    <div className="font-medium">
-                      {availability.doctor_detail.user.substring(0, 8)}...
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      {availability.doctor_detail.specializations[0].name}
-                    </div>
+                  <TableCell className="font-medium">
+                    {availability.doctor_detail.user?.username||"N/A"}
+                    {/* {availability.doctor.substring(0, 8)}... */}
                   </TableCell>
                   <TableCell>{getWeekdayName(availability.weekday)}</TableCell>
-                  <TableCell>{formatTime(availability.start_time)}</TableCell>
-                  <TableCell>{formatTime(availability.end_time)}</TableCell>
+                  <TableCell>
+                    {formatTime(availability.start_time)} -{" "}
+                    {formatTime(availability.end_time)}
+                  </TableCell>
+                  {/* <TableCell>
+                    <div className="flex flex-wrap gap-1">
+                      {availability.doctor_detail.specializations
+                        .slice(0, 1)
+                        .map((spec, i) => (
+                          <Badge key={i} variant="outline">
+                            {spec.name}
+                          </Badge>
+                        ))}
+                      {availability.doctor_detail.specializations.length >
+                        1 && (
+                        <Badge variant="outline">
+                          +
+                          {availability.doctor_detail.specializations.length -
+                            1}
+                        </Badge>
+                      )}
+                    </div>
+                  </TableCell> */}
+                  <TableCell>${availability.doctor_detail.fees}</TableCell>
                   <TableCell>
                     {availability.is_recurring ? (
                       <Badge variant="outline" className="bg-green-50">
@@ -326,10 +361,7 @@ export default function Availability() {
                         Available
                       </Badge>
                     ) : (
-                      <Badge
-                        variant="secondary"
-                        className="bg-red-100 text-red-800"
-                      >
+                      <Badge className="bg-red-100 text-red-800">
                         Unavailable
                       </Badge>
                     )}
