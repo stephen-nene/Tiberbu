@@ -7,107 +7,102 @@ import { apiClient1 } from "../services/apiClient";
 export const useUserStore = create(
   devtools(
     persist(
-    (set, get) => ({
-      user: null,
+      (set, get) => ({
+        user: null,
 
-      token: null,
-      loggedIn: false,
+        accessToken: null,
+        refreshToken: null,
 
-      darkMode: false,
+        token: null,
+        loggedIn: false,
 
-      // Get user info
-      getUser: () => get().user,
+        darkMode: false,
 
-      // Toggle Dark Mode
-      toggleDarkMode: () => {
-        toast.success("Dark mode toggled!", {
-          duration: 500,
-          position: "bottom-left",
-        });
-        set((state) => {
-          // const newMode = !state.darkMode;
-          // localStorage.setItem("darkMode", JSON.stringify(newMode));
-          return { darkMode: !state.darkMode };
-        });
-      },
+        // Get user info
+        getUser: () => get().user,
 
-      // Set user after login/signup
-      setUser: (user, token) => set({ user, token, loggedIn: true }),
+        // Toggle Dark Mode
+        toggleDarkMode: () => {
+          set((state) => ({darkMode: !state.darkMode           }));
+        },
 
-      // Clear user on logout
-      clearUser: () => set({ user: null, token: null, loggedIn: false }),
-      login: async (data, navigate) => {
-        const toastId = toast.loading("Logging in..."); // Show loading toast
-        const newdata = {
-          identifier: data.identifier||data.email,
-          password: data.password,
-        }
+        // Set user after login/signup
+        setUser: (user, token) => set({ user, token, loggedIn: true }),
 
-        try {
-          const response = await apiClient1.post(
-            "profiles/auth/login/",
-            newdata
-          );
-          // console.log("Response:", response);
-          if (response.status === 200) {
-            set({
-              user: response.data.User,
-              token: response.data.message || response.data.User.id,
-              loggedIn: true,
-            });
-            toast.success(response.data.message || "Login successful!"); // Replace loading toast with success
-            setTimeout(() => {
-              navigate("/dashboard");
-            }, 3000);
-            return response;
+        // Clear user on logout
+        clearUser: () => set({ user: null, token: null, loggedIn: false }),
+        login: async (data, navigate) => {
+          const toastId = toast.loading("Logging in..."); // Show loading toast
+          const newdata = {
+            identifier: data.identifier || data.email,
+            password: data.password,
+          };
+
+          try {
+            const response = await apiClient1.post(
+              "profiles/auth/login/",
+              newdata
+            );
+            // console.log("Response:", response);
+            if (response.status === 200) {
+              set({
+                user: response.data.User,
+                token: response.data.message || response.data.User.id,
+                loggedIn: true,
+              });
+              toast.success(response.data.message || "Login successful!"); // Replace loading toast with success
+              setTimeout(() => {
+                navigate("/dashboard");
+              }, 3000);
+              return response;
+            }
+          } catch (error) {
+            const error2 =
+              error?.response?.data?.error || error?.response?.data?.detail;
+            // console.error("Error:", error);
+            toast.error(error2 || "An error occurred");
+            throw error;
+          } finally {
+            toast.dismiss(toastId);
           }
-        } catch (error) {
-          const error2 =
-            error?.response?.data?.error || error?.response?.data?.detail;
-          // console.error("Error:", error);
-          toast.error(error2 || "An error occurred");
-          throw error;
-        } finally {
-          toast.dismiss(toastId);
-        }
-      },
-      fetchUser: async () => {
-        try {
-          const response = await apiClient1.get("profiles/auth/login/");
-          // console.log("Response:", response);
-          if (response.status === 200) {
-            set({ user: response?.data?.User, loggedIn: true });
+        },
+        fetchUser: async () => {
+          try {
+            const response = await apiClient1.get("profiles/auth/login/");
+            // console.log("Response:", response);
+            if (response.status === 200) {
+              set({ user: response?.data?.User, loggedIn: true });
+            }
+          } catch (error) {
+            console.error("Error:", error.response);
+            toast.error(error.response?.data?.detail);
           }
-        } catch (error) {
-          console.error("Error:", error.response);
-          toast.error(error.response?.data?.detail);
-        }
-      },
+        },
 
-      logOut: async () => {
-        try {
-          const response = await apiClient1.post("profiles/auth/logout/");
-          console.log(response);
-          if (response.status === 200) {
-            localStorage.removeItem("staff-storage");
+        logOut: async () => {
+          try {
+            const response = await apiClient1.post("profiles/auth/logout/");
+            console.log(response);
+            if (response.status === 200) {
+              localStorage.removeItem("staff-storage");
 
-            get().clearUser();
+              get().clearUser();
+            }
+          } catch (error) {
+            console.error("Error:", error);
+            toast.error(error.response?.data?.detail);
           }
-        } catch (error) {
-          console.error("Error:", error);
-          toast.error(error.response?.data?.detail);
-        }
-      },
-    }),
-    // { name: "user-storage" },
-    {
-      name: "user-storage",
-      partialize: (state) => ({
-        user: state.user,
-        darkMode: state.darkMode,
-        loggedIn: state.loggedIn,
+        },
       }),
-    }
-  )
+      // { name: "user-storage" },
+      {
+        name: "user-storage",
+        partialize: (state) => ({
+          user: state.user,
+          darkMode: state.darkMode,
+          loggedIn: state.loggedIn,
+        }),
+      }
+    )
   )
 );

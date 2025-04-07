@@ -98,17 +98,17 @@ export default function Login() {
       const credentials = {
         admin: {
           identifier: "admin@example.com",
-          password: "mnbvcxzxcvbnm",
+          password: "adminpassword123",
           role: "admin",
         },
         doctor: {
-          identifier: "drsmith@example.com",
-          password: "mnbvcxzxcvbnm",
+          identifier: "drjones@example.com",
+          password: "doctorpassword123",
           role: "doctor",
         },
         patient: {
-          identifier: "janedoe@example.com",
-          password: "mnbvcxzxcvbnm",
+          identifier: "janepatient@example.com",
+          password: "patientpassword123",
           role: "patient",
         },
       };
