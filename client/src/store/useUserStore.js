@@ -27,10 +27,10 @@ export const useUserStore = create(
         },
 
         // Set user after login/signup
-        setUser: (user, token) => set({ user, token, loggedIn: true }),
+        setUser: (user, token) => set({ user,  loggedIn: true }),
 
         // Clear user on logout
-        clearUser: () => set({ user: null, token: null, loggedIn: false }),
+        clearUser: () => set({ user: null,  loggedIn: false, accessToken: null, refreshToken: null }),
         login: async (data, navigate) => {
           const toastId = toast.loading("Logging in..."); // Show loading toast
           const newdata = {
@@ -47,7 +47,8 @@ export const useUserStore = create(
             if (response.status === 200) {
               set({
                 user: response.data.User,
-                token: response.data.message || response.data.User.id,
+                accessToken: response.data.access,                  
+                refreshToken: response.data.refresh,
                 loggedIn: true,
               });
               toast.success(response.data.message || "Login successful!"); // Replace loading toast with success
@@ -71,7 +72,7 @@ export const useUserStore = create(
             const response = await apiClient1.get("profiles/auth/login/");
             // console.log("Response:", response);
             if (response.status === 200) {
-              set({ user: response?.data?.User, loggedIn: true });
+              set({ user: response?.data?.User, loggedIn: true, accessToken: response?.data?.access, refreshToken: response?.data?.refresh });
             }
           } catch (error) {
             console.error("Error:", error.response);
@@ -100,7 +101,9 @@ export const useUserStore = create(
         partialize: (state) => ({
           user: state.user,
           darkMode: state.darkMode,
-          loggedIn: state.loggedIn,
+          // loggedIn: state.loggedIn,
+          accessToken: state.accessToken,
+          refreshToken: state.refreshToken
         }),
       }
     )
