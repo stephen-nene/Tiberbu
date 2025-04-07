@@ -169,3 +169,6 @@ class AvailabilityViewSet(viewsets.ModelViewSet):
 class AppointmentViewSet(viewsets.ModelViewSet):
     queryset = Appointment.objects.all()
     serializer_class = AppointmentSerializer
+    
+    # def create(self, request, *args, **kwargs):
+        
