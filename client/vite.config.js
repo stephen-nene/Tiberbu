@@ -6,9 +6,9 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
   
-  console.log(env.BACKEND_URL);
+  console.log(env.VITE_BACKEND_URL);
   
-  const backUrl = env.BACKEND_URL || "https://tiberbu.onrender.com/api/v1.0/";
+  const backUrl = env.VITE_BACKEND_URL || "https://tiberbu.onrender.com/api/v1.0/";
 
   return {
     plugins: [react(),tailwindcss()],

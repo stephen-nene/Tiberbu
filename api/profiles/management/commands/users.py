@@ -75,6 +75,9 @@ class Command(BaseCommand):
                 "doctor_profile": False,
             },
         ]
+        def safe_fake_dict(fake, num=3):
+            return {str(k): str(v) for k, v in fake.pydict(num).items()}
+
 
         created_count = 0
 
@@ -112,7 +115,7 @@ class Command(BaseCommand):
                             license_number=fake.bothify(text='???-#####'),
                             medical_license=fake.bothify(text='?????-#####'),
                             license_jurisdiction="Medical Board",
-                            certifications=fake.pydict(3),
+                            certifications=safe_fake_dict(fake),
                             experience=fake.random_int(min=5, max=20),
                             bio=fake.text(),
                             fees=fake.random_int(min=50, max=200),
@@ -129,8 +132,8 @@ class Command(BaseCommand):
                         patient = Patient.objects.create(
                             user=user,
                             medical_history=fake.text(),
-                            known_allergies=fake.pydict(3),
-                            permanent_medications=fake.pydict(3),
+                            known_allergies=safe_fake_dict(fake),
+                            permanent_medications=safe_fake_dict(fake),
                             emergency_contacts=[fake.phone_number(), fake.phone_number()],
                             primary_insurance=fake.md5(),
                         )
