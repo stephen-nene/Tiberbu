@@ -1,26 +1,13 @@
 import React, { useState, useEffect } from "react";
-import {
-  Search,
-  Filter,
-  RefreshCw,
-  Calendar,
-  Clock,
-  User,
-  X,
-  ChevronDown,
-  AlertCircle
-} from "lucide-react";
+import { Search, Filter, Calendar, Clock, RefreshCw, X } from "lucide-react";
 import { Button } from "@/components/shadcn/button";
 import { Input } from "@/components/shadcn/input";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/shadcn/card";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from "@/components/shadcn/dropdown-menu";
-import { Badge } from "@/components/shadcn/badge";
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/shadcn/card";
 import {
   Table,
   TableBody,
@@ -30,386 +17,328 @@ import {
   TableRow,
 } from "@/components/shadcn/table";
 import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/shadcn/dialog";
-import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/shadcn/select";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/shadcn/tabs";
+// import {
+//   Popover,
+//   PopoverContent,
+//   PopoverTrigger,
+// } from "@/components/shadcn/popover";
+import { Badge } from "@/components/shadcn/badge";
 import { manageStore } from "@/store/manageStore";
 import { useNavigate } from "react-router-dom";
 
 export default function Availability() {
   const fetchAvailabilities = manageStore((state) => state.fetchAvailabilities);
   const availabilities = manageStore((state) => state.availabilities);
-  const [viewMode, setViewMode] = useState("card");
-  const [filters, setFilters] = useState({
+  const [showFilters, setShowFilters] = useState(false);
+  const [filterParams, setFilterParams] = useState({
     doctor: "",
     weekday: "",
-    timeRange: { start: "", end: "" }
+    timeFrom: "",
+    timeTo: "",
   });
-  const [showFilters, setShowFilters] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    loadAvailabilities();
+    fetchAvailabilities();
   }, []);
 
-  const loadAvailabilities = async () => {
-    setIsLoading(true);
-    try {
-      await fetchAvailabilities();
-    } catch (error) {
-      console.error("Failed to fetch availabilities:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const weekdays = [
+    { value: 0, label: "Monday" },
+    { value: 1, label: "Tuesday" },
+    { value: 2, label: "Wednesday" },
+    { value: 3, label: "Thursday" },
+    { value: 4, label: "Friday" },
+    { value: 5, label: "Saturday" },
+    { value: 6, label: "Sunday" },
+  ];
 
-  // Convert weekday number to string
   const getWeekdayName = (day) => {
-    const weekdays = [
-      "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
-    ];
-    return weekdays[day];
+    return (
+      weekdays.find((weekday) => weekday.value === day)?.label || "Unknown"
+    );
   };
 
-  // Format time for display
   const formatTime = (timeString) => {
-    try {
-      const [hours, minutes] = timeString.split(":");
-      const date = new Date();
-      date.setHours(parseInt(hours));
-      date.setMinutes(parseInt(minutes));
-      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    } catch (e) {
-      return timeString;
-    }
+    const [hours, minutes] = timeString.split(":");
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? "PM" : "AM";
+    const formattedHour = hour % 12 || 12;
+    return `${formattedHour}:${minutes} ${ampm}`;
   };
 
-  // Filter availabilities based on selected filters
-  const filteredAvailabilities = availabilities.filter(item => {
-    let matchesDoctor = true;
-    let matchesWeekday = true;
-    let matchesTimeRange = true;
-    
-    if (filters.doctor) {
-      matchesDoctor = item.doctor === filters.doctor;
-    }
-    
-    if (filters.weekday !== "") {
-      matchesWeekday = item.weekday === parseInt(filters.weekday);
-    }
-    
-    if (filters.timeRange.start && filters.timeRange.end) {
-      const availStart = item.start_time;
-      const availEnd = item.end_time;
-      matchesTimeRange = 
-        (availStart >= filters.timeRange.start && availStart <= filters.timeRange.end) ||
-        (availEnd >= filters.timeRange.start && availEnd <= filters.timeRange.end) ||
-        (availStart <= filters.timeRange.start && availEnd >= filters.timeRange.end);
-    }
-    
-    return matchesDoctor && matchesWeekday && matchesTimeRange;
-  });
+  const handleFilterChange = (key, value) => {
+    setFilterParams({ ...filterParams, [key]: value });
+  };
 
-  // Get unique doctors for filter dropdown
-  const uniqueDoctors = [...new Set(availabilities.map(item => item.doctor))];
+  const applyFilters = () => {
+    console.log("Applying filters:", filterParams);
+    // Will be handled by backend - just logging for now
+  };
 
-  const clearFilters = () => {
-    setFilters({
+  const resetFilters = () => {
+    setFilterParams({
       doctor: "",
       weekday: "",
-      timeRange: { start: "", end: "" }
+      timeFrom: "",
+      timeTo: "",
     });
+    console.log("Filters reset");
+    fetchAvailabilities();
   };
 
-  // Empty state component
-  const EmptyState = ({ filtered }) => (
-    <div className="flex flex-col items-center justify-center py-12 text-center">
-      <AlertCircle className="h-12 w-12 text-gray-400 mb-4" />
-      <h3 className="text-lg font-medium text-gray-900 mb-2">No availabilities found</h3>
-      <p className="text-sm text-gray-500 max-w-md mb-6">
-        {filtered 
-          ? "No availabilities match your current filters. Try adjusting your filter criteria." 
-          : "There are no availabilities to display at the moment."}
-      </p>
-      <div className="flex gap-4">
-        {filtered && (
-          <Button variant="outline" onClick={clearFilters}>
-            <X className="mr-2 h-4 w-4" />
-            Clear Filters
-          </Button>
-        )}
-        <Button onClick={loadAvailabilities}>
-          <RefreshCw className="mr-2 h-4 w-4" />
-          Refresh Data
-        </Button>
-      </div>
-    </div>
-  );
+  const toggleFilters = () => {
+    setShowFilters(!showFilters);
+  };
+
+  // Group availabilities by doctor for card view
+  const doctorAvailabilities = availabilities.reduce((acc, availability) => {
+    const doctorId = availability.doctor;
+    if (!acc[doctorId]) {
+      acc[doctorId] = {
+        doctor: availability.doctor_detail,
+        schedules: [],
+      };
+    }
+    acc[doctorId].schedules.push(availability);
+    return acc;
+  }, {});
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="container mx-auto p-4">
+      <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Doctor Availabilities</h1>
-        
-        <div className="flex flex-wrap items-center gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => setShowFilters(!showFilters)}
-          >
-            <Filter className="mr-2 h-4 w-4" />
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={toggleFilters}>
+            <Filter className="h-4 w-4 mr-2" />
             {showFilters ? "Hide Filters" : "Show Filters"}
           </Button>
-          
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={loadAvailabilities}
-          >
-            <RefreshCw className="mr-2 h-4 w-4" />
+          <Button onClick={() => fetchAvailabilities()}>
+            <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
           </Button>
-
-          <Tabs 
-            value={viewMode} 
-            onValueChange={setViewMode} 
-            className="ml-auto"
-          >
-            <TabsList>
-              <TabsTrigger value="card">Card View</TabsTrigger>
-              <TabsTrigger value="table">Table View</TabsTrigger>
-            </TabsList>
-          </Tabs>
         </div>
       </div>
 
+      {/* Filter section */}
       {showFilters && (
-        <Card>
+        <Card className="mb-6">
           <CardHeader>
             <CardTitle className="text-lg">Filter Availabilities</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
-                <label className="text-sm font-medium mb-1 block">Doctor</label>
-                <Select 
-                  value={filters.doctor}
-                  onValueChange={(value) => setFilters({...filters, doctor: value})}
+                <label className="block text-sm font-medium mb-1">Doctor</label>
+                <Input
+                  placeholder="Search by doctor name"
+                  value={filterParams.doctor}
+                  onChange={(e) => handleFilterChange("doctor", e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Day of Week
+                </label>
+                <Select
+                  value={filterParams.weekday}
+                  onValueChange={(value) =>
+                    handleFilterChange("weekday", value)
+                  }
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="All Doctors" />
+                    <SelectValue placeholder="Select day" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="All">All Doctors</SelectItem>
-                    {uniqueDoctors.map((doctor) => (
-                      <SelectItem key={doctor} value={doctor}>
-                        {doctor}
+                    <SelectItem value="">All days</SelectItem>
+                    {weekdays.map((day) => (
+                      <SelectItem key={day.value} value={day.value.toString()}>
+                        {day.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-              
               <div>
-                <label className="text-sm font-medium mb-1 block">Day of Week</label>
-                <Select 
-                  value={filters.weekday}
-                  onValueChange={(value) => setFilters({...filters, weekday: value})}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="All Days" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Days</SelectItem>
-                    <SelectItem value="0">Monday</SelectItem>
-                    <SelectItem value="1">Tuesday</SelectItem>
-                    <SelectItem value="2">Wednesday</SelectItem>
-                    <SelectItem value="3">Thursday</SelectItem>
-                    <SelectItem value="4">Friday</SelectItem>
-                    <SelectItem value="5">Saturday</SelectItem>
-                    <SelectItem value="6">Sunday</SelectItem>
-                  </SelectContent>
-                </Select>
+                <label className="block text-sm font-medium mb-1">
+                  From Time
+                </label>
+                <Input
+                  type="time"
+                  value={filterParams.timeFrom}
+                  onChange={(e) =>
+                    handleFilterChange("timeFrom", e.target.value)
+                  }
+                />
               </div>
-              
-              <div className="flex gap-2">
-                <div className="flex-1">
-                  <label className="text-sm font-medium mb-1 block">Start Time</label>
-                  <Input 
-                    type="time" 
-                    value={filters.timeRange.start}
-                    onChange={(e) => setFilters({
-                      ...filters, 
-                      timeRange: {...filters.timeRange, start: e.target.value}
-                    })}
-                  />
-                </div>
-                <div className="flex-1">
-                  <label className="text-sm font-medium mb-1 block">End Time</label>
-                  <Input 
-                    type="time" 
-                    value={filters.timeRange.end}
-                    onChange={(e) => setFilters({
-                      ...filters, 
-                      timeRange: {...filters.timeRange, end: e.target.value}
-                    })}
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  To Time
+                </label>
+                <Input
+                  type="time"
+                  value={filterParams.timeTo}
+                  onChange={(e) => handleFilterChange("timeTo", e.target.value)}
+                />
               </div>
             </div>
+            <div className="flex justify-end mt-4 gap-2">
+              <Button variant="outline" onClick={resetFilters}>
+                <X className="h-4 w-4 mr-2" />
+                Clear
+              </Button>
+              <Button onClick={applyFilters}>Apply Filters</Button>
+            </div>
           </CardContent>
-          <CardFooter className="flex justify-between">
-            <Button variant="outline" onClick={clearFilters}>Clear Filters</Button>
-            <Button onClick={() => setShowFilters(false)}>Apply Filters</Button>
-          </CardFooter>
         </Card>
       )}
 
-      {isLoading ? (
-        <div className="flex justify-center items-center py-20">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-        </div>
-      ) : filteredAvailabilities.length === 0 ? (
-        <EmptyState filtered={
-          filters.doctor !== "" || 
-          filters.weekday !== "" || 
-          (filters.timeRange.start !== "" && filters.timeRange.end !== "")
-        } />
-      ) : (
-        <Tabs value={viewMode} className="w-full">
-          <TabsContent value="card" className="mt-0">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredAvailabilities.map((item) => (
-                <Card key={item.id} className="overflow-hidden">
-                  <CardHeader className="bg-gray-50 p-4">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <Badge className="mb-2">
-                          {getWeekdayName(item.weekday)}
-                        </Badge>
-                        <CardTitle className="text-base font-medium">
-                          {item.doctor_detail.specializations.map(spec => spec.name).join(", ")}
-                        </CardTitle>
-                      </div>
-                      <Badge variant={item.is_available ? "success" : "destructive"}>
-                        {item.is_available ? "Available" : "Unavailable"}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="p-4 space-y-4">
-                    <div className="flex items-center">
-                      <User className="h-4 w-4 mr-2 text-gray-500" />
-                      <span className="font-medium">Doctor ID:</span>
-                      <span className="ml-2 text-sm">{item.doctor}</span>
-                    </div>
-                    
-                    <div className="flex items-center">
-                      <Clock className="h-4 w-4 mr-2 text-gray-500" />
-                      <span className="font-medium">Hours:</span>
-                      <span className="ml-2 text-sm">
-                        {formatTime(item.start_time)} - {formatTime(item.end_time)}
-                      </span>
-                    </div>
-                    
-                    <div className="flex items-center">
-                      <Calendar className="h-4 w-4 mr-2 text-gray-500" />
-                      <span className="font-medium">Recurring:</span>
-                      <span className="ml-2 text-sm">
-                        {item.is_recurring ? "Yes" : "No"}
-                      </span>
-                    </div>
-                    
-                    {item.doctor_detail.experience && (
-                      <div className="mt-2 text-sm">
-                        <span className="font-medium">Experience:</span> {item.doctor_detail.experience} years
-                      </div>
-                    )}
-                    
-                    {item.doctor_detail.specializations.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {item.doctor_detail.specializations.map((spec, index) => (
-                          <Badge key={index} variant="outline" className="text-xs">
-                            {spec.name}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="table" className="mt-0">
-            <Card>
-              <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Doctor</TableHead>
-                      <TableHead>Day</TableHead>
-                      <TableHead>Hours</TableHead>
-                      <TableHead>Specializations</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Recurring</TableHead>
-                      <TableHead>Experience</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredAvailabilities.map((item) => (
-                      <TableRow key={item.id}>
-                        <TableCell className="font-medium">
-                          {item.doctor.substring(0, 8)}...
-                        </TableCell>
-                        <TableCell>{getWeekdayName(item.weekday)}</TableCell>
-                        <TableCell>
-                          {formatTime(item.start_time)} - {formatTime(item.end_time)}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-wrap gap-1">
-                            {item.doctor_detail.specializations.slice(0, 2).map((spec, index) => (
-                              <Badge key={index} variant="outline" className="text-xs">
-                                {spec.name}
-                              </Badge>
-                            ))}
-                            {item.doctor_detail.specializations.length > 2 && (
-                              <Badge variant="outline" className="text-xs">
-                                +{item.doctor_detail.specializations.length - 2}
-                              </Badge>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={item.is_available ? "success" : "destructive"}>
-                            {item.is_available ? "Available" : "Unavailable"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{item.is_recurring ? "Yes" : "No"}</TableCell>
-                        <TableCell>{item.doctor_detail.experience} years</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+      {/* Card view for doctor availabilities */}
+      {availabilities.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+          {Object.values(doctorAvailabilities).map((item) => (
+            <Card key={item.doctor.user}>
+              <CardHeader>
+                <CardTitle>Dr. {item.doctor.user.substring(0, 8)}...</CardTitle>
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {item.doctor.specializations.map((spec, index) => (
+                    <Badge key={index} variant="outline">
+                      {spec.name}
+                    </Badge>
+                  ))}
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-sm">
+                  <p>
+                    <span className="font-medium">Experience:</span>{" "}
+                    {item.doctor.experience} years
+                  </p>
+                  <p>
+                    <span className="font-medium">Consultation Fee:</span> $
+                    {item.doctor.fees}
+                  </p>
+                  <p>
+                    <span className="font-medium">Accepting New Patients:</span>{" "}
+                    {item.doctor.accepting_new_patients ? "Yes" : "No"}
+                  </p>
+                  <p>
+                    <span className="font-medium">Emergency Available:</span>{" "}
+                    {item.doctor.emergency_availability ? "Yes" : "No"}
+                  </p>
+
+                  <div className="mt-4">
+                    <h4 className="font-medium mb-2">Availability Schedule:</h4>
+                    <ul className="space-y-1">
+                      {item.schedules.map((schedule) => (
+                        <li
+                          key={schedule.id}
+                          className="text-sm border-l-2 border-blue-500 pl-2"
+                        >
+                          <span className="font-medium">
+                            {getWeekdayName(schedule.weekday)}:
+                          </span>{" "}
+                          {formatTime(schedule.start_time)} -{" "}
+                          {formatTime(schedule.end_time)}
+                          {schedule.is_recurring && (
+                            <Badge className="ml-2" variant="secondary">
+                              Recurring
+                            </Badge>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
               </CardContent>
             </Card>
-          </TabsContent>
-        </Tabs>
+          ))}
+        </div>
+      ) : (
+        <Card className="p-8 text-center">
+          <div className="flex flex-col items-center justify-center space-y-4">
+            <Calendar className="h-12 w-12 text-gray-400" />
+            <h3 className="text-lg font-medium">No availabilities found</h3>
+            <p className="text-sm text-gray-500">
+              There are currently no doctor availabilities matching your
+              criteria.
+            </p>
+            <Button
+              onClick={() => {
+                resetFilters();
+                fetchAvailabilities();
+              }}
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh Data
+            </Button>
+          </div>
+        </Card>
+      )}
+
+      {/* Table view for availabilities */}
+      {availabilities.length > 0 && (
+        <div>
+          <h2 className="text-xl font-bold mb-4">Availability Details</h2>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Doctor</TableHead>
+                <TableHead>Day</TableHead>
+                <TableHead>Start Time</TableHead>
+                <TableHead>End Time</TableHead>
+                <TableHead>Recurring</TableHead>
+                <TableHead>Availability</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {availabilities.map((availability) => (
+                <TableRow key={availability.id}>
+                  <TableCell>
+                    <div className="font-medium">
+                      {availability.doctor_detail.user.substring(0, 8)}...
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      {availability.doctor_detail.specializations[0].name}
+                    </div>
+                  </TableCell>
+                  <TableCell>{getWeekdayName(availability.weekday)}</TableCell>
+                  <TableCell>{formatTime(availability.start_time)}</TableCell>
+                  <TableCell>{formatTime(availability.end_time)}</TableCell>
+                  <TableCell>
+                    {availability.is_recurring ? (
+                      <Badge variant="outline" className="bg-green-50">
+                        Yes
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="bg-gray-50">
+                        No
+                      </Badge>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {availability.is_available ? (
+                      <Badge className="bg-green-100 text-green-800">
+                        Available
+                      </Badge>
+                    ) : (
+                      <Badge
+                        variant="secondary"
+                        className="bg-red-100 text-red-800"
+                      >
+                        Unavailable
+                      </Badge>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       )}
     </div>
   );
