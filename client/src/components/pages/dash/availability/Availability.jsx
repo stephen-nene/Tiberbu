@@ -37,6 +37,7 @@ import { Badge } from "@/components/shadcn/badge";
 import { manageStore } from "@/store/manageStore";
 import { useNavigate } from "react-router-dom";
 
+
 export default function Availability() {
   const fetchAvailabilities = manageStore((state) => state.fetchAvailabilities);
   const availabilities = manageStore((state) => state.availabilities);

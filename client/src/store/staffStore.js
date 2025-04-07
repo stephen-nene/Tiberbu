@@ -34,6 +34,7 @@ export const staffStore = create(
                 id: toastId,
               });
             } else {
+              // const error = 
               toast.error(
                 `Failed to fetch ${filters.role}. Status: ${response.status}`,
                 {
@@ -42,8 +43,15 @@ export const staffStore = create(
               );
             }
           } catch (error) {
-            console.error(`Error fetching ${filters.role}`, error);
-            toast.error(`Failed to fetch ${filters.role}`, { id: toastId });
+            if(error.response.data){
+
+              const errorr = error?.response?.data?.detail || error?.response?.data?.error||`Failed to fetch ${filters.role}`
+              toast.error(errorr, { id: toastId });
+            }else{ 
+              console.error(`Error fetching ${filters.role}`, error);
+
+            }
+
           } finally {
             set({ loading: false });
           }

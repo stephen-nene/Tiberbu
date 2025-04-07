@@ -3,7 +3,6 @@ venv
 
 *.env
 
-
 *.db
 
 __init__.*

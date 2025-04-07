@@ -38,6 +38,9 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 
 ALLOWED_HOSTS = ["tiberbu.onrender.com",'localhost:5173','tiberbuke.vercel.app']
 
+AUTH_USER_MODEL = 'profiles.HealthcareUser'  # update to your actual app name
+from rest_framework_simplejwt.settings import api_settings
+
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=20),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
@@ -57,6 +60,10 @@ SIMPLE_JWT = {
     "AUTH_COOKIE_SECURE": True,  # Use True in production (for HTTPS)
     "AUTH_COOKIE_HTTP_ONLY": True,  # Prevent JavaScript access
     "AUTH_COOKIE_PATH": "/",  # Available for all routes
+
+
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',  # make sure your tokens use this field
 }
 
 
@@ -76,6 +83,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'profiles',
     'management',
+    'drf_yasg'
 ]
 
 MIDDLEWARE = [
@@ -95,7 +103,14 @@ REST_FRAMEWORK = {
            'rest_framework_simplejwt.authentication.JWTAuthentication',
        ),
    }
-
+# REST_FRAMEWORK = {
+#     'DEFAULT_AUTHENTICATION_CLASSES': (
+#         'rest_framework_simplejwt.authentication.JWTAuthentication',
+#     ),
+#     'DEFAULT_PERMISSION_CLASSES': (
+#         'rest_framework.permissions.IsAuthenticated',
+#     )
+# }
 
 # If you need to allow dynamic ports, use CORS_ALLOWED_ORIGIN_REGEXES instead:
 CORS_ALLOWED_ORIGIN_REGEXES = [

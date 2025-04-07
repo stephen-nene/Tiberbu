@@ -34,12 +34,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/shadcn/card";
+import {Alert } from '@/components/shadcn/alert'
 
 import { Button } from "@/components/shadcn/button";
 import { Input } from "@/components/shadcn/input";
 import { Switch } from "@/components/shadcn/switch";
 import { Checkbox } from "@/components/shadcn/checkbox";
 import { Textarea } from "@/components/shadcn/textarea";
+
+import {toast} from 'sonner'
 
 // const availabilitySchema = z.object({
 //   doctor: z.string({
@@ -140,14 +143,17 @@ export default function NewAvailability() {
       // Log the response for debugging
       console.log("Response:", response);
       if (response.status === 201) {
-        toast.success("Availability saved successfully!", {
-          id: toastId,
-        });
+        toast.success("Availability saved successfully!", );
 
         navigate("/dashboard/availability");
       }
     } catch (error) {
-      console.error("Failed to create availability:", error.response);
+      if(error.response.data){
+        console.error("Detailed error",error.response.data.detail)
+      }else{
+        
+        console.error("Failed to create availability:", error);
+      }
     } finally {
       setIsSubmitting(false);
     }

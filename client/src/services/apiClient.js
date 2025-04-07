@@ -1,6 +1,7 @@
 // === axios.js ===
 import axios from "axios";
 
+import { useUserStore } from "../store/useUserStore";
 // === Base URLs ===
 const env = import.meta.env.VITE_ENV
 const url = import.meta.env.VITE_BACKEND_URL;
@@ -29,13 +30,15 @@ const createApiClient = (baseURL, contentType = "application/json") => {
   client.interceptors.request.use(
     (config) => {
       
-      // You can manually add the access token from cookies if needed
-      // const accessToken = document.cookie.replace(
-      //   /(?:(?:^|.*;\s*)access_token\s*=\s*([^;]*).*$)|^.*$/,
-      //   "$1"
-      // );
-      // if (accessToken) {
-      //   config.headers.Authorization = `Bearer ${accessToken}`;
+      const { accessToken, refreshToken } = useUserStore.getState();
+
+      if (accessToken) {
+        config.headers.Authorization = `Bearer ${accessToken}`;
+      }
+
+      // Optionally include refresh token in a custom header
+      // if (refreshToken) {
+      //   config.headers["x-refresh-token"] = refreshToken;
       // }
 
 

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Specialization,Availability, WeekDay,Appointment
-from profiles.models import Doctor,Patient
+from profiles.models import Doctor,Patient,HealthcareUser
 # from profiles.serializers import DoctorSerializer
 # from profiles.serializers import DoctorSerializer
 class SpecializationSerializer(serializers.ModelSerializer):
@@ -25,6 +25,11 @@ class SpecializationSerializer(serializers.ModelSerializer):
             # 'updated_at'
         ]
         read_only_fields = ['slug', 'created_at', 'updated_at']
+    
+class UserSerializerView(serializers.ModelSerializer):
+    class Meta:
+        model = HealthcareUser
+        fields = ['id','username','email']
         
 class ShortSpecializationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -33,8 +38,8 @@ class ShortSpecializationSerializer(serializers.ModelSerializer):
             'name',
             'description',
             'department',
-            'is_surgical',
-            'is_primary_care',
+            # 'is_surgical',
+            # 'is_primary_care',
             'average_consultation_fee',
             'is_active',
         ]
@@ -42,6 +47,7 @@ class ShortSpecializationSerializer(serializers.ModelSerializer):
         
 class DoctorSerializer(serializers.ModelSerializer):
     specializations = ShortSpecializationSerializer(many=True, read_only=True)
+    user = UserSerializerView(read_only=True)
     class Meta:
         model = Doctor
         fields = [
@@ -50,6 +56,7 @@ class DoctorSerializer(serializers.ModelSerializer):
 
 
 class PatientSerializer(serializers.ModelSerializer):
+    user = UserSerializerView(read_only=True)
 
 
     class Meta:
