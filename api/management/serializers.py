@@ -147,4 +147,17 @@ class ClinicalAttachmentSerializer(serializers.ModelSerializer):
         # You can add custom validation logic here if needed
         return attrs
     
+class PrescriptionSerializer(serializers.ModelSerializer):
+    """Serializer to display and receive Prescription data."""
+    issued_by = DoctorSerializer(read_only=True)
+    medical_record = ClinicalAttachmentSerializer(read_only=True)
     
+    class Meta:
+        model = Prescription
+        fields = [
+            'id', 'medical_record', 'issued_by', 'medication_name', 'dosage', 
+            'frequency', 'start_date', 'end_date', 'refills_remaining', 'instructions'
+        ]
+    def validate(self, attrs):
+        # You can add custom validation logic here if needed
+        return attrs

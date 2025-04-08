@@ -171,6 +171,7 @@ class ClinicalAttachment(BaseUUIDModel, TimeStampedModel):
 class Prescription(models.Model):
     """Prescriptions linked to medical records"""
     medical_record = models.OneToOneField(ClinicalAttachment, on_delete=models.CASCADE, related_name='prescription')
+    issued_by = models.ForeignKey('profiles.Doctor', on_delete=models.SET_NULL, null=True, blank=True)
     medication_name = models.CharField(max_length=200)
     dosage = models.CharField(max_length=100)
     frequency = models.CharField(max_length=100)

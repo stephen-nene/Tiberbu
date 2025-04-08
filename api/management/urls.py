@@ -8,6 +8,7 @@ router.register(r'specializations', SpecializationViewSet, basename='specializat
 router.register(r'availabilities', AvailabilityViewSet, basename='availability')
 router.register(r'appointments', AppointmentViewSet, basename='appointment')
 router.register(r'clinical-attachments', ClinicalAttachmentViewSet, basename='clinical-attachment')
+router.register(r'prescriptions', PrescriptionViewSet, basename='prescription')
 # router.register(r'trips', TripViewSet)
 # router.register(r'logs', LogSheetViewSet)
 

@@ -3,8 +3,8 @@ from django.db import transaction
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .models import Specialization,Availability,Appointment,ClinicalAttachment
-from .serializers import SpecializationSerializer,AvailabilitySerializer, AppointmentSerializer,ClinicalAttachmentSerializer
+from .models import Specialization,Availability,Appointment,ClinicalAttachment,Prescription
+from .serializers import SpecializationSerializer,AvailabilitySerializer, AppointmentSerializer,ClinicalAttachmentSerializer,PrescriptionSerializer
 from django.shortcuts import get_object_or_404
 
 from rest_framework.permissions import IsAuthenticated
@@ -434,6 +434,59 @@ class ClinicalAttachmentViewSet(viewsets.ModelViewSet):
         operation_description="Delete a Clinical Attachment by ID",
         responses={204: 'No Content'},
         tags=['Clinical Attachments']
+    )
+    def destroy(self, request, *args, **kwargs):
+        return super().destroy(request, *args, **kwargs)
+    
+class PrescriptionViewSet(viewsets.ModelViewSet):
+    queryset = Prescription.objects.all()
+    serializer_class = PrescriptionSerializer
+    permission_classes = [IsAuthenticated]  # Adjust this as needed (e.g., IsAdminUser, etc.)
+
+    @swagger_auto_schema(
+        operation_description="List all Prescriptions",
+        responses={200: PrescriptionSerializer(many=True)},
+        tags=['Prescriptions']
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_description="Create a new Prescription",
+        responses={201: PrescriptionSerializer},
+        tags=['Prescriptions']
+    )
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_description="Retrieve a Prescription by ID",
+        responses={200: PrescriptionSerializer},
+        tags=['Prescriptions']
+    )
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_description="Update an existing Prescription",
+        responses={200: PrescriptionSerializer},
+        tags=['Prescriptions']
+    )
+    def update(self, request, *args, **kwargs):
+        return super().update(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_description="Partial update of an existing Prescription",
+        responses={200: PrescriptionSerializer},
+        tags=['Prescriptions']
+    )
+    def partial_update(self, request, *args, **kwargs):
+        return super().partial_update(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_description="Delete a Prescription by ID",
+        responses={204: 'No Content'},
+        tags=['Prescriptions']
     )
     def destroy(self, request, *args, **kwargs):
         return super().destroy(request, *args, **kwargs)
