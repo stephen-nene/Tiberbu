@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Specialization,Availability, WeekDay,Appointment
+from .models import Specialization,Availability, WeekDay,Appointment,ClinicalAttachment,Prescription,TimeOff
 from profiles.models import Doctor,Patient,HealthcareUser
 # from profiles.serializers import DoctorSerializer
 # from profiles.serializers import DoctorSerializer
@@ -26,7 +26,7 @@ class SpecializationSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['slug', 'created_at', 'updated_at']
     
-class UserSerializerView(serializers.ModelSerializer):
+class UserSerializerViewSerializer(serializers.ModelSerializer):
     class Meta:
         model = HealthcareUser
         fields = ['id','username','email']
@@ -47,7 +47,7 @@ class ShortSpecializationSerializer(serializers.ModelSerializer):
         
 class DoctorSerializer(serializers.ModelSerializer):
     specializations = ShortSpecializationSerializer(many=True, read_only=True)
-    user = UserSerializerView(read_only=True)
+    user = UserSerializerViewSerializer(read_only=True)
     class Meta:
         model = Doctor
         fields = [
@@ -56,8 +56,7 @@ class DoctorSerializer(serializers.ModelSerializer):
 
 
 class PatientSerializer(serializers.ModelSerializer):
-    user = UserSerializerView(read_only=True)
-
+    user = UserSerializerViewSerializer(read_only=True)
 
     class Meta:
         model = Patient
@@ -126,4 +125,63 @@ class AppointmentSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['created_at', 'updated_at']
         
+
+# class ClinicalAttachmentSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = ClinicalAttachment
+#         fields = [
+#             'id',
+#             'appointment',
+#             'file',
+#             'description',
+#             'created_at',
+#             'updated_at'
+#         ]
+#         read_only_fields = ['created_at', 'updated_at']
+class ClinicalAttachmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ClinicalAttachment
+        fields = '__all__'  # Serialize all fields in the model
+
+    def validate(self, attrs):
+        # You can add custom validation logic here if needed
+        return attrs
+    
+class PrescriptionSerializer(serializers.ModelSerializer):
+    """Serializer to display and receive Prescription data."""
+    issued_by = DoctorSerializer(read_only=True)
+    medical_record = ClinicalAttachmentSerializer(read_only=True)
+    
+    class Meta:
+        model = Prescription
+        fields = [
+            'id', 'medical_record', 'issued_by', 'medication_name', 'dosage', 
+            'frequency', 'start_date', 'end_date', 'refills_remaining', 'instructions'
+        ]
+    def validate(self, attrs):
+        # You can add custom validation logic here if needed
+        return attrs
+    
+class TimeOffSerializer(serializers.ModelSerializer):
+    doctor = serializers.PrimaryKeyRelatedField(queryset=Doctor.objects.all())
+    doctor_detail = DoctorSerializer(source='doctor', read_only=True)
+    class Meta:
+        model = TimeOff
+        fields = [
+            'id',
+            'doctor',
+            'doctor_detail',
+            'start_datetime',
+            'end_datetime',
+            'reason',
+            'is_approved',
+            'created_at',
+            'updated_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at']
         
+    def validate(self, attrs):
+        """Custom validation to ensure start_datetime is before end_datetime"""
+        if attrs['start_datetime'] >= attrs['end_datetime']:
+            raise serializers.ValidationError("start_datetime must be earlier than end_datetime.")
+        return attrs
