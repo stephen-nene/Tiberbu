@@ -161,3 +161,27 @@ class PrescriptionSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         # You can add custom validation logic here if needed
         return attrs
+    
+class TimeOffSerializer(serializers.ModelSerializer):
+    doctor = serializers.PrimaryKeyRelatedField(queryset=Doctor.objects.all())
+    doctor_detail = DoctorSerializer(source='doctor', read_only=True)
+    class Meta:
+        model = TimeOff
+        fields = [
+            'id',
+            'doctor',
+            'doctor_detail',
+            'start_datetime',
+            'end_datetime',
+            'reason',
+            'is_approved',
+            'created_at',
+            'updated_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at']
+        
+    def validate(self, attrs):
+        """Custom validation to ensure start_datetime is before end_datetime"""
+        if attrs['start_datetime'] >= attrs['end_datetime']:
+            raise serializers.ValidationError("start_datetime must be earlier than end_datetime.")
+        return attrs

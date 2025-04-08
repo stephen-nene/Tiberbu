@@ -3,8 +3,8 @@ from django.db import transaction
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .models import Specialization,Availability,Appointment,ClinicalAttachment,Prescription
-from .serializers import SpecializationSerializer,AvailabilitySerializer, AppointmentSerializer,ClinicalAttachmentSerializer,PrescriptionSerializer
+from .models import Specialization,Availability,Appointment,ClinicalAttachment,Prescription,TimeOff
+from .serializers import SpecializationSerializer,AvailabilitySerializer, AppointmentSerializer,ClinicalAttachmentSerializer,PrescriptionSerializer,TimeOffSerializer
 from django.shortcuts import get_object_or_404
 
 from rest_framework.permissions import IsAuthenticated
@@ -487,6 +487,59 @@ class PrescriptionViewSet(viewsets.ModelViewSet):
         operation_description="Delete a Prescription by ID",
         responses={204: 'No Content'},
         tags=['Prescriptions']
+    )
+    def destroy(self, request, *args, **kwargs):
+        return super().destroy(request, *args, **kwargs)
+
+class TimeOffViewSet(viewsets.ModelViewSet):
+    queryset = TimeOff.objects.all()
+    serializer_class = TimeOffSerializer
+    permission_classes = [IsAuthenticated]  # Adjust this as needed (e.g., IsAdminUser, etc.)
+
+    @swagger_auto_schema(
+        operation_description="List all Time Offs",
+        responses={200: TimeOffSerializer(many=True)},
+        tags=['Time Offs']
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_description="Create a new Time Off",
+        responses={201: TimeOffSerializer},
+        tags=['Time Offs']
+    )
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_description="Retrieve a Time Off by ID",
+        responses={200: TimeOffSerializer},
+        tags=['Time Offs']
+    )
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_description="Update an existing Time Off",
+        responses={200: TimeOffSerializer},
+        tags=['Time Offs']
+    )
+    def update(self, request, *args, **kwargs):
+        return super().update(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_description="Partial update of an existing Time Off",
+        responses={200: TimeOffSerializer},
+        tags=['Time Offs']
+    )
+    def partial_update(self, request, *args, **kwargs):
+        return super().partial_update(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_description="Delete a Time Off by ID",
+        responses={204: 'No Content'},
+        tags=['Time Offs']
     )
     def destroy(self, request, *args, **kwargs):
         return super().destroy(request, *args, **kwargs)
