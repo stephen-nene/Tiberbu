@@ -168,7 +168,7 @@ class ClinicalAttachment(BaseUUIDModel, TimeStampedModel):
     def __str__(self):
         return f"{self.document_type} for {self.content_object} - {self.caption or 'No Caption'}"
 
-class Prescription(models.Model):
+class Prescription(BaseUUIDModel, TimeStampedModel):
     """Prescriptions linked to medical records"""
     medical_record = models.OneToOneField(ClinicalAttachment, on_delete=models.CASCADE, related_name='prescription')
     issued_by = models.ForeignKey('profiles.Doctor', on_delete=models.SET_NULL, null=True, blank=True)
