@@ -3,9 +3,12 @@ from django.db import transaction
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .models import Specialization,Availability,Appointment 
-from .serializers import SpecializationSerializer,AvailabilitySerializer, AppointmentSerializer
+from .models import Specialization,Availability,Appointment,ClinicalAttachment
+from .serializers import SpecializationSerializer,AvailabilitySerializer, AppointmentSerializer,ClinicalAttachmentSerializer
 from django.shortcuts import get_object_or_404
+
+from rest_framework.permissions import IsAuthenticated
+
 
 # from profiles.permissions import IsAdminUserCustom
 
@@ -377,6 +380,60 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         operation_summary="Cancel/Delete an appointment",
         operation_description="Remove an appointment from the system. This action is irreversible.",
         tags=["Appointments"]
+    )
+    def destroy(self, request, *args, **kwargs):
+        return super().destroy(request, *args, **kwargs)
+    
+class ClinicalAttachmentViewSet(viewsets.ModelViewSet):
+    queryset = ClinicalAttachment.objects.all()
+    serializer_class = ClinicalAttachmentSerializer
+    permission_classes = [IsAuthenticated]  # Adjust this as needed (e.g., IsAdminUser, etc.)
+
+
+    @swagger_auto_schema(
+        operation_description="List all Clinical Attachments",
+        responses={200: ClinicalAttachmentSerializer(many=True)},
+        tags=['Clinical Attachments']
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_description="Create a new Clinical Attachment",
+        responses={201: ClinicalAttachmentSerializer},
+        tags=['Clinical Attachments']
+    )
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_description="Retrieve a Clinical Attachment by ID",
+        responses={200: ClinicalAttachmentSerializer},
+        tags=['Clinical Attachments']
+    )
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_description="Update an existing Clinical Attachment",
+        responses={200: ClinicalAttachmentSerializer},
+        tags=['Clinical Attachments']
+    )
+    def update(self, request, *args, **kwargs):
+        return super().update(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_description="Partial update of an existing Clinical Attachment",
+        responses={200: ClinicalAttachmentSerializer},
+        tags=['Clinical Attachments']
+    )
+    def partial_update(self, request, *args, **kwargs):
+        return super().partial_update(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_description="Delete a Clinical Attachment by ID",
+        responses={204: 'No Content'},
+        tags=['Clinical Attachments']
     )
     def destroy(self, request, *args, **kwargs):
         return super().destroy(request, *args, **kwargs)

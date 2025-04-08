@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Specialization,Availability, WeekDay,Appointment
+from .models import Specialization,Availability, WeekDay,Appointment,ClinicalAttachment,Prescription,TimeOff
 from profiles.models import Doctor,Patient,HealthcareUser
 # from profiles.serializers import DoctorSerializer
 # from profiles.serializers import DoctorSerializer
@@ -26,7 +26,7 @@ class SpecializationSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['slug', 'created_at', 'updated_at']
     
-class UserSerializerView(serializers.ModelSerializer):
+class UserSerializerViewSerializer(serializers.ModelSerializer):
     class Meta:
         model = HealthcareUser
         fields = ['id','username','email']
@@ -47,7 +47,7 @@ class ShortSpecializationSerializer(serializers.ModelSerializer):
         
 class DoctorSerializer(serializers.ModelSerializer):
     specializations = ShortSpecializationSerializer(many=True, read_only=True)
-    user = UserSerializerView(read_only=True)
+    user = UserSerializerViewSerializer(read_only=True)
     class Meta:
         model = Doctor
         fields = [
@@ -56,8 +56,7 @@ class DoctorSerializer(serializers.ModelSerializer):
 
 
 class PatientSerializer(serializers.ModelSerializer):
-    user = UserSerializerView(read_only=True)
-
+    user = UserSerializerViewSerializer(read_only=True)
 
     class Meta:
         model = Patient
@@ -126,4 +125,26 @@ class AppointmentSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['created_at', 'updated_at']
         
-        
+
+# class ClinicalAttachmentSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = ClinicalAttachment
+#         fields = [
+#             'id',
+#             'appointment',
+#             'file',
+#             'description',
+#             'created_at',
+#             'updated_at'
+#         ]
+#         read_only_fields = ['created_at', 'updated_at']
+class ClinicalAttachmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ClinicalAttachment
+        fields = '__all__'  # Serialize all fields in the model
+
+    def validate(self, attrs):
+        # You can add custom validation logic here if needed
+        return attrs
+    
+    
