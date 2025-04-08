@@ -87,6 +87,8 @@ class Specialization(BaseUUIDModel, TimeStampedModel):
 class Availability(BaseUUIDModel, TimeStampedModel):
     doctor = models.ForeignKey('profiles.Doctor', on_delete=models.PROTECT, related_name='availability_slots')
     weekday = models.PositiveSmallIntegerField(choices=WeekDay.choices)
+    # JSON structure: [{ "start": "09:00", "end": "10:00" }, { "start": "11:00", "end": "12:00" }]
+    # time_slots = models.JSONField(default=list)    
     start_time = models.TimeField()
     end_time = models.TimeField()
     is_recurring = models.BooleanField(default=True)
@@ -132,10 +134,24 @@ class Appointment(BaseUUIDModel, TimeStampedModel):
         return f"{self.patient.user.username} - {self.doctor.user.username if self.doctor else 'Unassigned'} on {self.scheduled_time} ({self.get_status_display()})"
 
 
+class TimeOff(BaseUUIDModel, TimeStampedModel):
+    doctor = models.ForeignKey('profiles.Doctor', on_delete=models.PROTECT)
+    start_datetime = models.DateTimeField(null=False, blank=False, validators=[MinValueValidator(date.today())])
+    end_datetime = models.DateTimeField(null=False, blank=False, validators=[MinValueValidator(date.today())])
+    reason = models.TextField(blank=True, null=True)
+    is_approved = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = "Time Off"
+        verbose_name_plural = "Time Offs"
+    def __str__(self):
+        return f"{self.doctor.user.get_full_name()} off from {self.start_datetime} to {self.end_datetime}"
+    
 class ClinicalAttachment(BaseUUIDModel, TimeStampedModel):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.UUIDField()
     content_object = GenericForeignKey()
+    appointment = models.ForeignKey(Appointment, on_delete=models.SET_NULL, null=True, blank=True, related_name='records')
     file = models.FileField(upload_to="clinical_attachments/",
                             validators=[FileExtensionValidator(allowed_extensions=['pdf', 'jpg', 'dcm'])])
     document_type = models.CharField(max_length=50, choices=ClinicalDocumentType.choices)
@@ -151,3 +167,17 @@ class ClinicalAttachment(BaseUUIDModel, TimeStampedModel):
 
     def __str__(self):
         return f"{self.document_type} for {self.content_object} - {self.caption or 'No Caption'}"
+
+class Prescription(models.Model):
+    """Prescriptions linked to medical records"""
+    medical_record = models.OneToOneField(ClinicalAttachment, on_delete=models.CASCADE, related_name='prescription')
+    medication_name = models.CharField(max_length=200)
+    dosage = models.CharField(max_length=100)
+    frequency = models.CharField(max_length=100)
+    start_date = models.DateField()
+    end_date = models.DateField(blank=True, null=True)
+    refills_remaining = models.PositiveIntegerField(default=0)
+    instructions = models.TextField(blank=True, null=True)
+    
+    def __str__(self):
+        return f"{self.medication_name} for {self.medical_record.appointment.patient.user.get_full_name()}"

@@ -8,7 +8,7 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/components/shadcn/avatar";
-import {useUserStore} from "@/store/useUserStore";
+import { useUserStore } from "@/store/useUserStore";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -32,11 +32,10 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`sticky top-0 z-50 w-full border-b ${
-        darkMode
+      className={`sticky top-0 z-50 w-full border-b ${darkMode
           ? "bg-gray-900 border-gray-800 text-white"
           : "bg-white border-gray-200 text-gray-900"
-      }`}
+        }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
@@ -60,11 +59,10 @@ const Navbar = () => {
                 <Link
                   key={item.name}
                   to={item.path}
-                  className={`px-3 py-2 rounded-md text-sm font-medium ${
-                    location.pathname === item.path
+                  className={`px-3 py-2 rounded-md text-sm font-medium ${location.pathname === item.path
                       ? "dark:bg-gray-700 dark:text-white bg-gray-200 text-gray-900"
                       : "dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                  }`}
+                    }`}
                 >
                   {item.name}
                 </Link>
@@ -88,75 +86,87 @@ const Navbar = () => {
               )}
             </Button>
             <div className="md:block hidden">
-            {loggedIn ? (
-              <div className="md:flex hidden  gap-1.5">
-                <Link
-                  to="/dashboard"
-                  className={`flex items-center px-3 py-2 rounded-md text-sm font-medium 
+              {loggedIn ? (
+                <div className="md:flex hidden  gap-1.5">
+                  <Link
+                    to="/dashboard"
+                    className={`flex items-center px-3 py-2 rounded-md text-sm font-medium 
                     
                     dark:bg-green-600 dark: text-black dark:hover:bg-green-700
                       bg-green-500  hover:bg-green-600
                   `}
-                >
-                  <User size={16} className="mr-1" />
-                  Dashboard
-                </Link>
+                  >
+                    <User size={16} className="mr-1" />
+                    Dashboard
+                  </Link>
 
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  onClick={logOut}
-                  className="ml-auto"
-                >
-                  <LogOut size={20} />
-                </Button>
-              </div>
-            ) : (
-              <div className="md:block hidden px-5">
-                <Link
-                  to="/login"
-                  className={` px-3 py-2 rounded-md text-base font-medium text-center ${
-                    darkMode
-                      ? "bg-blue-600 text-white hover:bg-blue-700"
-                      : "bg-blue-500 text-white hover:bg-blue-600"
-                  }`}
-                  onClick={toggleMenu}
-                >
-                  Login
-                </Link>
-              </div>
-            )}
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    onClick={logOut}
+                    className="ml-auto"
+                  >
+                    <LogOut size={20} />
+                  </Button>
+                </div>
+              ) : (
+                <div className="md:block hidden px-5">
+                  <Link
+                    to="/login"
+                    className={` px-3 py-2 rounded-md text-base font-medium text-center ${darkMode
+                        ? "bg-blue-600 text-white hover:bg-blue-700"
+                        : "bg-blue-500 text-white hover:bg-blue-600"
+                      }`}
+                    onClick={toggleMenu}
+                  >
+                    Login
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
 
           {/* Mobile menu button */}
-            <div className="flex md:hidden">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={toggleDarkMode}
-                className={`rounded-full mr-2 ${
-                  darkMode ? "hover:bg-gray-700" : "hover:bg-gray-100"
+          <div className="flex md:hidden">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleDarkMode}
+              className={`rounded-full mr-2 ${darkMode ? "hover:bg-gray-700" : "hover:bg-gray-100"
                 }`}
-              >
-                {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-              </Button>
+            >
+              {darkMode ? <Sun size={20} /> : <Moon size={20} />}
+            </Button>
 
-              <Button
-                variant="ghost"
-                size="icon"
+            <div className="md:block hidden px-5">
+              <Link
+                to="/login"
+                className={` px-3 py-2 rounded-md text-base font-medium text-center ${darkMode
+                    ? "bg-blue-600 text-white hover:bg-blue-700"
+                    : "bg-blue-500 text-white hover:bg-blue-600"
+                  }`}
                 onClick={toggleMenu}
-                className={`inline-flex items-center justify-center p-2 rounded-md ${
-                  darkMode
-                    ? "text-gray-400 hover:text-white hover:bg-gray-700"
-                    : "text-gray-500 hover:text-gray-900 hover:bg-gray-100"
+              >
+                Login
+              </Link>
+            </div>
+            <Link to="/login"
+            >
+              <Button
+                onClick={toggleMenu}
+                className={`inline-flex items-center justify-center  px-3 py-2 rounded-md ${darkMode
+                  ? "bg-blue-600 text-white hover:bg-blue-700"
+                  : "bg-blue-500 text-white hover:bg-blue-600"
                 }`}
               >
-                <span className="sr-only">Open main menu</span>
-                {isOpen ? <X size={24} /> : <Menu size={24} />}
+                {/* <span className="sr-only">Open main menu</span> */}
+                {/* {isOpen ? <X size={24} /> : <Menu size={24} />} */}
+                Login
               </Button>
-            </div>
-          
+            </Link>
+
+          </div>
+
         </div>
       </div>
 
@@ -168,15 +178,14 @@ const Navbar = () => {
               <Link
                 key={item.name}
                 to={item.path}
-                className={`block px-3 py-2 rounded-md text-base font-medium ${
-                  location.pathname === item.path
+                className={`block px-3 py-2 rounded-md text-base font-medium ${location.pathname === item.path
                     ? darkMode
                       ? "bg-gray-700 text-white"
                       : "bg-gray-100 text-gray-900"
                     : darkMode
-                    ? "text-gray-300 hover:bg-gray-700 hover:text-white"
-                    : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                }`}
+                      ? "text-gray-300 hover:bg-gray-700 hover:text-white"
+                      : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                  }`}
                 onClick={toggleMenu}
               >
                 {item.name}
@@ -211,11 +220,10 @@ const Navbar = () => {
               <div className="px-5">
                 <Link
                   to="/login"
-                  className={`block px-3 py-2 rounded-md text-base font-medium text-center ${
-                    darkMode
+                  className={`block px-3 py-2 rounded-md text-base font-medium text-center ${darkMode
                       ? "bg-blue-600 text-white hover:bg-blue-700"
                       : "bg-blue-500 text-white hover:bg-blue-600"
-                  }`}
+                    }`}
                   onClick={toggleMenu}
                 >
                   Login
