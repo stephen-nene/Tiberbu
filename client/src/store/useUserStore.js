@@ -23,14 +23,18 @@ export const useUserStore = create(
 
         // Toggle Dark Mode
         toggleDarkMode: () => {
-          set((state) => ({darkMode: !state.darkMode           }));
+          set((state) => ({ darkMode: !state.darkMode }));
         },
 
         // Set user after login/signup
-        setUser: (user, token) => set({ user,  loggedIn: true }),
+        setUser: (user, token, refreshToken, accessToken) => set({ user, loggedIn: true, accessToken, refreshToken }),
 
         // Clear user on logout
-        clearUser: () => set({ user: null,  loggedIn: false, accessToken: null, refreshToken: null }),
+        clearUser: () => {
+          localStorage.removeItem("staff-storage");
+          set({ user: null, loggedIn: false, accessToken: null, refreshToken: null })
+        },
+
         login: async (data, navigate) => {
           const toastId = toast.loading("Logging in..."); // Show loading toast
           const newdata = {
@@ -47,7 +51,7 @@ export const useUserStore = create(
             if (response.status === 200) {
               set({
                 user: response.data.User,
-                accessToken: response.data.access,                  
+                accessToken: response.data.access,
                 refreshToken: response.data.refresh,
                 loggedIn: true,
               });

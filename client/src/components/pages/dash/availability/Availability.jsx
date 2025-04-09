@@ -315,7 +315,7 @@ export default function Availability() {
                 <TableHead>Doctor ID</TableHead>
                 <TableHead>Day</TableHead>
                 <TableHead>Time</TableHead>
-                {/* <TableHead>Specialization</TableHead> */}
+                <TableHead className="hidden md:block">Specialization</TableHead>
                 <TableHead>Fee</TableHead>
                 <TableHead>Recurring</TableHead>
                 <TableHead>Status</TableHead>
@@ -333,44 +333,44 @@ export default function Availability() {
                     {formatTime(availability.start_time)} -{" "}
                     {formatTime(availability.end_time)}
                   </TableCell>
-                  {/* <TableCell>
+                  <TableCell className="hidden md:block">
                     <div className="flex flex-wrap gap-1">
-                      {availability.doctor_detail.specializations
+                      {availability?.doctor_detail?.specializations
                         .slice(0, 1)
                         .map((spec, i) => (
                           <Badge key={i} variant="outline">
                             {spec.name}
                           </Badge>
                         ))}
-                      {availability.doctor_detail.specializations.length >
+                      {availability?.doctor_detail?.specializations?.length >
                         1 && (
                         <Badge variant="outline">
                           +
-                          {availability.doctor_detail.specializations.length -
+                          {availability?.doctor_detail?.specializations?.length -
                             1}
                         </Badge>
                       )}
                     </div>
-                  </TableCell> */}
-                  <TableCell>${availability.doctor_detail.fees}</TableCell>
+                  </TableCell>
+                  <TableCell>${availability?.doctor_detail?.fees}</TableCell>
                   <TableCell>
                     {availability.is_recurring ? (
-                      <Badge variant="outline" className="bg-green-50">
+                      <Badge variant="info" >
                         Yes
                       </Badge>
                     ) : (
-                      <Badge variant="outline" className="bg-gray-50">
+                      <Badge variant="warning">
                         No
                       </Badge>
                     )}
                   </TableCell>
                   <TableCell>
                     {availability.is_available ? (
-                      <Badge className="bg-green-100 text-green-800">
+                      <Badge variant="success">
                         Available
                       </Badge>
                     ) : (
-                      <Badge className="bg-red-100 text-red-800">
+                      <Badge variant="destructive">
                         Unavailable
                       </Badge>
                     )}

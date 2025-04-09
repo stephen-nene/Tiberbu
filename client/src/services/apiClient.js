@@ -50,7 +50,25 @@ const createApiClient = (baseURL, contentType = "application/json") => {
   // === Response Interceptor ===
   client.interceptors.response.use(
     (response) => response,
-    (error) => Promise.reject(error)
+    (error) => {
+      const userStore = useUserStore.getState();
+    // console.error("Error here",error)
+    // Handle 403 Forbidden (token expired/invalid)
+    // console.log(userStore);
+    if (error.response?.status === 403) {
+      userStore.clearUser();
+      window.location.href = "/login?session_expired=true";
+    }
+
+    // Handle 401 Unauthorized
+    if (error.response?.status === 401) {
+      userStore.clearUser();
+      window.location.href = "/login?unauthorized=true";
+    }
+    // Convert to standardized error format
+    
+    return Promise.reject(error);
+  }
   );
 
   return client;

@@ -23,6 +23,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS(f"Found {specialization_count} specializations in the database. Skipping 'seed_specializations'."))
 
         # Now, proceed with creating users
+        
         users_data = [
             {
                 "username": "admin",
@@ -75,9 +76,9 @@ class Command(BaseCommand):
                 "doctor_profile": False,
             },
         ]
+
         def safe_fake_dict(fake, num=3):
             return {str(k): str(v) for k, v in fake.pydict(num).items()}
-
 
         created_count = 0
 
