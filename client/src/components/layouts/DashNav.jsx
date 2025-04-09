@@ -432,15 +432,9 @@ const navItems = [
           <div className="flex items-center justify-between h-16">
             {/* Left */}
             <div className="flex items-center">
-              <div className="flex  gap-1.5 items-center mr-4">
+              <Link to="/dashboard" className="flex  gap-1.5 items-center mr-4">
                 <Activity className="h-8 w-8 text-blue-600" />
-                <span className="text-2xl font-bold">
-                  <span className="font-bold text-blue-900 dark:text-white">
-                    tibe
-                  </span>
-                  <span className="text-rose-500 font-bold">rbu</span>
-                </span>
-              </div>
+              </Link>
               <Button
                 variant="ghost"
                 // size="icon"
@@ -453,18 +447,18 @@ const navItems = [
 
             {/* Right */}
             <div className="flex items-center space-x-5">
-              {/* Cart */}
-              <button className="text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white transition-colors relative bg-gray-50 dark:bg-gray-800 p-2 rounded-full">
+              
+              {/* <button className="text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white transition-colors relative bg-gray-50 dark:bg-gray-800 p-2 rounded-full">
                 <ShoppingCart size={20} />
-              </button>
+              </button> */}
 
               {/* Notification */}
-              <button className="text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white transition-colors relative bg-gray-50 dark:bg-gray-800 p-2 rounded-full">
+              {/* <button className="text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white transition-colors relative bg-gray-50 dark:bg-gray-800 p-2 rounded-full">
                 <Bell size={20} />
-                {/* <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-medium rounded-full h-5 w-5 flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-medium rounded-full h-5 w-5 flex items-center justify-center">
                   3
-                </span> */}
-              </button>
+                </span>
+              </button> */}
 
               {/* Dark Mode Toggle */}
               <Button
@@ -484,7 +478,7 @@ const navItems = [
               <div className="flex items-center">
                 <Link
                   to="/dashboard/settings/profile"
-                  className="flex items-center space-x-2 p-0.9 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                  className="flex relative items-center space-x-2 p-0.9 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 >
                   <Avatar className="h-9 w-9 border-2 border-white dark:border-gray-800">
                     <AvatarImage
@@ -495,6 +489,9 @@ const navItems = [
                       {user?.email?.charAt(0) || "U"}
                     </AvatarFallback>
                   </Avatar>
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-medium rounded-full h-5 w-5 flex items-center justify-center">
+                  3
+                </span>
                 </Link>
               </div>
             </div>

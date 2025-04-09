@@ -10,6 +10,14 @@ A full-stack healthcare management system built with Django for the backend and 
 1. [Documentation1](https://tiberbu.onrender.com/swagger)
 2. [Documentation2](https://tiberbu.onrender.com/redoc)
 3. [Front-End](https://tiberbuke.vercel.app)
+4. [Screen-Cast](./tiberbu.webm)
+5. [Screen-recording](https://youtu.be/-cfe9xxmIT0")
+
+---
+
+<iframe width="560" height="315" src="https://youtu.be/-cfe9xxmIT0" frameborder="0" allowfullscreen></iframe>
+
+---
 
 ## **Table of Contents**
 

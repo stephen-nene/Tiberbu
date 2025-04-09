@@ -57,13 +57,13 @@ const createApiClient = (baseURL, contentType = "application/json") => {
     // console.log(userStore);
     if (error.response?.status === 403) {
       userStore.clearUser();
-      window.location.href = "/login?session_expired=true";
+      // window.location.href = "/login?session_expired=true";
     }
 
     // Handle 401 Unauthorized
     if (error.response?.status === 401) {
       userStore.clearUser();
-      window.location.href = "/login?unauthorized=true";
+      // window.location.href = "/login?unauthorized=true";
     }
     // Convert to standardized error format
     

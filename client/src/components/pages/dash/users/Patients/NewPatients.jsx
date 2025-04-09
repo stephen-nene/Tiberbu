@@ -283,15 +283,15 @@ export default function PatientForm() {
   // Submit handler
   const onSubmit = async (data) => {
 
-        const data2 = {
-          ...data.basicInfo,
-          id: location.state?.patientData?.id || '',
-          password: "dummypassword", // You can remove this for actual submissions
+    const data2 = {
+      ...data.basicInfo,
+      id: location.state?.patientData?.id || '',
+      password: "dummypassword", // You can remove this for actual submissions
 
-          attachments: data.attachments,
-          patient_profile: data.patientInfo,
-        };
-        console.log("✅ Form submitted:", data2);
+      attachments: data.attachments,
+      patient_profile: data.patientInfo,
+    };
+    console.log("✅ Form submitted:", data2);
 
     if (data2.id || mode === "edit") {
       // Update existing patient
@@ -305,30 +305,30 @@ export default function PatientForm() {
   const updatePatient = async (data) => {
     // if user.id then this will be used instaed since the user is already created
     const toastId = toast.loading("updating patient...");
-     try {
-       // Simulate API call (replace with your actual API request)
-       const response = await patchPatient(data);
+    try {
+      // Simulate API call (replace with your actual API request)
+      const response = await patchPatient(data);
 
-       // // Dismiss the loading toast since the operation is complete
-       // toast.dismiss(toastId);
+      // // Dismiss the loading toast since the operation is complete
+      // toast.dismiss(toastId);
 
-       console.log("Response:", response);
-       navigate("/dashboard/patients");
+      console.log("Response:", response);
+      navigate("/dashboard/patients");
 
-       // Show a success toast (you can customize the message as needed)
-       toast.success("Patient saved successfully!", {
-         id: toastId,
-       });
+      // Show a success toast (you can customize the message as needed)
+      toast.success("Patient saved successfully!", {
+        id: toastId,
+      });
 
-     } catch (error) {
-       if (error?.response?.data) {
-         // Process the errors and display them as toast notifications
-         processErrors(error?.response?.data, toastId);
-       }
-       console.error("Error saving patient:", error?.response);
-     } finally {
+    } catch (error) {
+      if (error?.response?.data) {
+        // Process the errors and display them as toast notifications
+        processErrors(error?.response?.data, toastId);
+      }
+      console.error("Error saving patient:", error?.response);
+    } finally {
       //  toast.dismiss(toastId);
-     }
+    }
   };
 
   const createPatient = async (data) => {
@@ -470,8 +470,8 @@ export default function PatientForm() {
         {mode === "create"
           ? "New Patient Registration"
           : mode === "edit"
-          ? "Edit Patient Information"
-          : "Patient Details"}
+            ? "Edit Patient Information"
+            : "Patient Details"}
       </h1>
 
       <Form {...form}>
@@ -481,13 +481,16 @@ export default function PatientForm() {
             onValueChange={setActiveTab}
             className="w-full"
           >
-            <TabsList className="grid grid-cols-3 mb-4">
+            <TabsList className={`grid grid-col-1 ${!location?.state?.patientData?.id ? "md:grid-cols-2" : " md:grid-cols-3 "} mb-4 gap-4`}>
               <TabsTrigger value="basic">Basic Information</TabsTrigger>
               {/* if atimetdata is null don't show */}
               <TabsTrigger value="patient">Patient Information</TabsTrigger>
-              <TabsTrigger value="attachments">Medical Attachments</TabsTrigger>
+              {location?.state?.patientData?.id && (
+
+                <TabsTrigger value="attachments">Medical Attachments</TabsTrigger>
+              )}
               {/* {location?.state?.patientData?.id && (
-                <>
+                <> md:grid-cols-3 
                 </>
               )} */}
             </TabsList>
@@ -929,7 +932,7 @@ export default function PatientForm() {
                           Uploaded Attachments
                         </h3>
                         {!form.getValues("attachments") ||
-                        form.getValues("attachments").length === 0 ? (
+                          form.getValues("attachments").length === 0 ? (
                           <p className="text-gray-500">
                             No attachments uploaded yet.
                           </p>
@@ -1103,7 +1106,7 @@ const KnownAllergiesField = ({ field, form, isDisabled }) => {
           )}
 
           {!isDisabled && (
-            <div className="border border-gray-200 rounded-md p-3 bg-gray-50">
+            <div className="border border-gray-200 dark:bg-gray-950 rounded-md p-3 bg-gray-50">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <Input
                   placeholder="Substance"
@@ -1137,7 +1140,7 @@ const KnownAllergiesField = ({ field, form, isDisabled }) => {
               </div>
               <Button
                 type="button"
-                variant="outline"
+                variant="info"
                 size="sm"
                 className="mt-3 w-full"
                 onClick={addAllergy}
@@ -1234,7 +1237,7 @@ const PermanentMedicationsField = ({ field, form, isDisabled }) => {
           )}
 
           {!isDisabled && (
-            <div className="border border-gray-200 rounded-md p-3 bg-gray-50">
+            <div className="border border-gray-200 dark:bg-gray-950 rounded-md p-3 bg-gray-50">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <Input
                   placeholder="Medication Name"
@@ -1348,7 +1351,7 @@ const EmergencyContactsField = ({ field, form, isDisabled }) => {
           )}
 
           {!isDisabled && (
-            <div className="border border-gray-200 rounded-md p-3 bg-gray-50">
+            <div className="border border-gray-200 dark:bg-gray-950 rounded-md p-3 bg-gray-50">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <Input
                   placeholder="Contact Name"
@@ -1377,7 +1380,7 @@ const EmergencyContactsField = ({ field, form, isDisabled }) => {
               </div>
               <Button
                 type="button"
-                variant="outline"
+                variant="info"
                 size="sm"
                 className="mt-3 w-full"
                 onClick={addContact}
